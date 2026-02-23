@@ -25,7 +25,7 @@ export default function Carousel({ images, autoPlayInterval = 5000 }) {
   };
 
   return (
-    <div className="relative w-full h-[700px] md:h-[900px] overflow-hidden rounded-2xl shadow-2xl group">
+    <div className="relative w-full h-[700px] md:h-[700px] overflow-hidden rounded-2xl shadow-2xl group">
       <div
         className="flex transition-transform duration-700 ease-out h-full"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}

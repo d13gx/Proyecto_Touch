@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from "react-icons/fa";
+import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight, FaShieldAlt } from "react-icons/fa";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import carrusel_1 from "../assets/Foto_fachada-1.png";
@@ -75,7 +75,7 @@ export function HomePage() {
                 <div className="bg-purple-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-600 transition-colors">
                   <FaUsers className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Personal de Envases CMF S.A.</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Departamento</h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3">Búsquedas de departamentos y trabajadores de la empresa</p>
                 <div className="flex justify-center">
                   <div className="bg-purple-500 rounded-full p-2 group-hover:bg-purple-600 transition-colors">
@@ -89,9 +89,9 @@ export function HomePage() {
                 className="group bg-gradient-to-r from-red-50 to-rose-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <div className="bg-red-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-red-600 transition-colors">
-                  <FaHeadset className="text-white text-lg sm:text-xl" />
+                  <FaShieldAlt className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">¿Quieres Ingresar a Planta?</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Seguridad</h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3">¡Primero debes ver nuestro video de seguridad!</p>
                 <div className="flex justify-center">
                   <div className="bg-red-500 rounded-full p-2 group-hover:bg-red-600 transition-colors">
@@ -102,15 +102,15 @@ export function HomePage() {
 
               <Link
                 to="/informaciones"
-                className="group bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-orange-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="group bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-yellow-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                <div className="bg-orange-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-600 transition-colors">
+                <div className="bg-yellow-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-yellow-600 transition-colors">
                   <FaHeadset className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Informaciones de Envases CMF S.A.</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Contacto</h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3">Datos de contacto e informaciones generales de la empresa</p>
                 <div className="flex justify-center">
-                  <div className="bg-orange-500 rounded-full p-2 group-hover:bg-orange-600 transition-colors">
+                  <div className="bg-yellow-500 rounded-full p-2 group-hover:bg-yellow-600 transition-colors">
                     <FaArrowRight className="text-white text-xs" />
                   </div>
                 </div>

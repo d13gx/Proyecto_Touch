@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config/api.js';
+import { API_BASE_URL } from '../../config/api.js'; 
 import Footer from '../../components/components-seguridad/Footer';
-import HeaderCuestionario from '../../components/components-seguridad/HeaderCuestionario';
 import DatosPersonales from '../../components/components-seguridad/DatosPersonales';
 import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario';
 import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado';
@@ -153,11 +152,7 @@ export default function SurveyApp() {
   // Formulario principal
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      <HeaderCuestionario 
-        step={step} 
-        savedSurveysCount={savedSurveys.length} 
-        onAdminClick={() => setShowAdmin(true)} 
-      />
+      
       
       <div className="flex-1 w-full px-4 py-8">
         <div className="max-w-4xl mx-auto">
@@ -206,8 +201,6 @@ export default function SurveyApp() {
           )}
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

@@ -9,9 +9,10 @@ export function Nav() {
 
   const quickLinks = [
     { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
-    { path: "/departamentos", icon: FaBuilding, label: "Deptos", color: "green" },
-    { path: "/trabajadores", icon: FaUsers, label: "Personal", color: "purple" },
-    { path: "/informaciones", icon: FaInfoCircle, label: "Info", color: "orange" },
+    { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
+    { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
+    { path: "/pages-seguridad/home", icon: FaVideo, label: "Seguridad", color: "red" },
+    { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" }
   ];
 
   const getColorClasses = (color) => {
@@ -19,7 +20,10 @@ export function Nav() {
       blue: 'bg-blue-500 hover:bg-blue-600 border-blue-400',
       green: 'bg-green-500 hover:bg-green-600 border-green-400',
       purple: 'bg-purple-500 hover:bg-purple-600 border-purple-400',
-      orange: 'bg-orange-500 hover:bg-orange-600 border-orange-400'
+      orange: 'bg-orange-500 hover:bg-orange-600 border-orange-400',
+      teal: 'bg-teal-500 hover:bg-teal-600 border-teal-400',
+      red: 'bg-red-500 hover:bg-red-600 border-red-400',
+      yellow: 'bg-yellow-500 hover:bg-yellow-600 border-yellow-400'
     };
     return colorMap[color] || colorMap.blue;
   };
@@ -47,17 +51,7 @@ export function Nav() {
             
             <div className="flex items-center gap-3">
               
-              <button
-              
-                onClick={() => navigate("/video")}
-                className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 
-                         hover:from-green-600 hover:to-green-700
-                         px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white
-                         transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-green-400"
-              >
-                <FaVideo className="text-sm sm:text-base" />
-                <span className="hidden sm:inline">Video</span>
-              </button>
+            
 
               {!isHome && (
                 <button

@@ -1,7 +1,7 @@
 .fade {
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .fade.visible {
@@ -12,23 +12,24 @@
 .fade.hidden {
   opacity: 0;
   transform: translateY(20px);
+  transition: all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .bot-saludo-avatar {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  bottom: 300px;
+  right: 250px;
   background: linear-gradient(145deg, #e6e9ff 0%, #d9ddff 100%);
   border-radius: 30px;
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-  padding: 20px 30px;
+  padding: 40px 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: auto;
-  max-width: 480px;
+  max-width: 600px;
   border: 2px solid #e0e5ff;
-  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  transition: all 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   opacity: 0;
   transform: translateX(100%);
   z-index: 1000;
@@ -60,8 +61,8 @@
 }
 
 .avatar-bot {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 20px;
   object-fit: cover;
   border: 3px solid #4f46e5;
@@ -72,7 +73,7 @@
 }
 
 .bot-saludo-avatar div {
-  font-size: 1.2em;
+  font-size: 1.4em;
   color: #1f2937;
   line-height: 1.5;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;

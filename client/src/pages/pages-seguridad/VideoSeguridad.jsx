@@ -1,13 +1,25 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
 import Footer from '../../components/components-seguridad/Footer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function VideoSeguridad() {
     const [showQR, setShowQR] = useState(false);
+    const navigate = useNavigate();
     
     // URL para generar QR que dirija al cuestionario local
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.origin + '/cuestionario')}`;
+
+    useEffect(() => {
+        if (showQR) {
+            // Temporizador de 30 segundos para redirigir al HomePage
+            const timer = setTimeout(() => {
+                navigate('/home');
+            }, 30000); // 30 segundos
+
+            return () => clearTimeout(timer);
+        }
+    }, [showQR, navigate]);
 
     const handleVideoEnded = () => {
         setShowQR(true);
@@ -18,10 +30,10 @@ export default function VideoSeguridad() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
+        <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
 
             {/* modifica el tamaño del video */}
-            <main className="flex-1 max-w-7xl mx-auto px-8 py-12">
+            <main className="max-w-7xl mx-auto px-8 py-12">
                 <div className="bg-white rounded-lg shadow h-full overflow-hidden">
                     {/* Video Player - solo se muestra cuando el video no ha terminado */}
                     {!showQR ? (

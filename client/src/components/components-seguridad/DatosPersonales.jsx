@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { consultarPorRUT } from '../services/api';
+import { consultarPorRUT } from '../../services/api';
 
 export default function DatosPersonales({ 
   onContinue,

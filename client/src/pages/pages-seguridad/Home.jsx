@@ -24,22 +24,24 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
-      <main className="flex-grow max-w-7xl mx-auto px-8 py-12">
+    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      <main className="max-w-7xl mx-auto px-8 py-12">
         <div className="space-y-12">
-          <BotSaludoAnimado />
-
           <div className="animate-fade-in">
             <Carousel images={carouselImages} />
           </div>
 
-          <div>
-            <h2 className="text-4xl font-bold text-center text-gray-800">¡Para Ingresar a Planta tienes que ver el video!</h2>
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-4xl font-bold text-center text-gray-800">¡Para Ingresar a Planta tienes que ver el video!</h2>
+            </div>
+
+            <div className="flex justify-center animate-fade-in-delay">
+              <VideoButton onClick={handleVideoClick} />
+            </div>
           </div>
 
-          <div className="flex justify-center animate-fade-in-delay">
-            <VideoButton onClick={handleVideoClick} />
-          </div>
+          <BotSaludoAnimado />
 
         </div>
       </main>

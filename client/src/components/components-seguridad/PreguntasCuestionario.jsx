@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config/api.js';
+import { API_BASE_URL } from '../../config/api.js';
 
 const surveyQuestions = [
   {
