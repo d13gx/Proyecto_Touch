@@ -1,0 +1,232 @@
+/* 🎨 ESTILOS MEJORADOS PARA JERARQUÍA Y NUEVOS ICONOS */
+
+/* 🔧 MEJORAS EN LA VISUALIZACIÓN JERÁRQUICA */
+.depto-hierarchy {
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.depto-hierarchy::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--primary-color) 0%, transparent 100%);
+  opacity: 0.3;
+  transition: all var(--transition-normal);
+}
+
+.depto-card:hover .depto-hierarchy::before {
+  opacity: 0.6;
+}
+
+/* 📊 LÍNEAS DE CONEXIÓN MEJORADAS */
+.hierarchy-connector {
+  position: absolute;
+  left: -20px;
+  top: 35px;
+  width: 20px;
+  height: 2px;
+  background: var(--primary-color);
+  opacity: 0.3;
+}
+
+.hierarchy-vertical {
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--primary-color);
+  opacity: 0.2;
+}
+
+/* 🎯 NUEVOS ESTILOS PARA BOTONES ESPECÍFICOS */
+.see-depto-btn {
+  padding: 6px 12px;
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.see-depto-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.dependencies-btn {
+  padding: 6px 12px;
+  background: var(--secondary-color);
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dependencies-btn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+/* 🔄 MEJORAS EN ANIMACIONES DE EXPANSIÓN */
+.depto-children {
+  position: relative;
+  margin-left: 40px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border-color);
+  transition: all var(--transition-normal);
+}
+
+.depto-card.expanded .depto-children {
+  border-left-color: var(--primary-color);
+  opacity: 1;
+}
+
+.depto-children::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--primary-color) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.depto-card.expanded .depto-children::before {
+  opacity: 0.3;
+}
+
+/* 📱 MEJORAS RESPONSIVE PARA JERARQUÍA */
+@media (max-width: 768px) {
+  .depto-hierarchy::before {
+    left: 15px;
+  }
+  
+  .hierarchy-connector {
+    left: -15px;
+    width: 15px;
+  }
+  
+  .depto-children {
+    margin-left: 30px;
+    padding-left: 8px;
+  }
+  
+  .depto-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .see-depto-btn,
+  .dependencies-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 🎨 ACTUALIZACIÓN DE ICONOS POR NIVEL */
+.nivel-0 .depto-icon::before { content: '💼'; } /* Gerencia General */
+.nivel-1 .depto-icon::before { content: '👔'; } /* Gerencias */
+.nivel-2 .depto-icon::before { content: '🏢'; } /* Departamentos */
+.nivel-3 .depto-icon::before { content: '📦'; } /* Subdepartamentos */
+
+/* ✨ EFECTO DE EXPANSIÓN MEJORADO */
+.depto-expand-section {
+  max-height: 0;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.depto-expand-section.expanded {
+  max-height: 5000px;
+  animation: expandDepto 0.5s ease-out;
+}
+
+@keyframes expandDepto {
+  from {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    max-height: 5000px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🔍 INDICADOR DE DEPENDENCIAS */
+.dependencies-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  background: var(--secondary-color);
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.dependencies-count {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* 🎯 ESTILOS PARA ESTADO DE EXPANSIÓN */
+.depto-card-content.expanding {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 15px rgba(26, 35, 126, 0.15);
+}
+
+.expand-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: var(--secondary-color);
+  border-radius: 6px;
+}
+
+/* 📊 MEJORAS VISUALES PARA JERARQUÍA CLARA */
+.depto-level-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.depto-card-content {
+  position: relative;
+}

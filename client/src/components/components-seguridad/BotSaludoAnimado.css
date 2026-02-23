@@ -1,0 +1,141 @@
+.fade {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.fade.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.bot-saludo-avatar {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(145deg, #e6e9ff 0%, #d9ddff 100%);
+  border-radius: 30px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  max-width: 480px;
+  border: 2px solid #e0e5ff;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  opacity: 0;
+  transform: translateX(100%);
+  z-index: 1000;
+  animation: float 3s ease-in-out infinite;
+  text-align: center;
+}
+
+.bot-saludo-avatar.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.avatar-container {
+  position: relative;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.avatar-bot {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 3px solid #4f46e5;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+  background: #f8f9ff;
+  transition: all 0.3s ease;
+  background: #f9fafb;
+}
+
+.bot-saludo-avatar div {
+  font-size: 1em;
+  color: #1f2937;
+  line-height: 1.5;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  margin-left: 15px;
+  font-weight: 500;
+}
+
+.bot-saludo-avatar strong {
+  color: #4f46e5;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(79, 70, 229, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+/* Efecto de burbuja de chat */
+.bot-saludo-avatar::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: #ffffff transparent;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+}
+
+/* Animación sutil de latido para el avatar */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.avatar-bot:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+}
+
+/* Se eliminó el indicador de estado en línea */
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}

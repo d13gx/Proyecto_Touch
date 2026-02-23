@@ -1,0 +1,47 @@
+--Cristofer Ivan cayuan Montre
+--APP TOUCH
+--Django + React
+--Proyecto CRUD + LDAP
+
+--react
+cd frontend   # carpeta donde está el React
+npm install   # o yarn install
+
+#en la raiz del proyecto django
+python -m venv venv
+pip install -r requirements.txt
+
+# en el cd del front 
+npm install
+
+pip freeze > requirements.txt
+# para actualizar las dependencias
+
+fetch(`http://172.18.7.197:8000/app_touch/api/ldap-search/?q=${encodeURIComponent(nombreCompleto)}`)
+
+--react
+cd frontend   # carpeta donde está el React
+npm install   # o yarn install
+
+#en la raiz del proyecto django
+python -m venv venv
+pip install -r requirements.txt
+
+# en el cd del front 
+npm install
+
+pip freeze > requirements.txt
+# para actualizar las dependencias
+
+
+#púntos verdes porterias
+#puntos rojos departamentos
+#puntos azules gerencia y subgerencias
+#puntos amarillos baños y camarines
+#puntos naranjos jefaturas
+#puntos morados bodegas
+#puntos celestes calles y pasillos
+
+  bodega: L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/679/679720.png", iconSize: [36, 36] }),
+    departamento: L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/1973/1973803.png", iconSize: [36, 36] }),
+      porteria: L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/3037/3037207.png", iconSize: [36, 36] }),

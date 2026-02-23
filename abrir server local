@@ -1,0 +1,16 @@
+http://172.18.7.202:5173/
+en react
+npm run dev -- --host
+
+http://172.18.7.202:8000/
+en django
+python manage.py runserver 0.0.0.0:8000
+
+
+en el mismo equipo
+http://127.0.0.1:8000/ django
+http://localhost:5173/ react
+
+    fetch("http://172.18.7.202:8000/app_touch/api/mapas/1/")
+
+    import logo from "../assets/logo.jpg";

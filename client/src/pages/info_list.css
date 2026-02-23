@@ -1,0 +1,575 @@
+/* info_list.css - Estilos para el componente Info_List */
+
+/* Ocultar controles específicos de Google Maps */
+.gm-style-cc, 
+.gmnoprint, 
+.gm-fullscreen-control,
+.gm-style-moc,
+a[href*="maps/dir"],
+a[href*="google.com/maps"],
+.gm-control-active,
+.gm-svpc {
+  display: none !important;
+}
+
+/* Estilos generales para el componente */
+.info-list-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+}
+
+/* Header principal */
+.info-list-header {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .info-list-header {
+    border-radius: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-list-header {
+    border-radius: 2rem;
+  }
+}
+
+/* Icono del header */
+.info-list-header-icon {
+  height: 3.5rem;
+  width: 3.5rem;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 640px) {
+  .info-list-header-icon {
+    height: 4rem;
+    width: 4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-list-header-icon {
+    height: 5rem;
+    width: 5rem;
+  }
+}
+
+/* Botón de regreso */
+.info-list-back-btn {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 0.75rem;
+  transition: all 0.3s;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.info-list-back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (min-width: 640px) {
+  .info-list-back-btn {
+    display: flex;
+  }
+}
+
+/* Tarjeta del mapa */
+.info-list-map-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  border: 2px solid #f3f4f6;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 500px;
+}
+
+.info-list-map-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Contenedor del mapa */
+.info-list-map-container {
+  flex: 1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Iframe del mapa */
+.info-list-map-iframe {
+  border: 0;
+  min-height: 250px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Overlay para controles del mapa */
+.info-list-map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Tarjeta de información de contacto */
+.info-list-contact-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left-width: 4px;
+}
+
+.info-list-contact-card-blue {
+  background-color: #dbeafe;
+  border-left-color: #3b82f6;
+}
+
+.info-list-contact-card-green {
+  background-color: #dcfce7;
+  border-left-color: #22c55e;
+}
+
+.info-list-contact-card-purple {
+  background-color: #f3e8ff;
+  border-left-color: #a855f7;
+}
+
+/* Iconos de contacto */
+.info-list-contact-icon {
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.info-list-contact-icon-blue {
+  color: #2563eb;
+}
+
+.info-list-contact-icon-green {
+  color: #16a34a;
+}
+
+.info-list-contact-icon-purple {
+  color: #9333ea;
+}
+
+/* Texto de contacto */
+.info-list-contact-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1d4ed8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.info-list-contact-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.info-list-contact-value-blue {
+  color: #1e3a8a;
+}
+
+.info-list-contact-value-green {
+  color: #166534;
+}
+
+.info-list-contact-value-purple {
+  color: #581c87;
+}
+
+/* Tarjeta de trabajadores TI */
+.info-list-ti-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 2px solid #f3f4f6;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+/* Estados de carga y error */
+.info-list-loading-card,
+.info-list-error-card,
+.info-list-empty-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 2px solid #f3f4f6;
+  padding: 1.5rem;
+  height: 100%;
+  text-align: center;
+}
+
+/* Iconos de estado */
+.info-list-status-icon {
+  height: 5rem;
+  width: 5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+}
+
+.info-list-status-icon-indigo {
+  background-color: #e0e7ff;
+}
+
+.info-list-status-icon-red {
+  background-color: #fee2e2;
+}
+
+.info-list-status-icon-yellow {
+  background-color: #fef3c7;
+}
+
+.info-list-status-icon-indigo svg {
+  color: #4f46e5;
+}
+
+.info-list-status-icon-red svg {
+  color: #dc2626;
+}
+
+.info-list-status-icon-yellow svg {
+  color: #d97706;
+}
+
+/* Jefe de departamento */
+.info-list-jefe-section {
+  margin-bottom: 1.5rem;
+}
+
+.info-list-jefe-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-list-jefe-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: #fefce8;
+  border-left-width: 4px;
+  border-left-color: #eab308;
+}
+
+.info-list-jefe-avatar {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 9999px;
+  background-color: #fef9c3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-list-jefe-avatar svg {
+  color: #ca8a04;
+  font-size: 0.875rem;
+}
+
+.info-list-jefe-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.info-list-jefe-title {
+  font-size: 0.75rem;
+  color: #a16207;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.info-list-jefe-email {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.info-list-jefe-email svg {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.info-list-jefe-email span {
+  color: #000000;
+  word-break: break-word;
+}
+
+/* Equipo TI */
+.info-list-equipo-section {
+  margin-top: 1rem;
+}
+
+.info-list-equipo-header {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.info-list-equipo-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-list-equipo-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  border-left-width: 4px;
+  border-left-color: #6366f1;
+}
+
+.info-list-equipo-avatar {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 9999px;
+  background-color: #e0e7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-list-equipo-avatar svg {
+  color: #4f46e5;
+  font-size: 0.875rem;
+}
+
+.info-list-equipo-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.info-list-equipo-title {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.info-list-equipo-email {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.info-list-equipo-email svg {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.info-list-equipo-email span {
+  color: #000000;
+  word-break: break-word;
+}
+
+/* Grid responsivo */
+.info-list-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .info-list-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Espaciado responsivo */
+.info-list-spacing {
+  padding: 0.75rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .info-list-spacing {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .info-list-spacing {
+    padding: 1.5rem 1.5rem;
+  }
+}
+
+/* Títulos */
+.info-list-main-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 640px) {
+  .info-list-main-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-list-main-title {
+    font-size: 1.875rem;
+  }
+}
+
+.info-list-ti-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+/* Texto de contador */
+.info-list-counter {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Utilidades de texto */
+.info-list-text-break {
+  word-break: break-word;
+}
+
+.info-list-text-black {
+  color: #000000;
+}
+
+/* Transiciones suaves */
+.info-list-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Efectos de hover */
+.info-list-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .info-list-map-card {
+    min-height: 400px;
+  }
+  
+  .info-list-contact-card {
+    padding: 0.75rem;
+  }
+  
+  .info-list-ti-card {
+    padding: 1rem;
+  }
+}
+
+/* Asegurar que los correos sean negros y no clickeables */
+.info-list-email-text {
+  color: #000000 !important;
+  text-decoration: none !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.info-list-email-text:hover {
+  color: #000000 !important;
+  text-decoration: none !important;
+}
+
+/* Prevenir selección de texto en emails */
+.info-list-email-text {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .info-list-transition,
+  .info-list-hover-effect,
+  .info-list-map-card,
+  .info-list-back-btn {
+    transition: none;
+  }
+}
+
+/* Modo oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  .info-list-container {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+  }
+  
+  .info-list-map-card,
+  .info-list-ti-card,
+  .info-list-loading-card,
+  .info-list-error-card,
+  .info-list-empty-card {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .info-list-contact-value {
+    color: #f9fafb;
+  }
+  
+  .info-list-equipo-card {
+    background: #374151;
+  }
+  
+  .info-list-jefe-card {
+    background: #451a03;
+  }
+}

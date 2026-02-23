@@ -1,0 +1,59 @@
+# 1️⃣ Configurar Git para manejar line endings en Windows
+git config --global core.autocrlf true
+
+# 2️⃣ Crear .gitignore si no existe (ignorar archivos innecesarios)
+echo "__pycache__/
+*.pyc
+db.sqlite3
+*.log
+node_modules/
+.vscode/" > .gitignore
+
+# 3️⃣ Verificar el estado actual del repo
+git status
+
+# 4️⃣ Agregar todos los archivos rastreables
+git add .
+
+# 5️⃣ Hacer commit con mensaje
+git commit -m "Actualización completa del proyecto: front-end y back-end"
+
+# 6️⃣ Subir cambios a GitHub (rama main)
+git push origin main
+
+
+VER OTRAS VERSIONES
+
+# 1️⃣ Guarda tus cambios actuales temporalmente (si los hay)
+git stash push -m "Guardando cambios antes de revisar versiones"
+
+# 2️⃣ Muestra las últimas 10 versiones con resumen
+git log --oneline -10
+
+# 3️⃣ Para revisar una versión específica (reemplaza <commit_hash> por el ID que te muestra git log)
+git checkout <commit_hash>
+
+# 4️⃣ Una vez revisado, vuelve a tu rama principal
+git checkout main
+
+# 5️⃣ Recupera tus cambios guardados en stash
+git stash pop
+
+
+------------------------------
+
+Qué debes subir a GitHub
+
+Sí subir:
+
+package.json
+
+package-lock.json (o yarn.lock)
+
+Todo tu código (src/, public/)
+
+No subir:
+
+node_modules/ (pesa gigas, se ignora en .gitignore)
+
+dist/ o build/ (los archivos compilados)

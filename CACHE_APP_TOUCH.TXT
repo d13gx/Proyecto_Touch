@@ -1,0 +1,176 @@
+ GUÍA COMPLETA DEL SISTEMA DE CACHE
+🔧 CONFIGURACIÓN DEL CACHE
+Backend y Tabla
+python
+
+# Configuración en settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache_table',  # Tabla en la base de datos
+    }
+}
+
+# Timeouts configurados
+CACHE_TIMEOUT = 60 * 60 * 24 * 14  # 2 semanas
+LDAP_CACHE_TIMEOUT = 60 * 60 * 24   # 1 día
+
+Estructura de la Tabla
+sql
+-- Tabla: django_cache_table
+-- Columnas:
+--   cache_key (varchar(255)) - Clave única del cache
+--   value (TEXT) - Datos serializados
+--   expires (datetime) - Fecha de expiración
+
+🗝️ SISTEMA DE CLAVES DE CACHE
+Formato de Claves
+text
+:1:[key_prefix]_[function_name]_[query_parameters]
+Claves Específicas por Endpoint
+Endpoint	Clave Ejemplo	Timeout
+Árbol Jerárquico	:1:arbol_jerarquico_get_arbol_jerarquico_	24h
+Búsqueda LDAP	:1:ldap_search_search_ldap_q=nombre	24h
+Detalle Trabajador	:1:trabajador_detail_trabajador_detail_ldap_correo=usuario@cmf.cl	1h
+Departamentos	:1:lista_departamentos_get_lista_departamentos_	24h
+Jefes Masivos	:1:jefes_masivos_get_jefes_masivos_	24h
+
+🔍 CÓMO CONSULTAR EL CACHE
+1. Ver Todas las Claves
+python
+from django.db import connection
+
+with connection.cursor() as cursor:
+    cursor.execute("SELECT cache_key FROM django_cache_table")
+    keys = cursor.fetchall()
+    for key in keys:
+        print(f"🔑 {key[0]}")
+2. Buscar Claves Específicas
+python
+# Por patrón
+with connection.cursor() as cursor:
+    cursor.execute("SELECT cache_key FROM django_cache_table WHERE cache_key LIKE '%arbol%'")
+    arbol_keys = cursor.fetchall()
+    
+    cursor.execute("SELECT cache_key FROM django_cache_table WHERE cache_key LIKE '%ldap%'")
+    ldap_keys = cursor.fetchall()
+3. Ver Contenido del Cache
+python
+from django.core.cache import cache
+
+# Obtener datos específicos
+arbol_data = cache.get(':1:arbol_jerarquico_get_arbol_jerarquico_')
+if arbol_data:
+    print(f"🌳 Departamentos: {len(arbol_data.get('estructura', []))}")
+    print(f"⏰ Timestamp: {arbol_data.get('timestamp')}")
+4. Estadísticas del Cache
+python
+from django.db import connection
+
+with connection.cursor() as cursor:
+    # Total de entradas
+    cursor.execute("SELECT COUNT(*) FROM django_cache_table")
+    total = cursor.fetchone()[0]
+    
+    # Entradas por tipo
+    cursor.execute("SELECT COUNT(*) FROM django_cache_table WHERE cache_key LIKE '%arbol%'")
+    arbol_count = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM django_cache_table WHERE cache_key LIKE '%ldap%'")
+    ldap_count = cursor.fetchone()[0]
+    
+    print(f"📊 Total: {total} | Árbol: {arbol_count} | LDAP: {ldap_count}")
+🛠️ OPERACIONES DE MANTENIMIENTO
+1. Limpiar Cache Específico
+python
+from django.core.cache import cache
+
+# Limpiar solo árbol jerárquico
+cache.delete(':1:arbol_jerarquico_get_arbol_jerarquico_')
+
+# Limpiar por patrón (desde BD)
+from django.db import connection
+with connection.cursor() as cursor:
+    cursor.execute("DELETE FROM django_cache_table WHERE cache_key LIKE '%arbol%'")
+2. Limpiar Todo el Cache
+python
+
+python manage.py shell
+from django.core.cache import cache
+cache.clear()  # ⚠️ Esto borra TODO el cache
+
+
+3. Usar Endpoint de Limpieza
+bash
+# URL: /app_touch/api/limpiar-cache-ldap/
+# Requiere: Usuario staff o modo DEBUG
+📊 MONITOREO Y LOGS
+Logs de Cache
+El sistema genera logs detallados:
+
+text
+🎯 ❌ CACHE MISS arbol_jerarquico: 'desconocido' | ⏱️ 0.404s | 💾 24h | 📁 dict
+🎯 ✅ CACHE HIT arbol_jerarquico: 'desconocido'
+Headers de Respuesta
+Cada respuesta incluye headers de cache:
+
+X-Cache: HIT|MISS
+
+X-Cache-Key: clave_usada
+
+X-Cache-Timestamp: timestamp
+
+🔄 FLUJO DE CACHE
+1. Primera Request
+text
+Request → ❌ CACHE MISS → Ejecutar función → Guardar en cache → Response
+2. Requests Posteriores
+text
+Request → ✅ CACHE HIT → Obtener de cache → Response (rápido)
+🚀 MEJORES PRÁCTICAS
+Para Desarrollo
+python
+# Verificar estado del cache
+def check_cache_health():
+    from django.core.cache import cache
+    from django.db import connection
+    
+    # Test básico
+    cache.set('health_check', 'ok', 10)
+    test_ok = cache.get('health_check') == 'ok'
+    
+    # Verificar tabla
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM django_cache_table")
+        count = cursor.fetchone()[0]
+    
+    return {
+        'cache_backend': 'working' if test_ok else 'broken',
+        'cache_entries': count,
+        'timestamp': time.time()
+    }
+Para Producción
+Monitorizar el tamaño de la tabla de cache
+
+Limpiar regularmente cache expirado
+
+Usar timeouts apropiados según la frecuencia de cambio de datos
+
+🐛 SOLUCIÓN DE PROBLEMAS
+Problemas Comunes y Soluciones
+"no such table: django_cache_table"
+
+python
+python manage.py createcachetable
+Cache no se actualiza
+
+python
+# Forzar actualización
+cache.delete('clave_especifica')
+# O limpiar todo
+cache.clear()
+Datos desactualizados
+
+python
+# Reducir timeout o implementar invalidación manual
+CACHE_TIMEOUT = 60 * 60  # 1 hora en lugar de 2 semanas

@@ -1,0 +1,339 @@
+/* TouchKeyboard.css - Mejorado Responsive */
+.touch-keyboard {
+  width: 100%;
+  background: #f0f0f0;
+  border-top: 1px solid #ccc;
+  padding: 8px;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.touch-keyboard-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.touch-keyboard-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.touch-keyboard-row:last-child {
+  margin-bottom: 0;
+}
+
+.touch-key {
+  flex: 1;
+  min-width: 40px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+}
+
+.touch-key:active {
+  background: #e0e0e0;
+  transform: scale(0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.touch-key-special {
+  background: #d0d0d0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.touch-key-space {
+  flex: 3;
+  background: #4a90e2;
+  color: white;
+}
+
+.touch-key-done {
+  background: #34c759;
+  color: white;
+  font-weight: 600;
+}
+
+.touch-key-backspace {
+  background: #ff3b30;
+  color: white;
+  font-size: 20px;
+}
+
+.touch-key-shift {
+  background: #8e8e93;
+  color: white;
+}
+
+.touch-key-shift-active {
+  background: #007aff;
+  color: white;
+}
+
+/* ========== MEJORAS RESPONSIVE ========== */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 1024px) {
+  .touch-keyboard {
+    padding: 8px 6px;
+  }
+  
+  .touch-key {
+    height: 52px;
+    font-size: 17px;
+    min-width: 38px;
+    border-radius: 7px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 7px;
+    gap: 3px;
+  }
+  
+  .touch-key-special {
+    font-size: 15px;
+  }
+}
+
+/* Tablets pequeñas y móviles grandes */
+@media (max-width: 768px) {
+  .touch-keyboard {
+    padding: 6px 4px;
+  }
+  
+  .touch-key {
+    height: 48px;
+    font-size: 16px;
+    min-width: 35px;
+    border-radius: 6px;
+    min-height: 42px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 6px;
+    gap: 3px;
+  }
+  
+  .touch-key-special {
+    font-size: 14px;
+  }
+  
+  .touch-key-backspace {
+    font-size: 18px;
+  }
+}
+
+/* Móviles medianos */
+@media (max-width: 640px) {
+  .touch-keyboard {
+    padding: 5px 3px;
+  }
+  
+  .touch-key {
+    height: 46px;
+    font-size: 15px;
+    min-width: 32px;
+    border-radius: 5px;
+    min-height: 40px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 5px;
+    gap: 2px;
+  }
+  
+  .touch-key-special {
+    font-size: 13px;
+  }
+  
+  .touch-key-backspace {
+    font-size: 16px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .touch-keyboard {
+    padding: 4px 2px;
+  }
+  
+  .touch-key {
+    height: 44px;
+    font-size: 14px;
+    min-width: 28px;
+    border-radius: 4px;
+    min-height: 38px;
+    font-weight: 600;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 4px;
+    gap: 2px;
+  }
+  
+  .touch-key-special {
+    font-size: 12px;
+    font-weight: 700;
+  }
+  
+  .touch-key-backspace {
+    font-size: 14px;
+  }
+  
+  .touch-key-space {
+    font-size: 12px;
+  }
+}
+
+/* Móviles muy pequeños (iPhone SE, etc) */
+@media (max-width: 375px) {
+  .touch-keyboard {
+    padding: 3px 1px;
+  }
+  
+  .touch-key {
+    height: 42px;
+    font-size: 13px;
+    min-width: 25px;
+    border-radius: 4px;
+    min-height: 36px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 3px;
+    gap: 1px;
+  }
+  
+  .touch-key-special {
+    font-size: 11px;
+  }
+  
+  .touch-key-backspace {
+    font-size: 13px;
+  }
+  
+  .touch-key-space {
+    font-size: 11px;
+  }
+}
+
+/* Pantallas muy grandes */
+@media (min-width: 1200px) {
+  .touch-keyboard-inner {
+    max-width: 900px;
+  }
+  
+  .touch-key {
+    height: 55px;
+    font-size: 20px;
+    min-width: 45px;
+    border-radius: 10px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 10px;
+    gap: 5px;
+  }
+  
+  .touch-key-special {
+    font-size: 18px;
+  }
+}
+
+/* ========== MEJORAS DE ACCESIBILIDAD Y USABILIDAD ========== */
+
+/* Prevenir zoom en iOS */
+.touch-key {
+  font-size: 16px;
+  touch-action: manipulation;
+}
+
+/* Mejorar accesibilidad */
+.touch-key:focus {
+  outline: 2px solid #007aff;
+  outline-offset: 2px;
+}
+
+/* Estados de hover para dispositivos con mouse */
+@media (hover: hover) {
+  .touch-key:hover {
+    background: #f5f5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .touch-key-special:hover {
+    background: #c0c0c0;
+  }
+  
+  .touch-key-space:hover {
+    background: #357abd;
+  }
+  
+  .touch-key-done:hover {
+    background: #2da54e;
+  }
+  
+  .touch-key-backspace:hover {
+    background: #e0352a;
+  }
+  
+  .touch-key-shift:hover {
+    background: #7d7d82;
+  }
+}
+
+/* Mejoras para modo landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .touch-keyboard {
+    padding: 4px 2px;
+  }
+  
+  .touch-key {
+    height: 40px;
+    font-size: 14px;
+    min-width: 30px;
+    min-height: 36px;
+  }
+  
+  .touch-keyboard-row {
+    margin-bottom: 3px;
+    gap: 2px;
+  }
+}
+
+/* Soporte para dispositivos con notch */
+@supports (padding: max(0px)) {
+  .touch-keyboard {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Mejoras de rendimiento para animaciones */
+.touch-key {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Estados de carga/deshab

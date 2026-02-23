@@ -1,0 +1,405 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Nav } from "./components/Nav";
+import { HomePage } from "./pages/HomePage";
+import { Trab_List } from "./pages/Trab_List";
+import Depto_List from "./pages/Depto_List";
+import { Info_List } from "./pages/Info_list";
+import Mapa_Cmf from "./pages/Mapa_Cmf";
+import Depto_Detail from "./pages/Depto_Detail";
+import Trab_Detail from "./pages/Trab_Detail";
+import Keyboard from "./components/Keyboard";
+import { useEffect, useState } from "react";
+
+function App() {
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    console.log('📱 ACTIVANDO MODO APP NATIVA AVANZADO...');
+    
+    // Detectar si está en modo standalone (PWA instalada)
+    const checkDisplayMode = () => {
+      const isInStandaloneMode = () =>
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://');
+      
+      setIsStandalone(isInStandaloneMode());
+      
+      if (isInStandaloneMode()) {
+        console.log('✅ Ejecutando en modo PWA standalone');
+        document.body.classList.add('pwa-standalone');
+      } else {
+        console.log('⚠️ Ejecutando en navegador - Recomendar instalación');
+        document.body.classList.add('pwa-browser');
+      }
+    };
+
+    // 1. CONFIGURACIÓN AVANZADA DE VIEWPORT
+    const configureAdvancedViewport = () => {
+      let viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) {
+        viewportMeta = document.createElement('meta');
+        viewportMeta.name = 'viewport';
+        document.head.appendChild(viewportMeta);
+      }
+      
+      // Configuración MÁS IMPORTANTE: viewport-fit=cover
+      viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no';
+      
+      // Meta tags avanzados para iOS
+      const advancedMetaTags = [
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        { name: 'apple-mobile-web-app-title', content: 'CMF App' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'theme-color', content: '#1a237e' },
+        { name: 'msapplication-TileColor', content: '#1a237e' },
+        { name: 'msapplication-tap-highlight', content: 'no' },
+        { name: 'application-name', content: 'CMF App' },
+        { name: 'format-detection', content: 'telephone=no' }
+      ];
+      
+      advancedMetaTags.forEach(tag => {
+        let meta = document.querySelector(`meta[name="${tag.name}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.name = tag.name;
+          document.head.appendChild(meta);
+        }
+        meta.content = tag.content;
+      });
+
+      // Link tags para iOS
+      const linkTags = [
+        { rel: 'apple-touch-icon', href: '/icons/icon-152x152.png' },
+        { rel: 'apple-touch-startup-image', href: '/splash-screen.png' },
+        { rel: 'manifest', href: '/manifest.json' }
+      ];
+
+      linkTags.forEach(link => {
+        let linkElement = document.querySelector(`link[rel="${link.rel}"]`);
+        if (!linkElement) {
+          linkElement = document.createElement('link');
+          linkElement.rel = link.rel;
+          document.head.appendChild(linkElement);
+        }
+        linkElement.href = link.href;
+      });
+    };
+
+    // 2. ESTILOS CORREGIDOS - NAV Y FOOTER DEJAN ESPACIO PARA BARRA DE ESTADO
+    const applyAdvancedAppStyles = () => {
+      const styles = `
+        <style id="app-native-styles">
+          /* === RESET CORREGIDO === */
+          body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            background: #1a237e;
+            
+            /* USAR TODA LA PANTALLA INCLUYENDO ÁREA DEL NOTCH */
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            position: fixed;
+            
+            /* PERMITIR QUE LA BARRA DE ESTADO SE VEA POR ENCIMA */
+            padding: 0;
+          }
+          
+          #root {
+            /* CONTENEDOR PRINCIPAL - OCUPA TODA LA PANTALLA */
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(to bottom right, #e0f2fe, #ffffff, #e0f7fa);
+            
+            /* ESTRUCTURA FLEX PARA ORGANIZAR CONTENIDO */
+            display: flex;
+            flex-direction: column;
+          }
+          
+          /* === CONTENEDOR PRINCIPAL DE LA APP === */
+          .app-main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            
+            /* DEJAR ESPACIO PARA BARRA DE ESTADO SUPERIOR E INFERIOR */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            
+            box-sizing: border-box;
+          }
+          
+          /* === ÁREA DE CONTENIDO PRINCIPAL === */
+          .app-content-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            
+            /* PADDING PARA QUE EL CONTENIDO NO QUEDE DETRÁS DE NAV/FOOTER */
+            padding-top: 0;
+            padding-bottom: 0;
+          }
+          
+          /* === ESTILOS ESPECÍFICOS PARA COMPONENTES === */
+          
+          /* Nav debe empezar DESPUÉS de la barra de estado */
+          .safe-nav {
+            width: 100%;
+            background: linear-gradient(to right, #1e40af, #1e3a8a, #1e3a8a);
+            /* NO usar position: fixed con top:0 - eso tapa la barra de estado */
+          }
+          
+          /* Footer debe estar antes del área segura inferior */
+          .safe-footer {
+            width: 100%;
+            background: linear-gradient(to right, #1e40af, #1e3a8a, #1e3a8a);
+            /* NO usar position: fixed con bottom:0 */
+          }
+          
+          /* Contenido entre nav y footer */
+          .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+          }
+          
+          /* === BLOQUEO DE COMPORTAMIENTOS NO DESEADOS === */
+          * {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+          }
+          
+          ::-webkit-scrollbar {
+            display: none;
+          }
+          
+          * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+          }
+          
+          input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+          }
+        </style>
+      `;
+      
+      if (!document.querySelector('#app-native-styles')) {
+        document.head.insertAdjacentHTML('beforeend', styles);
+      }
+      
+      // Reestructurar el layout
+      const root = document.getElementById('root');
+      if (root && !root.querySelector('.app-main-container')) {
+        const mainContainer = document.createElement('div');
+        mainContainer.className = 'app-main-container';
+        
+        const contentArea = document.createElement('div');
+        contentArea.className = 'app-content-area';
+        
+        // Mover todo el contenido existente al nuevo contenedor
+        while (root.firstChild) {
+          contentArea.appendChild(root.firstChild);
+        }
+        
+        mainContainer.appendChild(contentArea);
+        root.appendChild(mainContainer);
+      }
+    };
+
+    // 3. BLOQUEO DE GESTOS (igual que antes)
+    const setupAdvancedGestureBlocking = () => {
+      // [Mantener todo el código de bloqueo igual...]
+      const blockZoom = (e) => {
+        if ((e.ctrlKey || e.metaKey) && 
+            (e.key === '+' || e.key === '-' || e.key === '0' || e.key === '=')) {
+          e.preventDefault();
+          return false;
+        }
+        
+        if (e.ctrlKey && (e.type === 'wheel' || e.type === 'mousewheel')) {
+          e.preventDefault();
+          return false;
+        }
+      };
+
+      const blockMultiTouch = (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+          return false;
+        }
+      };
+
+      const blockNavigation = (e) => {
+        const blockedKeys = {
+          'F5': true, 'F12': true, 'F11': true,
+          'r': e.ctrlKey, 'R': e.ctrlKey && e.shiftKey,
+          'I': e.ctrlKey && e.shiftKey,
+          'p': e.ctrlKey, 'P': e.ctrlKey,
+          's': e.ctrlKey, 'S': e.ctrlKey && e.shiftKey
+        };
+        
+        if (blockedKeys[e.key] || (e.key && blockedKeys[e.key] !== undefined)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      };
+
+      // Prevenir pull-to-refresh
+      let startY = 0;
+      const preventPullToRefresh = (e) => {
+        if (e.touches.length === 1) {
+          startY = e.touches[0].clientY;
+        }
+      };
+
+      const checkPullToRefresh = (e) => {
+        if (e.touches.length === 1) {
+          const currentY = e.touches[0].clientY;
+          if (currentY - startY > 100 && window.scrollY === 0) {
+            e.preventDefault();
+            return false;
+          }
+        }
+      };
+
+      // AGREGAR EVENT LISTENERS
+      const events = [
+        ['keydown', blockZoom],
+        ['keydown', blockNavigation],
+        ['wheel', blockZoom, { passive: false }],
+        ['mousewheel', blockZoom, { passive: false }],
+        ['touchstart', blockMultiTouch, { passive: false }],
+        ['touchmove', blockMultiTouch, { passive: false }],
+        ['touchstart', preventPullToRefresh, { passive: true }],
+        ['touchmove', checkPullToRefresh, { passive: false }],
+        ['gesturestart', (e) => e.preventDefault()],
+        ['gesturechange', (e) => e.preventDefault()],
+        ['gestureend', (e) => e.preventDefault()],
+        ['contextmenu', (e) => e.preventDefault()],
+        ['selectstart', (e) => e.preventDefault()],
+        ['dragstart', (e) => e.preventDefault()]
+      ];
+
+      events.forEach(([event, handler, options]) => {
+        document.addEventListener(event, handler, options);
+      });
+
+      window.addEventListener('beforeunload', (e) => {
+        e.preventDefault();
+        e.returnValue = '';
+        return e.returnValue;
+      });
+
+      // BLOQUEAR ATRÁS DEL NAVEGADOR
+      const blockBrowserBack = () => {
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = () => {
+          window.history.pushState(null, null, window.location.href);
+        };
+      };
+
+      // OCULTAR INTERFAZ DEL NAVEGADOR EN MOBILE
+      const hideMobileBrowserUI = () => {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 100);
+        
+        let scrollTimeout;
+        const hideUIOnScroll = () => {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            window.scrollTo(0, 1);
+          }, 50);
+        };
+        
+        window.addEventListener('scroll', hideUIOnScroll, { passive: true });
+        return () => window.removeEventListener('scroll', hideUIOnScroll);
+      };
+
+      // EJECUTAR CONFIGURACIONES
+      checkDisplayMode();
+      configureAdvancedViewport();
+      applyAdvancedAppStyles();
+      const cleanupScroll = hideMobileBrowserUI();
+      blockBrowserBack();
+
+      console.log('✅ MODO APP NATIVA ACTIVADO - RESPETANDO BARRA DE ESTADO');
+
+      // CLEANUP
+      return () => {
+        events.forEach(([event, handler, options]) => {
+          document.removeEventListener(event, handler, options);
+        });
+        
+        window.removeEventListener('beforeunload', (e) => {
+          e.preventDefault();
+          e.returnValue = '';
+        });
+        
+        if (cleanupScroll) cleanupScroll();
+        
+        const injectedStyles = document.querySelector('#app-native-styles');
+        if (injectedStyles) injectedStyles.remove();
+        
+        // Restaurar estructura
+        const root = document.getElementById('root');
+        if (root) {
+          const contentArea = root.querySelector('.app-content-area');
+          if (contentArea) {
+            while (contentArea.firstChild) {
+              root.appendChild(contentArea.firstChild);
+            }
+            const mainContainer = root.querySelector('.app-main-container');
+            if (mainContainer) mainContainer.remove();
+          }
+        }
+        
+        document.body.classList.remove('pwa-standalone', 'pwa-browser');
+      };
+    };
+
+    setupAdvancedGestureBlocking();
+  }, []);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/mapa" element={<Mapa_Cmf />} />
+        <Route element={<Nav />}>
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/trabajadores" element={<Trab_List />} />
+          <Route path="/departamentos" element={<Depto_List />} />
+          <Route path="/informaciones" element={<Info_List />} />
+          <Route path="/depto-detail" element={<Depto_Detail />} />
+          <Route path="/trabajadores/:id" element={<Trab_Detail />} />
+          <Route path="/Keyboard" element={<Keyboard />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
