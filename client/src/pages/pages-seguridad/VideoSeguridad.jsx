@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import Logo from '../assets/logo-cmf-azul.svg';
-import Footer from '../components/Footer';
+import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
+import Footer from '../../components/components-seguridad/Footer';
 import { useState } from 'react';
 
 export default function VideoSeguridad() {
@@ -19,22 +19,6 @@ export default function VideoSeguridad() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
-            <header className="bg-white shadow-md">
-                <div className="max-w-7xl mx-auto px-8 py-6 flex items-center gap-4">   
-                    <div>
-                        <img src={Logo} alt="CMF Envases" className="h-28 md:h-36 object-contain" />
-                        <p className="text-sm text-gray-600"></p>
-                    </div>
-                    <nav className="ml-auto">
-                        <Link
-                            to="/"
-                            className="px-11 py-7 bg-blue-600 !text-white text-xl font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-200"
-                        >
-                            Volver al inicio
-                        </Link>
-                    </nav>
-                </div>
-            </header>
 
             {/* modifica el tamaño del video */}
             <main className="flex-1 max-w-7xl mx-auto px-8 py-12">
@@ -94,7 +78,6 @@ export default function VideoSeguridad() {
                     )}
                 </div>
             </main>
-            <Footer />
         </div>
     )
 }

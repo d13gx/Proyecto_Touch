@@ -1,13 +1,13 @@
-import Logo from '../assets/logo-cmf-azul.svg';
-import Carousel from '../components/Carousel';
-import BotSaludoAnimado from '../components/BotSaludoAnimado';
-import Footer from '../components/Footer';
+import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
+import Carousel from '../../components/components-seguridad/Carousel';
+import BotSaludoAnimado from '../../components/components-seguridad/BotSaludoAnimado';
+import Footer from '../../components/components-seguridad/Footer';
 import { useNavigate } from 'react-router-dom';
-import carrusel1 from '../assets/carrusel_1.webp';
-import carrusel2 from '../assets/carrusel_2.webp';
-import carrusel3 from '../assets/carrusel_3.webp';
-import carrusel4 from '../assets/carrusel_4.webp';
-import VideoButton from '../components/VideoButton';
+import carrusel1 from '../../assets/assets-seguridad/carrusel_1.webp';
+import carrusel2 from '../../assets/assets-seguridad/carrusel_2.webp';
+import carrusel3 from '../../assets/assets-seguridad/carrusel_3.webp';
+import carrusel4 from '../../assets/assets-seguridad/carrusel_4.webp';
+import VideoButton from '../../components/components-seguridad/VideoButton';
 
 function Home() {
   const carouselImages = [
@@ -20,20 +20,11 @@ function Home() {
   const navigate = useNavigate();
 
   const handleVideoClick = () => {
-    navigate('/video-seguridad');
+    navigate('/pages-seguridad/video-seguridad');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
-      <header className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center gap-4">
-          <div>
-            <img src={Logo} alt="CMF Envases" className="h-28 md:h-36 object-contain" />
-            <p className="text-sm text-gray-600"></p>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-grow max-w-7xl mx-auto px-8 py-12">
         <div className="space-y-12">
           <BotSaludoAnimado />
@@ -43,7 +34,7 @@ function Home() {
           </div>
 
           <div>
-            <h2 className="text-6xl font-bold text-center text-gray-800">¿Quieres Ingresar a Planta?</h2>
+            <h2 className="text-4xl font-bold text-center text-gray-800">¡Para Ingresar a Planta tienes que ver el video!</h2>
           </div>
 
           <div className="flex justify-center animate-fade-in-delay">
@@ -52,8 +43,6 @@ function Home() {
 
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

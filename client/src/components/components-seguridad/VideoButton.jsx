@@ -1,4 +1,4 @@
-import { PlayCircle } from "lucide-react";
+import { FaPlay } from "react-icons/fa";
 
 export default function VideoButton({ onClick }) {
   const buttonStyle = {
@@ -16,7 +16,7 @@ export default function VideoButton({ onClick }) {
     >
       <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
-      <PlayCircle size={68} className="relative z-10" />
+      <FaPlay size={68} className="relative z-10" />
 
       <span className="relative z-10" style={{ fontSize: 'inherit' }}>
         Video de Seguridad 

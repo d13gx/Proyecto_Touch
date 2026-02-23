@@ -9,12 +9,13 @@ import carrusel_4 from "../assets/Inyeccion-Soplado_2-1.png";
 import carrusel_5 from "../assets/innovacion-4.png";
 import carrusel_6 from "../assets/seguridad.png";
 import { useState } from "react";
-import BotSaludoAnimado from "../components/BotSaludoAnimado";
 import TimeoutRedirect from "../components/TimeoutRedirect"; // 👈 IMPORTAR
+import PersonalModal from "../components/PersonalModal"; // 👈 IMPORTAR MODAL
 
 
 export function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showPersonalModal, setShowPersonalModal] = useState(false);
 
   const slideDescriptions = [
     "Nuestra empresa Envases CMF S.A.",
@@ -39,7 +40,7 @@ export function HomePage() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-center">
             <div className="text-center text-white px-4">
               <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                Bienvenido a nuestra APP Interactiva
+                Bienvenido a CMF Envases  
               </h1>
               <p className="text-blue-100 text-sm sm:text-lg md:text-xl mt-3 sm:mt-4 max-w-2xl mx-auto">
                 ¿En qué te podemos ayudar hoy?
@@ -67,34 +68,33 @@ export function HomePage() {
                 </div>
               </Link>
 
-              <Link
-                to="/departamentos"
-                className="group bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                <div className="bg-green-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-green-600 transition-colors">
-                  <FaBuilding className="text-white text-lg sm:text-xl" />
-                </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Departamentos de Envases CMF S.A.</h3>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3">Estructura organizacional de la empresa</p>
-                <div className="flex justify-center">
-                  <div className="bg-green-500 rounded-full p-2 group-hover:bg-green-600 transition-colors">
-                    <FaArrowRight className="text-white text-xs" />
-                  </div>
-                </div>
-              </Link>
-
-              <Link
-                to="/trabajadores"
-                state={{ fromHome: true }}
-                className="group bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              <div
+                onClick={() => setShowPersonalModal(true)}
+                className="group bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               >
                 <div className="bg-purple-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-600 transition-colors">
                   <FaUsers className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Trabajadores de Envases CMF S.A.</h3>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3">Búsquedas y detalles del personal de la empresa</p>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Personal de Envases CMF S.A.</h3>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3">Búsquedas de departamentos y trabajadores de la empresa</p>
                 <div className="flex justify-center">
                   <div className="bg-purple-500 rounded-full p-2 group-hover:bg-purple-600 transition-colors">
+                    <FaArrowRight className="text-white text-xs" />
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to="/pages-seguridad/home"
+                className="group bg-gradient-to-r from-red-50 to-rose-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <div className="bg-red-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-red-600 transition-colors">
+                  <FaHeadset className="text-white text-lg sm:text-xl" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">¿Quieres Ingresar a Planta?</h3>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3">¡Primero debes ver nuestro video de seguridad!</p>
+                <div className="flex justify-center">
+                  <div className="bg-red-500 rounded-full p-2 group-hover:bg-red-600 transition-colors">
                     <FaArrowRight className="text-white text-xs" />
                   </div>
                 </div>
@@ -186,14 +186,17 @@ export function HomePage() {
                   </div>
                 </Carousel>
                 
-                {/* Bot de saludo animado */}
-                <div className="mt-8">
-                  <BotSaludoAnimado />
-                </div>
+
               </div>
             </div>
           </div>
         </div>     
+        
+        {/* Modal de Personal */}
+        <PersonalModal 
+          isOpen={showPersonalModal} 
+          onClose={() => setShowPersonalModal(false)} 
+        />
       </div>
     </div>
   );

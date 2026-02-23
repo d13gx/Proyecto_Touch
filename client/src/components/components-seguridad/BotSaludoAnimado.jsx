@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./BotSaludoAnimado.css";
-import botellaImg from "../assets/botellacmf.webp";
+import botellaImg from "../../assets/assets-seguridad/botellacmf.webp";
 
 function BotSaludoAnimado() {
   const [visible, setVisible] = useState(false);
@@ -52,9 +52,7 @@ function BotSaludoAnimado() {
         />
       </div>
       <div>
-        {frasesSeguridadCMF[fraseActual]}<br />
-        Hoy es: <strong>{fechaHora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</strong><br />
-        y son las: <strong>{fechaHora.getHours()}:{fechaHora.getMinutes().toString().padStart(2, '0')}</strong>
+        {frasesSeguridadCMF[fraseActual]}
       </div>
     </div>
   );

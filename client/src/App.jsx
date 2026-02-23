@@ -10,6 +10,9 @@ import Trab_Detail from "./pages/Trab_Detail";
 import Keyboard from "./components/Keyboard";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from './components/ThemeContext';
+import SeguridadHome from "./pages/pages-seguridad/home";
+import VideoSeguridad from "./pages/pages-seguridad/VideoSeguridad";
+import Cuestionario from "./pages/pages-seguridad/Cuestionario";
 
 function App() {
   const [isStandalone, setIsStandalone] = useState(false);
@@ -370,6 +373,9 @@ function App() {
             <Route path="/mapa" element={<Mapa_Cmf />} />
             <Route path="/depto-detail" element={<Depto_Detail />} />
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
+            <Route path="/pages-seguridad/home" element={<SeguridadHome />} />
+            <Route path="/pages-seguridad/video-seguridad" element={<VideoSeguridad />} />
+            <Route path="/cuestionario" element={<Cuestionario />} />
             <Route path="/Keyboard" element={<Keyboard />} />
             <Route path="*" element={<Navigate to="/home" replace />} />
           </Route>

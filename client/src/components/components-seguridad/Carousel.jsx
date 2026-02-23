@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 export default function Carousel({ images, autoPlayInterval = 5000 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,7 +47,7 @@ export default function Carousel({ images, autoPlayInterval = 5000 }) {
         className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-4 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={32} />
+        <FaChevronLeft size={32} />
       </button>
 
       <button
@@ -55,7 +55,7 @@ export default function Carousel({ images, autoPlayInterval = 5000 }) {
         className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-4 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
         aria-label="Next slide"
       >
-        <ChevronRight size={32} />
+        <FaChevronRight size={32} />
       </button>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 md:gap-4">
