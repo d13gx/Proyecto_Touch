@@ -1,7 +1,5 @@
-import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
 import Carousel from '../../components/components-seguridad/Carousel';
 import BotSaludoAnimado from '../../components/components-seguridad/BotSaludoAnimado';
-import Footer from '../../components/components-seguridad/Footer';
 import { useNavigate } from 'react-router-dom';
 import carrusel1 from '../../assets/assets-seguridad/carrusel_1.webp';
 import carrusel2 from '../../assets/assets-seguridad/carrusel_2.webp';
@@ -20,7 +18,7 @@ function Home() {
   const navigate = useNavigate();
 
   const handleVideoClick = () => {
-    navigate('/pages-seguridad/video-seguridad');
+    navigate('/seguridad/video-seguridad');
   };
 
   return (

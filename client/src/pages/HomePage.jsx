@@ -40,7 +40,7 @@ export function HomePage() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-center">
             <div className="text-center text-white px-4">
               <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                Bienvenido a CMF Envases  
+                Bienvenido a Envases CMF   
               </h1>
               <p className="text-blue-100 text-sm sm:text-lg md:text-xl mt-3 sm:mt-4 max-w-2xl mx-auto">
                 ¿En qué te podemos ayudar hoy?
@@ -85,7 +85,7 @@ export function HomePage() {
               </div>
 
               <Link
-                to="/pages-seguridad/home"
+                to="/seguridad/home"
                 className="group bg-gradient-to-r from-red-50 to-rose-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <div className="bg-red-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-red-600 transition-colors">

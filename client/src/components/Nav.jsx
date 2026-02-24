@@ -11,7 +11,7 @@ export function Nav() {
     { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
     { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
     { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
-    { path: "/pages-seguridad/home", icon: FaVideo, label: "Seguridad", color: "red" },
+    { path: "/seguridad/home", icon: FaVideo, label: "Seguridad", color: "red" },
     { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" }
   ];
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config/api.js'; 
-import Footer from '../../components/components-seguridad/Footer';
-import DatosPersonales from '../../components/components-seguridad/DatosPersonales';
-import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario';
-import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado';
-import PanelAdministrativo from '../../components/components-seguridad/PanelAdministrativo';
+import Footer from '../../components/components-seguridad/Footer.jsx';
+import DatosPersonales from '../../components/components-seguridad/DatosPersonales.jsx';
+import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario.jsx';
+import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado.jsx';
+import PanelAdministrativo from '../../components/components-seguridad/PanelAdministrativo.jsx';
 
 export default function SurveyApp() {
   
