@@ -212,7 +212,6 @@ verificar_static_files.bat
 
 # Development files
 et --hard HEAD~1
-readme
 
 # Package manager files
 package-lock.json
@@ -231,13 +230,9 @@ secrets/
 
 # Media files (if large)
 trabajadores/
-*.jpg
-*.jpeg
-*.png
 *.gif
 *.mp4
 *.svg
-*.webp
 
 # Build artifacts
 build/
