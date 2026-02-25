@@ -21,11 +21,11 @@ cd /d "%~dp0"
 :: Verificar entorno virtual
 echo [1/3] Verificando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
-    echo [✓] Entorno virtual encontrado
+    echo [OK] Entorno virtual encontrado
 ) else (
     echo [!] Creando entorno virtual...
     python -m venv venv
-    echo [✓] Entorno virtual creado
+    echo [OK] Entorno virtual creado
 )
  
 :: Activar entorno virtual y verificar Django
@@ -36,13 +36,13 @@ python -c "import django" 2>nul
 if %errorlevel% neq 0 (
     echo [!] Instalando Django y dependencias...
     pip install django djangorestframework django-cors-headers
-    echo [✓] Django instalado
+    echo [OK] Django instalado
 ) else (
-    echo [✓] Django ya está instalado
+    echo [OK] Django ya está instalado
 )
  
 :: Ejecutar migraciones
-echo [✓] Ejecutando migraciones...
+echo [OK] Ejecutando migraciones...
 python manage.py migrate --noinput
  
 :: Iniciar servidores
@@ -73,7 +73,7 @@ echo [React] Iniciando aplicación React en puerto 5173...
 if exist "client\package.json" (
     start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
 ) else (
-    echo [!] No se ha encontrado package.json, omitiendo React
+    echo [OK] No se ha encontrado package.json, omitiendo React
 )
  
 :: Mensaje final
