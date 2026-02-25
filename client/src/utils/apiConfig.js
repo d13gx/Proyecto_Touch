@@ -50,7 +50,7 @@ export const API_BASE_URL = cachedApiUrl || (() => {
     return 'http://localhost:3001';
   } else {
     // Móviles usan IP por defecto (se actualizará con la real)
-    const defaultIp = import.meta.env.VITE_SERVER_IP || '172.19.7.96';
+    const defaultIp = import.meta.env.VITE_SERVER_IP || 'localhost';
     return `http://${defaultIp}:3001`;
   }
 })();

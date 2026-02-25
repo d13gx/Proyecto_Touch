@@ -17,6 +17,13 @@ echo.
 :: Cambiar al directorio principal
 cd /d "%~dp0"
 
+:: Configurar entorno automáticamente
+echo [0/3] Configurando entorno para esta máquina...
+python setup_environment.py
+if %errorlevel% neq 0 (
+    echo [!] Error en la configuración automática, continuando con configuración manual...
+)
+
 :: Verificar entorno virtual
 echo [1/3] Verificando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
@@ -88,7 +95,7 @@ if exist "client\backend\server.js" (
 timeout /t 2 /nobreak >nul
 
 :: Iniciar React con IP detectada
-echo [5/5] Iniciando aplicación React en puerto 5173...
+echo [5/5] Iniciando aplicacion React en puerto 5173...
 if exist "client\package.json" (
     start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://%LOCAL_IP%:5173 && echo ======================================== && echo. && npm run dev -- --host %LOCAL_IP%"
 ) else (
@@ -98,18 +105,18 @@ if exist "client\package.json" (
 :: Mensaje final
 echo.
 echo ========================================
-echo     ¡PROYECTO INICIADO CORRECTAMENTE!
+echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
 echo SERVIDORES ACTIVOS:
-echo   • Django API:     http://0.0.0.0:8000
-echo   • Node.js API:    http://%LOCAL_IP%:3001  
-echo   • React Frontend: http://%LOCAL_IP%:5173
+echo    Django API:     http://0.0.0.0:8000
+echo    Node.js API:    http://%LOCAL_IP%:3001  
+echo    React Frontend: http://%LOCAL_IP%:5173
 echo.
 echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo   • Django: http://%LOCAL_IP%:8000
-echo 📱 Para visitantes: http://%LOCAL_IP%:3001/Cuestionario
-echo 🔗 QR generado con: http://%LOCAL_IP%:3001
+echo    Django: http://%LOCAL_IP%:8000
+echo Para visitantes: http://%LOCAL_IP%:3001/Cuestionario
+echo  QR generado con: http://%LOCAL_IP%:3001
 echo.
 echo ========================================
 echo.

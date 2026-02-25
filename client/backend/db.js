@@ -1,20 +1,5 @@
 const sql = require('mssql');
-
-const config = {
-    user: 'VClientes',
-    password: 'Ayamopereichon2026',
-    server: '172.18.0.19',
-    database: 'VisitaCliente',
-    port: 1433,
-    options: {
-        encrypt: false,           // Cambiado a false para probar
-        trustServerCertificate: true,
-        enableArithAbort: true,
-        useUTC: false,
-        connectTimeout: 30000,
-        requestTimeout: 30000
-    }
-};
+const config = require('./config.js');
 
 async function connectDB() {
     try {
