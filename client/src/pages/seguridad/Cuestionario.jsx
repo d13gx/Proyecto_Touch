@@ -209,14 +209,6 @@ export default function SurveyApp() {
                 ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
                 : 'No tienes permiso para acceder al cuestionario.'}
             </p>
-            <div className="text-sm text-gray-500">
-              <p>Por favor:</p>
-              <ul className="text-left mt-2 space-y-1">
-                <li>• Escanea el código QR nuevamente</li>
-                <li>• Solicita un nuevo enlace válido</li>
-                <li>• Contacta al administrador si necesitas ayuda</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

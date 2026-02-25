@@ -94,7 +94,7 @@ export function HomePage() {
                 <div className="bg-red-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-red-600 transition-colors">
                   <FaShieldAlt className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">¿Eres visitante?</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">¿Quieres visitarnos?</h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3">¡Primero debes ver nuestro video de seguridad!</p>
                 <div className="flex justify-center">
                   <div className="bg-red-500 rounded-full p-2 group-hover:bg-red-600 transition-colors">
