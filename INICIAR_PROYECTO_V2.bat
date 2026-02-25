@@ -1,131 +1,101 @@
 @echo off
-setlocal enabledelayedexpansion
-
-REM Obtener la dirección IP de la interfaz Ethernet
-for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4" ^| findstr /v "127.0.0.1"') do (
-    for /f "tokens=*" %%b in ("%%a") do set IP_ADDRESS=%%b
-)
-
-REM Limpiar espacios en blanco
-echo IP cruda: !IP_ADDRESS!
-set IP_ADDRESS=!IP_ADDRESS: =!
-
-REM Si no se pudo obtener la IP, usar un valor por defecto
-if "!IP_ADDRESS!"=="" set IP_ADDRESS=172.18.7.150
-
-REM Cambiar al directorio principal del proyecto
+title Proyecto Touch - Inicio Automatico
+color 0A
+cls
+ 
+echo ========================================
+echo     PROYECTO TOUCH - INICIO COMPLETO
+echo ========================================
+echo.
+echo Este script iniciara automaticamente:
+echo   1. Backend Django (API de Datos)
+echo   2. Backend Node.js (API Server)  
+echo   3. Frontend React (Aplicación)
+echo.
+echo ========================================
+echo.
+ 
+:: Cambiar al directorio principal
 cd /d "%~dp0"
-
-REM Configurar entorno automáticamente si es necesario
-echo [0/4] Configurando entorno para esta máquina...
-if exist "setup_environment.py" (
-    python setup_environment.py
-) else (
-    echo [!] Script de configuración no encontrado, usando configuración existente...
-)
-
-REM Mostrar información de red
-echo.
-echo ===== INFORMACIÓN DE RED =====
-echo IP del servidor: %IP_ADDRESS%
-echo Red local: 172.18.0.0/16
-echo =============================
-echo.
-
-REM Verificar entorno virtual
-echo [1/4] Verificando entorno virtual...
+ 
+:: Verificar entorno virtual
+echo [1/3] Verificando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
-    echo [OK] Entorno virtual encontrado
+    echo [✓] Entorno virtual encontrado
 ) else (
     echo [!] Creando entorno virtual...
     python -m venv venv
-    echo [OK] Entorno virtual creado
+    echo [✓] Entorno virtual creado
 )
-
-REM Activar entorno virtual y verificar Django
-echo [2/4] Verificando Django...
+ 
+:: Activar entorno virtual y verificar Django
+echo [2/3] Verificando Django...
 call venv\Scripts\activate.bat
-
+ 
 python -c "import django" 2>nul
 if %errorlevel% neq 0 (
     echo [!] Instalando Django y dependencias...
     pip install django djangorestframework django-cors-headers
-    echo [OK] Django instalado
+    echo [✓] Django instalado
 ) else (
-    echo [OK] Django ya esta instalado
+    echo [✓] Django ya está instalado
 )
-
-REM Ejecutar migraciones
-echo [OK] Ejecutando migraciones...
+ 
+:: Ejecutar migraciones
+echo [✓] Ejecutando migraciones...
 python manage.py migrate --noinput
-
-REM Mostrar la dirección IP para acceso en red
+ 
+:: Iniciar servidores
 echo.
-echo =============================================
-echo  Servidor accesible en la red local en:
-echo  http://%IP_ADDRESS%:5173/home
+echo [3/3] Iniciando servidores...
 echo.
-echo  Asegurate de que:
-echo  1. Ambos dispositivos esten en la misma red
-echo  2. El firewall permite conexiones en los puertos 8000, 3001 y 5173
-echo =============================================
-echo.
-
-REM Iniciar servidor Django (puerto 8000)
-echo [3/4] Iniciando servidor Django en puerto 8000...
-start "Backend Django" cmd /k "title Django Backend - Puerto 8000 && cd /d %~dp0 && echo. && echo ======================================== && echo     Django Backend - PUERTO 8000 && echo     http://0.0.0.0:8000 && echo     Accesible desde: http://%IP_ADDRESS%:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
-
-REM Esperar 2 segundos
-timeout /t 2 /nobreak >nul
-
-REM Iniciar servidor Node.js (puerto 3001) - Base de datos
-echo [4/4] Iniciando servidor Node.js en puerto 3001...
+ 
+:: Iniciar Django (puerto 8000)
+echo [Django] Iniciando servidor Django en puerto 8000...
+start "Django API Server" cmd /k "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+ 
+:: Esperar 3 segundos
+timeout /t 3 /nobreak >nul
+ 
+:: Iniciar Node.js (puerto 3001)
+echo [Node.js] Iniciando servidor Node.js en puerto 3001...
 if exist "client\backend\server.js" (
-    start "Node.js API Server" cmd /k "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://%IP_ADDRESS%:3001 && echo ======================================== && echo. && node server.js"
+    start "Node.js API Server" cmd /k "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
 ) else (
     echo [!] No se ha encontrado server.js, omitiendo Node.js
 )
-
-REM Esperar 2 segundos
+ 
+:: Esperar 2 segundos
 timeout /t 2 /nobreak >nul
-
-REM Levantar servidor Vite (Frontend)
-echo [Frontend] Iniciando servidor React en puerto 5173...
+ 
+:: Iniciar React (puerto 5173)
+echo [React] Iniciando aplicación React en puerto 5173...
 if exist "client\package.json" (
-    start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://%IP_ADDRESS%:5173 && echo ======================================== && echo. && npm run dev -- --host %IP_ADDRESS%"
+    start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
 ) else (
     echo [!] No se ha encontrado package.json, omitiendo React
 )
-
-REM Esperar 2 segundos para que los servidores se inicien
-timeout /t 2 /nobreak >nul
-
-REM Abrir navegador
-echo.
-echo [Navegador] Abriendo aplicación...
-start http://localhost:5173/home
-start http://%IP_ADDRESS%:5173/home
-
-REM Mensaje final
+ 
+:: Mensaje final
 echo.
 echo ========================================
 echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
-echo SERVIDORES ACTIVOS:
-echo    Django API:     http://0.0.0.0:8000 (acceso: http://%IP_ADDRESS%:8000)
-echo    Node.js API:    http://%IP_ADDRESS%:3001  
-echo    React Frontend: http://%IP_ADDRESS%:5173
+echo   SERVICIOS ACTIVOS:
+echo   Django API:     http://localhost:8000
+echo   Node.js API:    http://localhost:3001  
+echo   React App:      http://localhost:5173
 echo.
 echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo    Django: http://%IP_ADDRESS%:8000
-echo    Para visitantes: http://%IP_ADDRESS%:3001/Cuestionario
-echo    QR generado con: http://%IP_ADDRESS%:3001
+echo   1. Ejecuta: ipconfig
+echo   2. Busca tu IP (ej: 192.168.1.X)
+echo   3. Usa: http://[TU-IP]:5173
 echo.
 echo ========================================
 echo.
-echo Las ventanas de los servidores se abrirán
-echo automáticamente. NO las cierres.
+echo Las ventanas de los servidores se abriran
+echo automaticamente. NO las cierres.
 echo.
 echo Presiona cualquier tecla para salir...
 pause >nul
