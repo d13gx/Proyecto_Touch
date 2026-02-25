@@ -43,7 +43,7 @@ if %errorlevel% neq 0 (
 :: Ejecutar migraciones
 echo [OK] Ejecutando migraciones...
 python manage.py migrate --noinput
-    
+
 :: Iniciar servidores
 echo.
 echo [3/3] Iniciando servidores...
@@ -65,12 +65,12 @@ if not defined LOCAL_IP (
 
 echo [OK] IP local detectada: %LOCAL_IP%
 
-:: Iniciar servidor Django con IP detectada
+:: Iniciar servidor Django con 0.0.0.0
 echo [3/5] Iniciando servidor Django en puerto 8000...
 if exist "manage.py" (
-    start "Backend Django" cmd /k "title Django Backend - Puerto 8000 && cd /d %~dp0 && echo. && echo ======================================== && echo     Django Backend - PUERTO 8000 && echo     http://%LOCAL_IP%:8000 && echo ======================================== && echo. && python manage.py runserver %LOCAL_IP%:8000"
+    start "Backend Django" cmd /k "title Django Backend - Puerto 8000 && cd /d %~dp0 && echo. && echo ======================================== && echo     Django Backend - PUERTO 8000 && echo     http://0.0.0.0:8000 && echo     Accesible desde: http://%LOCAL_IP%:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
 ) else (
-    echo [!] No se ha encontrado manage.py, omitiendo Django
+    echo [!] No se encontró manage.py, omitiendo Django
 )
 
 :: Esperar 2 segundos
@@ -101,23 +101,20 @@ echo ========================================
 echo     ¡PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
-echo SERVICIOS ACTIVOS CON IP %LOCAL_IP%:
-echo   • Django API:     http://%LOCAL_IP%:8000
+echo SERVIDORES ACTIVOS:
+echo   • Django API:     http://0.0.0.0:8000
 echo   • Node.js API:    http://%LOCAL_IP%:3001  
 echo   • React Frontend: http://%LOCAL_IP%:5173
 echo.
+echo ACCESO DESDE OTROS DISPOSITIVOS:
+echo   • Django: http://%LOCAL_IP%:8000
 echo 📱 Para visitantes: http://%LOCAL_IP%:3001/Cuestionario
 echo 🔗 QR generado con: http://%LOCAL_IP%:3001
 echo.
-echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo   1. Ejecuta: ipconfig
-echo   2. Busca tu IP (ej: 192.168.1.X)
-echo   3. Usa: http://[TU-IP]:5173
-echo.
 echo ========================================
 echo.
-echo Las ventanas de los servidores se abriran
-echo automaticamente. NO las cierres.
+echo Las ventanas de los servidores se abrirán
+echo automáticamente. NO las cierres.
 echo.
 echo Presiona cualquier tecla para salir...
 pause >nul

@@ -23,7 +23,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://172.18.7.150:5173",
     "http://172.18.8.94:5173", #totem
-    "http://172.18.0.0/16"  # Rango de red local
+    "http://172.19.7.96:5173", #diego
+    "http://172.18.0.0/16",  # Rango de red local
+    "http://172.19.0.0/16",  # Rango de red local
+    "http://192.168.0.0/16", # Rango de red local
+    "http://10.0.0.0/8"      # Rango de red local
 ]
 
 # Configuración de seguridad para desarrollo (ajustar en producción)
@@ -31,7 +35,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://172.18.8.94:5173', #totem
-    'http://172.18.7.150:5173'
+    'http://172.18.7.150:5173',
+    'http://172.19.7.96:5173'  #diego
 ]
 
 # Configuración de sesión
