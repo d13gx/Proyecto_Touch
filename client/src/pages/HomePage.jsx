@@ -4,7 +4,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import carrusel_1 from "../assets/Foto_fachada-1.png";
 import carrusel_2 from "../assets/foto-lab2.png";
-import carrusel_3 from "../assets/equipo-2.png";
+import carrusel_3 from "../assets/Botellacmf-Aviso-Carrusel.png";
 import carrusel_4 from "../assets/Inyeccion-Soplado_2-1.png";
 import carrusel_5 from "../assets/innovacion-4.png";
 import carrusel_6 from "../assets/seguridad.png";
@@ -86,12 +86,15 @@ export function HomePage() {
 
               <Link
                 to="/seguridad/home"
-                className="group bg-gradient-to-r from-red-50 to-rose-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="group bg-gradient-to-r from-red-50 to-rose-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-red-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative"
               >
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-sm sm:text-base font-bold px-3 py-2 rounded-full shadow-lg animate-pulse">
+                  NEW
+                </div>
                 <div className="bg-red-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-red-600 transition-colors">
                   <FaShieldAlt className="text-white text-lg sm:text-xl" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Seguridad</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">¿Eres visitante?</h3>
                 <p className="text-gray-600 text-xs sm:text-sm mb-3">¡Primero debes ver nuestro video de seguridad!</p>
                 <div className="flex justify-center">
                   <div className="bg-red-500 rounded-full p-2 group-hover:bg-red-600 transition-colors">
@@ -156,13 +159,13 @@ export function HomePage() {
                       className="max-w-full max-h-full object-contain rounded-lg"
                     />
                   </div>
-                  <div className="h-[25vh] sm:h-[30vh] md:h-[35vh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                  <Link to="/seguridad/home" className="block h-[25vh] sm:h-[30vh] md:h-[35vh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-colors cursor-pointer">
                     <img
                       src={carrusel_3}
                       alt="Equipo de trabajo"
                       className="max-w-full max-h-full object-contain rounded-lg"
                     />
-                  </div>
+                  </Link>
                   <div className="h-[25vh] sm:h-[30vh] md:h-[35vh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
                     <img
                       src={carrusel_4}

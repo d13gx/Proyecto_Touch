@@ -5,19 +5,11 @@ import DatosPersonales from '../../components/components-seguridad/DatosPersonal
 import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario.jsx';
 import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado.jsx';
 import PanelAdministrativo from '../../components/components-seguridad/PanelAdministrativo.jsx';
+import CuestionarioHeader from '../../components/components-seguridad/CuestionarioHeader.jsx';
+import TokenDebugDisplay from '../../components/components-seguridad/TokenDebugDisplay.jsx';
+import tokenManager from '../../utils/tokenManager';
 
 export default function SurveyApp() {
-  
-  useEffect(() => {
-    // Agregar clase para permitir scroll en móviles
-    document.body.classList.add('cuestionario-page');
-
-    return () => {
-      // Limpiar clase al salir de la página
-      document.body.classList.remove('cuestionario-page');
-    };
-  }, []);
-
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -25,6 +17,66 @@ export default function SurveyApp() {
   const [personalData, setPersonalData] = useState(null);
   const [errors, setErrors] = useState({});
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
+  const [tokenValid, setTokenValid] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentToken, setCurrentToken] = useState(null);
+
+  // Validar token al cargar el componente
+  useEffect(() => {
+    // Agregar clase para permitir scroll en móviles
+    document.body.classList.add('cuestionario-page');
+
+    console.log('🚀 Iniciando validación de token...');
+    
+    // Validar token
+    const token = tokenManager.extractTokenFromUrl();
+    console.log('🔍 Token extraído de URL:', token);
+    setCurrentToken(token); // Guardar token para mostrar
+    
+    if (token) {
+      // Primero validar si el token ya existe
+      const validation = tokenManager.validateToken(token);
+      
+      if (validation.valid) {
+        console.log('✅ Token válido, esperando para marcar como usado...');
+        setTokenValid(validation);
+      } else {
+        // Si el token no existe, intentar generarlo y guardarlo
+        const tokens = tokenManager.getAllTokens();
+        const existingToken = tokens.find(t => t.token === token);
+        
+        if (!existingToken) {
+          console.log('🆕 Token no existe, generando y guardando...');
+          const tokenData = tokenManager.generateAndSaveToken(token);
+          console.log('💾 Token guardado:', tokenData);
+          
+          // Validar el token recién guardado
+          const newValidation = tokenManager.validateToken(token);
+          setTokenValid(newValidation);
+          
+          if (newValidation.valid) {
+            console.log('✅ Nuevo token válido');
+          } else {
+            console.error('❌ Error al generar nuevo token:', newValidation.reason);
+          }
+        } else {
+          console.error('❌ Token ya existe pero está usado o expirado');
+          setTokenValid(validation);
+        }
+      }
+    } else {
+      // Acceso directo sin token (desarrollo)
+      console.log('🔓 Acceso directo sin token (modo desarrollo)');
+      setTokenValid({ valid: true, reason: 'Acceso directo' });
+    }
+
+    setLoading(false);
+
+    return () => {
+      // Limpiar clase al salir de la página
+      document.body.classList.remove('cuestionario-page');
+    };
+  }, []);
 
   // Cargar encuestas guardadas al iniciar
   useEffect(() => {
@@ -117,19 +169,78 @@ export default function SurveyApp() {
     setSavedSurveys(surveys);
   };
 
-  // Vista del panel administrativo
+  // Marcar token como usado cuando el usuario comience el cuestionario
+  const markTokenAsUsed = () => {
+    if (currentToken && tokenValid?.valid && tokenValid?.token) {
+      console.log('🔒 Marcando token como usado al comenzar cuestionario...');
+      tokenManager.markTokenAsUsed(tokenValid.token);
+      console.log('✅ Token marcado como usado exitosamente');
+    }
+  };
+
+  // Pantalla de carga
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Validando acceso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla de acceso denegado
+  if (tokenValid && !tokenValid.valid) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.502-3.242V7.176c0-1.575-1.962-3.242-2.502-3.242H4.938c-1.54 0-2.502 1.667-2.502 3.242v10.582c0 1.575 1.962 3.242 2.502 3.242h13.856c1.54 0 2.502-1.667 2.502-3.242V7.176c0-1.575-1.962-3.242-2.502-3.242z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-red-800 mb-2">Acceso Denegado</h1>
+            <p className="text-gray-600 mb-4">
+              {tokenValid.reason === 'Token no encontrado o ya usado' 
+                ? 'Este enlace ya ha sido utilizado o no es válido.'
+                : tokenValid.reason === 'Token expirado'
+                ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
+                : 'No tienes permiso para acceder al cuestionario.'}
+            </p>
+            <div className="text-sm text-gray-500">
+              <p>Por favor:</p>
+              <ul className="text-left mt-2 space-y-1">
+                <li>• Escanea el código QR nuevamente</li>
+                <li>• Solicita un nuevo enlace válido</li>
+                <li>• Contacta al administrador si necesitas ayuda</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (showAdmin) {
     loadShuffledQuestions();
     return (
-      <PanelAdministrativo
-        onBack={() => {
-          setShowAdmin(false);
-          setStep(1);
-          setPersonalData(null);
-          setSubmitted(false);
-        }}
-        shuffledQuestions={shuffledQuestions}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+        <CuestionarioHeader />
+        <div className="flex-1 w-full px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <PanelAdministrativo
+              onBack={() => {
+                setShowAdmin(false);
+                setStep(1);
+                setPersonalData(null);
+                setSubmitted(false);
+              }}
+              shuffledQuestions={shuffledQuestions}
+            />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -138,24 +249,39 @@ export default function SurveyApp() {
     const lastSurvey = savedSurveys[savedSurveys.length - 1];
     
     return (
-      <CuestionarioCompletado
-        lastSurvey={lastSurvey}
-        onNewSurvey={resetForm}
-        onViewAllSurveys={() => {
-          resetForm(); // Resetear todo primero
-          setShowAdmin(true);
-        }}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+        <CuestionarioHeader />
+        <div className="flex-1 w-full px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <CuestionarioCompletado
+              lastSurvey={lastSurvey}
+              onNewSurvey={resetForm}
+              onViewAllSurveys={() => {
+                resetForm(); // Resetear todo primero
+                setShowAdmin(true);
+              }}
+            />
+          </div>
+        </div>
+      </div>
     );
   }
 
   // Formulario principal
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      
+      {/* Header simple sin navegación */}
+      <CuestionarioHeader />
       
       <div className="flex-1 w-full px-4 py-8">
         <div className="max-w-4xl mx-auto">
+          {/* Debug display para ver el estado del token */}
+          <TokenDebugDisplay 
+            tokenValid={tokenValid} 
+            token={currentToken} 
+            loading={loading} 
+          />
+          
           {/* Header con botón de admin */}
           <div className="flex justify-end mb-4">
             <button
@@ -173,7 +299,6 @@ export default function SurveyApp() {
           </div>
 
           <div className="bg-white rounded-t-lg shadow-lg p-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Cuestionario de Seguridad</h1>
             <div className="flex items-center gap-2 mt-4">
               <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-indigo-600' : 'bg-gray-200'}`}></div>
               <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-indigo-600' : 'bg-gray-200'}`}></div>
@@ -186,7 +311,10 @@ export default function SurveyApp() {
           
           {step === 1 && (
             <DatosPersonales
-              onContinue={handleContinueToSurvey}
+              onContinue={(data) => {
+                markTokenAsUsed(); // Marcar token como usado aquí
+                handleContinueToSurvey(data);
+              }}
               onReset={resetForm}
             />
           )}

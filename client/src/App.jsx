@@ -379,10 +379,11 @@ function App() {
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
             <Route path="/seguridad/home" element={<SeguridadHome />} />
             <Route path="/seguridad/video-seguridad" element={<VideoSeguridad />} />
-            <Route path="/cuestionario" element={<Cuestionario />} />
             <Route path="/Keyboard" element={<Keyboard />} />
             <Route path="*" element={<Navigate to="/home" replace />} />
           </Route>
+          {/* Rutas sin header/layout principal */}
+          <Route path="/cuestionario" element={<Cuestionario />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

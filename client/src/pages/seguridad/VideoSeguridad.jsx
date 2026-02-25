@@ -2,13 +2,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
 import Footer from '../../components/components-seguridad/Footer';
 import { useState, useEffect } from 'react';
+import tokenManager from '../../utils/tokenManager';
 
 export default function VideoSeguridad() {
     const [showQR, setShowQR] = useState(false);
     const navigate = useNavigate();
     
-    // URL para generar QR que dirija al cuestionario local
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.origin + '/cuestionario')}`;
+    // Limpiar tokens expirados al cargar
+    useEffect(() => {
+        tokenManager.cleanExpiredTokens();
+    }, []);
+    
+    // Generar URL con token único para el QR
+    const cuestionarioUrl = tokenManager.getTokenizedUrl(window.location.origin + '/cuestionario');
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(cuestionarioUrl)}`;
 
     useEffect(() => {
         if (showQR) {

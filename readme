@@ -1,13 +1,21 @@
---Cristofer Ivan cayuan Montre
+--------------------------------------
+-- Cristofer Ivan Cayuan Montre     --
+-- Diego Ignacio Alonso Reyes Ponce --
+--------------------------------------
+
 --APP TOUCH
 --Django + React
---Proyecto CRUD + LDAP
+--Proyecto LDAP + BD
 
---react
+-- React
 cd client   # carpeta donde está el React
 npm install   # o yarn install
 
-#en la raiz del proyecto django
+-- Backend
+cd client/backend 
+npm install
+
+-- En La Raiz Del Proyecto Django
 python -m venv venv
 pip install -r requirements.txt
 pip freeze > requirements.txt
