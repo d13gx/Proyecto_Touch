@@ -38,7 +38,7 @@ if %errorlevel% neq 0 (
     pip install django djangorestframework django-cors-headers
     echo [OK] Django instalado
 ) else (
-    echo [OK] Django ya está instalado
+    echo [OK] Django ya esta instalado
 )
  
 :: Ejecutar migraciones
