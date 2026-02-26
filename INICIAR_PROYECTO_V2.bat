@@ -61,20 +61,34 @@ echo [Node.js] Instalando dependencias de npm...
 if exist "client\backend\package.json" (
     echo [Backend] Instalando dependencias en client/backend...
     cd client\backend
-    npm install || echo [!] Error en client/backend, continuando...
+    echo [DEBUG] Ejecutando npm install en client\backend...
+    npm install
+    if %errorlevel% neq 0 (
+        echo [!] Error en npm install de client/backend (codigo: %errorlevel%)
+    ) else (
+        echo [OK] Dependencias de client/backend instaladas correctamente
+    )
     cd ..\..
-    echo [OK] Dependencias de client/backend procesadas
 ) else (
     echo [!] No se encontro package.json en client/backend, omitiendo instalacion
 )
+
+:: Pausa breve antes de continuar
+echo [INFO] Esperando 2 segundos antes de continuar...
+timeout /t 2 /nobreak >nul
 
 :: Instalar dependencias de client (React)
 if exist "client\package.json" (
     echo [Frontend] Instalando dependencias en client...
     cd client
-    npm install || echo [!] Error en client, continuando...
+    echo [DEBUG] Ejecutando npm install en client...
+    npm install
+    if %errorlevel% neq 0 (
+        echo [!] Error en npm install de client (codigo: %errorlevel%)
+    ) else (
+        echo [OK] Dependencias de client instaladas correctamente
+    )
     cd ..
-    echo [OK] Dependencias de client procesadas
 ) else (
     echo [!] No se encontro package.json en client, omitiendo instalacion
 )
