@@ -2198,7 +2198,7 @@ def create_qr_token(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def validate_qr_token(request):
-    """Validar un token QR"""
+    """Validar un token QR con control de concurrencia"""
     try:
         token = request.data.get('token', '').strip()
         
@@ -2208,42 +2208,92 @@ def validate_qr_token(request):
                 'reason': 'Token requerido'
             }, status=400)
         
-        # Buscar token válido
+        # Usar bloqueo para evitar condiciones de carrera en validación
+        lock_key = f"validate_{token}"
+        
+        if RequestLockManager.is_locked(lock_key):
+            logger.info(f"⏳ Validación simultánea para token: {token[:8]}...")
+            # Esperar un momento y verificar cache
+            if RequestLockManager.wait_for_lock(lock_key, max_wait=1.0):
+                # Intentar obtener resultado cacheado
+                cache_key = f"qr_token_validation_{token}"
+                cached_result = cache.get(cache_key)
+                if cached_result:
+                    logger.info(f"✅ Resultado cacheado para token: {token[:8]}...")
+                    return Response(cached_result)
+        
+        if not RequestLockManager.acquire_lock(lock_key, timeout=3):
+            logger.warning(f"🚨 Timeout validando token: {token[:8]}...")
+            return Response({
+                'valid': False,
+                'reason': 'Sistema ocupado, intente nuevamente'
+            }, status=429)
+        
         try:
-            qr_token = QRToken.objects.get(token=token)
-        except QRToken.DoesNotExist:
-            logger.warning(f"❌ Token no encontrado: {token[:8]}...")
-            return Response({
-                'valid': False,
-                'reason': 'Token no encontrado'
-            }, status=404)
-        
-        # Validar token
-        if not qr_token.is_valid():
-            if qr_token.used:
-                reason = 'Token ya utilizado'
-                logger.warning(f"🚫 Token ya usado: {token[:8]}...")
-            else:
-                reason = 'Token expirado'
-                logger.warning(f"⏰ Token expirado: {token[:8]}...")
+            # Buscar token
+            try:
+                qr_token = QRToken.objects.get(token=token)
+            except QRToken.DoesNotExist:
+                logger.warning(f"❌ Token no encontrado: {token[:8]}...")
+                
+                # Cachear resultado negativo por 30 segundos
+                cache_key = f"qr_token_validation_{token}"
+                cache.set(cache_key, {
+                    'valid': False,
+                    'reason': 'Token no encontrado'
+                }, 30)
+                
+                RequestLockManager.release_lock(lock_key)
+                return Response({
+                    'valid': False,
+                    'reason': 'Token no encontrado'
+                }, status=404)
             
-            return Response({
-                'valid': False,
-                'reason': reason
-            }, status=400)
-        
-        logger.info(f"✅ Token válido: {token[:8]}...")
-        
-        return Response({
-            'valid': True,
-            'token_data': {
-                'token': qr_token.token,
-                'created_at': qr_token.created_at.isoformat(),
-                'expires_at': qr_token.expires_at.isoformat(),
-                'device_info': qr_token.device_info
+            # Validar token
+            if not qr_token.is_valid():
+                if qr_token.used:
+                    reason = 'Token ya utilizado'
+                    logger.warning(f"🚫 Token ya usado: {token[:8]}...")
+                else:
+                    reason = 'Token expirado'
+                    logger.warning(f"⏰ Token expirado: {token[:8]}...")
+                
+                # Cachear resultado negativo por 60 segundos
+                cache_key = f"qr_token_validation_{token}"
+                cache.set(cache_key, {
+                    'valid': False,
+                    'reason': reason
+                }, 60)
+                
+                RequestLockManager.release_lock(lock_key)
+                return Response({
+                    'valid': False,
+                    'reason': reason
+                }, status=400)
+            
+            logger.info(f"✅ Token válido: {token[:8]}...")
+            
+            result = {
+                'valid': True,
+                'token_data': {
+                    'token': qr_token.token,
+                    'created_at': qr_token.created_at.isoformat(),
+                    'expires_at': qr_token.expires_at.isoformat(),
+                    'device_info': qr_token.device_info
+                }
             }
-        })
-        
+            
+            # Cachear resultado positivo por 30 segundos
+            cache_key = f"qr_token_validation_{token}"
+            cache.set(cache_key, result, 30)
+            
+            RequestLockManager.release_lock(lock_key)
+            return Response(result)
+            
+        except Exception as e:
+            RequestLockManager.release_lock(lock_key)
+            raise e
+            
     except Exception as e:
         logger.error(f"Error validando token QR: {e}")
         return Response({'error': 'Error en validación'}, status=500)
@@ -2251,31 +2301,67 @@ def validate_qr_token(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def mark_qr_token_used(request):
-    """Marcar token QR como usado"""
+    """Marcar token QR como usado con control de concurrencia"""
     try:
         token = request.data.get('token', '').strip()
         
         if not token:
             return Response({'error': 'Token requerido'}, status=400)
         
+        # Usar bloqueo para evitar condiciones de carrera
+        lock_key = f"mark_used_{token}"
+        
+        if RequestLockManager.is_locked(lock_key):
+            logger.warning(f"⏳ Operación simultánea detectada para token: {token[:8]}...")
+            return Response({
+                'error': 'Token siendo procesado por otro usuario. Por favor espere.',
+                'error_code': 'TOKEN_BEING_PROCESSED'
+            }, status=429)
+        
+        if not RequestLockManager.acquire_lock(lock_key, timeout=5):
+            logger.warning(f"🚨 No se pudo adquirir lock para token: {token[:8]}...")
+            return Response({'error': 'Demasiadas solicitudes simultáneas'}, status=429)
+        
         try:
-            qr_token = QRToken.objects.get(token=token, used=False)
+            # Verificar token con select_for_update para bloqueo a nivel de base de datos
+            qr_token = QRToken.objects.select_for_update().get(token=token)
+            
+            if qr_token.used:
+                RequestLockManager.release_lock(lock_key)
+                return Response({
+                    'error': 'Token ya fue utilizado',
+                    'error_code': 'TOKEN_ALREADY_USED',
+                    'used_at': qr_token.used_at.isoformat() if qr_token.used_at else None
+                }, status=400)
+            
+            if not qr_token.is_valid():
+                RequestLockManager.release_lock(lock_key)
+                reason = 'expirado' if qr_token.expires_at <= timezone.now() else 'inválido'
+                return Response({
+                    'error': f'Token {reason}',
+                    'error_code': 'TOKEN_INVALID'
+                }, status=400)
+            
+            # Marcar como usado
+            qr_token.mark_as_used(request)
+            
+            logger.info(f"🔒 Token marcado como usado: {token[:8]}... IP: {qr_token.ip_address}")
+            
+            RequestLockManager.release_lock(lock_key)
+            
+            return Response({
+                'success': True,
+                'used_at': qr_token.used_at.isoformat(),
+                'ip_address': str(qr_token.ip_address),
+                'user_agent': qr_token.user_agent[:100] if qr_token.user_agent else None
+            })
+            
         except QRToken.DoesNotExist:
-            return Response({'error': 'Token no encontrado o ya usado'}, status=404)
-        
-        # Marcar como usado
-        qr_token.mark_as_used(request)
-        
-        logger.info(f"🔒 Token marcado como usado: {token[:8]}...")
-        
-        return Response({
-            'success': True,
-            'used_at': qr_token.used_at.isoformat(),
-            'ip_address': qr_token.ip_address,
-            'user_agent': qr_token.user_agent[:100] if qr_token.user_agent else None
-        })
-        
+            RequestLockManager.release_lock(lock_key)
+            return Response({'error': 'Token no encontrado'}, status=404)
+            
     except Exception as e:
+        RequestLockManager.release_lock(lock_key)
         logger.error(f"Error marcando token QR como usado: {e}")
         return Response({'error': 'Error marcando token'}, status=500)
 
@@ -2303,3 +2389,58 @@ def qr_token_stats(request):
     except Exception as e:
         logger.error(f"Error obteniendo estadísticas: {e}")
         return Response({'error': 'Error obteniendo stats'}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_server_ip(request):
+    """Obtener la IP real del servidor donde corre la aplicación"""
+    try:
+        import socket
+        
+        # Método 1: Obtener IP local conectando a un servidor externo
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+        except Exception:
+            local_ip = "127.0.0.1"
+        
+        # Método 2: Obtener hostname del servidor
+        hostname = socket.gethostname()
+        local_host = socket.gethostbyname(hostname)
+        
+        # Método 3: Obtener IPs de todas las interfaces
+        all_ips = []
+        try:
+            for interface in socket.getaddrinfo(hostname, None):
+                ip = interface[4][0]
+                if ip != '127.0.0.1' and ':' not in ip:  # Excluir IPv6 y localhost
+                    all_ips.append(ip)
+        except Exception:
+            pass
+        
+        # Seleccionar la mejor IP
+        server_ip = local_ip
+        if all_ips:
+            # Preferir IPs que no sean localhost
+            non_local_ips = [ip for ip in all_ips if not ip.startswith('127.') and not ip.startswith('169.254.')]
+            if non_local_ips:
+                server_ip = non_local_ips[0]
+        
+        logger.info(f"🖥️ IP del servidor detectada: {server_ip}")
+        
+        return Response({
+            'server_ip': server_ip,
+            'hostname': hostname,
+            'local_host': local_host,
+            'all_ips': list(set(all_ips)),
+            'request_ip': request.META.get('REMOTE_ADDR', 'unknown')
+        })
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo IP del servidor: {e}")
+        return Response({
+            'error': 'Error detectando IP del servidor',
+            'fallback_ip': request.META.get('REMOTE_ADDR', '127.0.0.1')
+        }, status=500)

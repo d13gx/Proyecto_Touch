@@ -48,9 +48,36 @@ export default function SurveyApp() {
           setTokenValid(validation);
         }
       } else {
-        // Acceso directo sin token (desarrollo)
-        console.log('🔓 Acceso directo sin token (modo desarrollo)');
-        setTokenValid({ valid: true, reason: 'Acceso directo' });
+        // Acceso directo sin token - generar uno nuevo automáticamente
+        console.log('🔓 Acceso directo sin token - generando token único...');
+        try {
+          const baseUrl = window.location.origin + '/cuestionario';
+          const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
+          
+          // Extraer el token de la URL generada
+          const urlObj = new URL(tokenizedUrl);
+          const newToken = urlObj.searchParams.get('token');
+          
+          if (newToken) {
+            console.log('✅ Nuevo token generado:', newToken);
+            setCurrentToken(newToken);
+            
+            // Validar el nuevo token
+            const validation = await tokenManager.validateToken(newToken);
+            if (validation.valid) {
+              setTokenValid(validation);
+              // Actualizar URL en el navegador sin recargar
+              window.history.replaceState({}, '', tokenizedUrl);
+            } else {
+              setTokenValid({ valid: false, reason: 'Error generando token' });
+            }
+          } else {
+            setTokenValid({ valid: false, reason: 'No se pudo generar token' });
+          }
+        } catch (error) {
+          console.error('❌ Error generando token automático:', error);
+          setTokenValid({ valid: false, reason: 'Error generando token' });
+        }
       }
 
       setLoading(false);

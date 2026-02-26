@@ -5,7 +5,7 @@ import logo from "../assets/logo.jpg";
 export function Nav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHome = location.pathname === "/home";
+  const isHome = location.pathname === "/seguridad/home";
 
   const quickLinks = [
     { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
@@ -55,7 +55,7 @@ export function Nav() {
 
               {!isHome && (
                 <button
-                  onClick={() => navigate("/home")}
+                  onClick={() => navigate("/seguridad/home")}
                   className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 
                            hover:from-green-600 hover:to-green-700
                            px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white

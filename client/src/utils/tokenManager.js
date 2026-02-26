@@ -168,9 +168,53 @@ class TokenManager {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(validTokens));
   }
 
+  // Obtener URL base correcta para tokens (detecta IP local automáticamente)
+  getBaseUrlForToken() {
+    const hostname = window.location.hostname;
+    
+    // Si ya es una IP o dominio público, usar el origin actual
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return window.location.origin;
+    }
+    
+    // En producción, usar variable de entorno si está disponible
+    if (import.meta.env.VITE_TOTEM_URL) {
+      return import.meta.env.VITE_TOTEM_URL;
+    }
+    
+    // Si estamos en localhost, intentar detectar la IP local automáticamente
+    // Usar la misma lógica que VideoSeguridad para consistencia
+    const commonPorts = ['5173', '3000', '8080'];
+    const commonIPs = [
+      '192.168.1.100', '192.168.0.100', '192.168.1.50',
+      '10.0.0.100', '172.19.7.96'
+    ];
+    
+    // Intentar con la IP actual primero
+    const currentPort = window.location.port || '5173';
+    for (const ip of commonIPs) {
+      try {
+        const testUrl = `http://${ip}:${currentPort}`;
+        // Simplemente retornar la primera IP común como fallback
+        // En producción, esto debería ser configurado por variables de entorno
+        return testUrl;
+      } catch (e) {
+        // Continuar intentando
+      }
+    }
+    
+    // Último fallback: usar origin actual
+    return window.location.origin;
+  }
+
   // Obtener URL con token (ahora crea token en backend)
   async getTokenizedUrl(baseUrl) {
     console.log('🆕 Creando token QR en backend...');
+    
+    // Si no se proporciona baseUrl, usar la detectada automáticamente
+    if (!baseUrl) {
+      baseUrl = this.getBaseUrlForToken();
+    }
     
     try {
       const response = await fetch(`${this.backendUrl}/app_touch/api/qr/create/`, {

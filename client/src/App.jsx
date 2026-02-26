@@ -369,7 +369,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<Nav />}>
-            <Route path="/" element={<Navigate to="/home" />} />
+            <Route path="/" element={<Navigate to="/seguridad/home" />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/trabajadores" element={<Trab_List />} />
             <Route path="/departamentos" element={<Depto_List />} />
