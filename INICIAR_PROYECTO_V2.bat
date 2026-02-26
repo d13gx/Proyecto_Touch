@@ -25,9 +25,9 @@ echo [1/4] Instalando dependencias de Node.js...
 if exist "client\backend\package.json" (
     echo [Backend] Instalando dependencias en client/backend...
     cd client\backend
-    npm install
+    npm install || echo [!] Error en la instalacion de client/backend, continuando...
     cd ..\..
-    echo [OK] Dependencias de client/backend instaladas
+    echo [OK] Dependencias de client/backend procesadas
 ) else (
     echo [!] No se encontro package.json en client/backend, omitiendo instalacion
 )
@@ -36,9 +36,9 @@ if exist "client\backend\package.json" (
 if exist "client\package.json" (
     echo [Frontend] Instalando dependencias en client...
     cd client
-    npm install
+    npm install || echo [!] Error en la instalacion de client, continuando...
     cd ..
-    echo [OK] Dependencias de client instaladas
+    echo [OK] Dependencias de client procesadas
 ) else (
     echo [!] No se encontro package.json en client, omitiendo instalacion
 )
@@ -60,15 +60,24 @@ call venv\Scripts\activate.bat
 python -c "import django" 2>nul
 if %errorlevel% neq 0 (
     echo [!] Instalando Django y dependencias...
-    pip install django djangorestframework django-cors-headers
-    echo [OK] Django instalado
+    pip install django djangorestframework django-cors-headers || echo [!] Error en la instalacion de Django, continuando...
+    echo [OK] Django procesado
 ) else (
     echo [OK] Django ya esta instalado
 )
 
+:: Instalar dependencias de Python desde requirements.txt
+echo [Python] Instalando dependencias desde requirements.txt...
+if exist "requirements.txt" (
+    pip install -r requirements.txt || echo [!] Error en la instalacion de requirements.txt, continuando...
+    echo [OK] Dependencias de Python procesadas
+) else (
+    echo [!] No se encontro requirements.txt, omitiendo instalacion de dependencias
+)
+
 :: Ejecutar migraciones
 echo [OK] Ejecutando migraciones...
-python manage.py migrate --noinput
+python manage.py migrate --noinput || echo [!] Error en migraciones, continuando...
 
 :: Iniciar servidores
 echo.
