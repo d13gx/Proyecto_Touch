@@ -228,12 +228,6 @@ settings/local.py
 secrets/
 .secrets/
 
-# Media files (if large)
-trabajadores/
-*.gif
-*.mp4
-*.svg
-
 # Build artifacts
 build/
 out/

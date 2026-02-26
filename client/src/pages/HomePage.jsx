@@ -4,7 +4,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import carrusel_1 from "../assets/Foto_fachada-1.png";
 import carrusel_2 from "../assets/foto-lab2.png";
-import carrusel_3 from "../assets/Botellacmf-Aviso-Carrusel.png";
+import carrusel_3 from "../assets/Carrusel-3.png";
 import carrusel_4 from "../assets/Inyeccion-Soplado_2-1.png";
 import carrusel_5 from "../assets/innovacion-4.png";
 import carrusel_6 from "../assets/seguridad.png";

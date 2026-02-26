@@ -7,6 +7,8 @@
 --Django + React
 --Proyecto LDAP + BD
 
+-
+
 -- React
 cd client   # carpeta donde está el React
 npm install   # o yarn install
