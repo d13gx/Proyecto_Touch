@@ -1,16 +1,19 @@
 @echo off
-title Proyecto Touch - Inicio Automatico
+title Proyecto Touch - Iniciar Servidores
 color 0A
 cls
  
 echo ========================================
-echo     PROYECTO TOUCH - INICIO COMPLETO
+echo     PROYECTO TOUCH - INICIAR SERVIDORES
 echo ========================================
 echo.
-echo Este script iniciara automaticamente:
-echo   1. Backend Django (API de Datos)
-echo   2. Backend Node.js (API Server)  
-echo   3. Frontend React (Aplicacion)
+echo Este script iniciara los servidores asumiendo
+echo que las dependencias ya estan instaladas.
+echo.
+echo Si es la primera vez, ejecuta:
+echo   1. npm install (en client/)
+echo   2. npm install (en client/backend/)
+echo   3. pip install -r requirements.txt
 echo.
 echo ========================================
 echo.
@@ -18,44 +21,23 @@ echo.
 :: Cambiar al directorio principal
 cd /d "%~dp0"
  
-:: Verificar entorno virtual
-echo [1/3] Verificando entorno virtual...
+:: Activar entorno virtual
+echo [1/3] Activando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
-    echo [OK] Entorno virtual encontrado
+    call venv\Scripts\activate.bat
+    echo [OK] Entorno virtual activado
 ) else (
-    echo [!] Creando entorno virtual...
+    echo [!] No se encontro entorno virtual, creandolo...
     python -m venv venv
-    echo [OK] Entorno virtual creado
-)
- 
-:: Activar entorno virtual y verificar Django
-echo [2/3] Verificando Django...
-call venv\Scripts\activate.bat
- 
-python -c "import django" 2>nul
-if %errorlevel% neq 0 (
-    echo [!] Instalando Django y dependencias...
-    pip install django djangorestframework django-cors-headers || echo [!] Error en Django, continuando...
-    echo [OK] Django procesado
-) else (
-    echo [OK] Django ya esta instalado
-)
-
-:: Instalar dependencias de Python desde requirements.txt
-echo [Python] Instalando dependencias desde requirements.txt...
-if exist "requirements.txt" (
-    pip install -r requirements.txt || echo [!] Error en requirements.txt, continuando...
-    echo [OK] Dependencias de Python procesadas
-) else (
-    echo [!] No se encontro requirements.txt, omitiendo instalacion de dependencias
+    call venv\Scripts\activate.bat
+    echo [OK] Entorno virtual creado y activado
 )
 
 :: Ejecutar migraciones
-echo [OK] Ejecutando migraciones...
-python manage.py migrate --noinput || echo [!] Error en migraciones, continuando...
-
+echo [2/3] Ejecutando migraciones...
+python manage.py migrate --noinput || echo [!] Error en migraciones, pero continuando...
+ 
 :: Iniciar servidores
-echo.
 echo [3/3] Iniciando servidores...
 echo.
  
@@ -88,7 +70,7 @@ if exist "client\package.json" (
 :: Mensaje final
 echo.
 echo ========================================
-echo     PROYECTO INICIADO CORRECTAMENTE!
+echo     SERVIDORES INICIADOS!
 echo ========================================
 echo.
 echo   SERVICIOS ACTIVOS:
