@@ -10,16 +10,41 @@ echo.
 echo Este script iniciara automaticamente:
 echo   1. Backend Django (API de Datos)
 echo   2. Backend Node.js (API Server)  
-echo   3. Frontend React (Aplicación)
+echo   3. Frontend React (Aplicacion)
 echo.
 echo ========================================
 echo.
  
 :: Cambiar al directorio principal
 cd /d "%~dp0"
- 
+
+:: Instalar dependencias de Node.js primero
+echo [1/4] Instalando dependencias de Node.js...
+
+:: Instalar dependencias de client/backend
+if exist "client\backend\package.json" (
+    echo [Backend] Instalando dependencias en client/backend...
+    cd client\backend
+    npm install
+    cd ..\..
+    echo [OK] Dependencias de client/backend instaladas
+) else (
+    echo [!] No se encontro package.json en client/backend, omitiendo instalacion
+)
+
+:: Instalar dependencias de client (React)
+if exist "client\package.json" (
+    echo [Frontend] Instalando dependencias en client...
+    cd client
+    npm install
+    cd ..
+    echo [OK] Dependencias de client instaladas
+) else (
+    echo [!] No se encontro package.json en client, omitiendo instalacion
+)
+
 :: Verificar entorno virtual
-echo [1/3] Verificando entorno virtual...
+echo [2/4] Verificando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
     echo [OK] Entorno virtual encontrado
 ) else (
@@ -29,7 +54,7 @@ if exist "venv\Scripts\activate.bat" (
 )
  
 :: Activar entorno virtual y verificar Django
-echo [2/3] Verificando Django...
+echo [3/4] Verificando Django...
 call venv\Scripts\activate.bat
  
 python -c "import django" 2>nul
@@ -40,14 +65,14 @@ if %errorlevel% neq 0 (
 ) else (
     echo [OK] Django ya esta instalado
 )
- 
+
 :: Ejecutar migraciones
 echo [OK] Ejecutando migraciones...
 python manage.py migrate --noinput
- 
+
 :: Iniciar servidores
 echo.
-echo [3/3] Iniciando servidores...
+echo [4/4] Iniciando servidores...
 echo.
  
 :: Iniciar Django (puerto 8000)

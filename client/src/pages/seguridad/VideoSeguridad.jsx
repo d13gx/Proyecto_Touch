@@ -6,6 +6,9 @@ import tokenManager from '../../utils/tokenManager';
 
 export default function VideoSeguridad() {
     const [showQR, setShowQR] = useState(false);
+    const [videoCompleted, setVideoCompleted] = useState(false);
+    const [generatingQR, setGeneratingQR] = useState(false);
+    const [qrUrl, setQrUrl] = useState('');
     const navigate = useNavigate();
     
     // Limpiar tokens expirados al cargar
@@ -13,9 +16,31 @@ export default function VideoSeguridad() {
         tokenManager.cleanExpiredTokens();
     }, []);
     
-    // Generar URL con token único para el QR
-    const cuestionarioUrl = tokenManager.getTokenizedUrl(window.location.origin + '/cuestionario');
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(cuestionarioUrl)}`;
+    // Generar QR cuando el video termina
+    const handleVideoEnd = async () => {
+        try {
+            setVideoCompleted(true);
+            setGeneratingQR(true);
+            
+            // Generar URL con token usando el backend
+            const cuestionarioUrl = window.location.origin + '/cuestionario';
+            const tokenizedUrl = await tokenManager.getTokenizedUrl(cuestionarioUrl);
+            
+            // Generar URL del código QR
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tokenizedUrl)}`;
+            
+            setQrUrl(qrUrl);
+            setShowQR(true);
+            setGeneratingQR(false);
+            
+            console.log('✅ QR generado exitosamente:', qrUrl);
+        } catch (error) {
+            console.error('❌ Error generando QR:', error);
+            setGeneratingQR(false);
+            // Mostrar mensaje de error al usuario
+            alert('Error generando el código QR. Por favor intente nuevamente.');
+        }
+    };
 
     useEffect(() => {
         if (showQR) {
@@ -27,10 +52,6 @@ export default function VideoSeguridad() {
             return () => clearTimeout(timer);
         }
     }, [showQR, navigate]);
-
-    const handleVideoEnded = () => {
-        setShowQR(true);
-    };
 
     const handleVideoReplay = () => {
         setShowQR(false);
@@ -49,7 +70,7 @@ export default function VideoSeguridad() {
                                 controls
                                 className="w-full h-full rounded-md"
                                 style={{ objectFit: 'contain' }}
-                                onEnded={handleVideoEnded}
+                                onEnded={handleVideoEnd}
                             >
                                 <source src="/visitas_1.mp4" type="video/mp4" />
                                 Tu navegador no soporta el elemento de video.

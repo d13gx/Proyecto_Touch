@@ -2,7 +2,19 @@
 class TokenManager {
   constructor() {
     this.STORAGE_KEY = 'qr_tokens';
-    this.TOKEN_EXPIRY_MINUTES = 5; // Tokens expiran en 5 minutos
+    this.TOKEN_EXPIRY_MINUTES = 2; // Tokens expiran en 2 minutos
+    
+    // Detectar si estamos en localhost o en red
+    this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    this.backendUrl = this.isLocalhost 
+      ? 'http://localhost:8000' 
+      : `http://${window.location.hostname}:8000`;
+    
+    console.log('🌐 Configuración TokenManager:', {
+      isLocalhost: this.isLocalhost,
+      hostname: window.location.hostname,
+      backendUrl: this.backendUrl
+    });
   }
 
   // Generar un token único para el dispositivo
@@ -71,62 +83,75 @@ class TokenManager {
     }
   }
 
-  // Validar si un token es válido
-  validateToken(token) {
-    console.log('🔍 Validando token:', token);
+  // Validar si un token es válido (ahora usa backend)
+  async validateToken(token) {
+    console.log('🔍 Validando token con backend:', token);
+    const backendUrl = `${this.backendUrl}/app_touch/api/qr/validate/`;
+    console.log('🌐 URL completa:', backendUrl);
     
-    const tokens = this.getAllTokens();
-    console.log('📝 Tokens existentes:', tokens);
-    
-    const tokenData = tokens.find(t => t.token === token && !t.used);
-    console.log('🎯 Token encontrado:', tokenData);
-    
-    if (!tokenData) {
-      console.log('❌ Token no encontrado o ya usado');
-      return { valid: false, reason: 'Token no encontrado o ya usado' };
+    try {
+      const response = await fetch(backendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token })
+      });
+      
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+      
+      const result = await response.json();
+      console.log('📝 Resultado validación backend:', result);
+      
+      if (response.ok && result.valid) {
+        return {
+          valid: true,
+          token: result.token_data.token,
+          deviceInfo: result.token_data.device_info,
+          createdAt: result.token_data.created_at
+        };
+      } else {
+        return {
+          valid: false,
+          reason: result.reason || 'Error en validación'
+        };
+      }
+    } catch (error) {
+      console.error('❌ Error validando token con backend:', error);
+      console.error('❌ Error completo:', error.message);
+      return {
+        valid: false,
+        reason: 'Error de conexión con servidor: ' + error.message
+      };
     }
-
-    const now = new Date();
-    const expiresAt = new Date(tokenData.expiresAt);
-    
-    console.log('⏰ Fechas:', { now: now.toISOString(), expires: expiresAt.toISOString() });
-    
-    if (now > expiresAt) {
-      console.log('⏰ Token expirado');
-      return { valid: false, reason: 'Token expirado' };
-    }
-
-    // NO marcar como usado aquí - solo validar
-    // El marcado como usado debe hacerse explícitamente cuando se accede al cuestionario
-    
-    console.log('✅ Token válido, devolviendo:', token);
-    
-    return { 
-      valid: true, 
-      deviceInfo: tokenData.deviceInfo,
-      createdAt: tokenData.createdAt,
-      token: token // Devolver el token para poder marcarlo después
-    };
   }
 
-  // Marcar token como usado
-  markTokenAsUsed(token) {
-    console.log('🔒 Marcando token como usado:', token);
+  // Marcar token como usado (ahora usa backend)
+  async markTokenAsUsed(token) {
+    console.log('🔒 Marcando token como usado en backend:', token);
     
-    const tokens = this.getAllTokens();
-    const tokenIndex = tokens.findIndex(t => t.token === token);
-    
-    console.log('📝 Índice del token:', tokenIndex);
-    
-    if (tokenIndex !== -1) {
-      console.log('📝 Antes de marcar:', tokens[tokenIndex]);
-      tokens[tokenIndex].used = true;
-      tokens[tokenIndex].usedAt = new Date().toISOString();
-      console.log('📝 Después de marcar:', tokens[tokenIndex]);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tokens));
-      console.log('✅ Token marcado como usado exitosamente');
-    } else {
-      console.log('❌ No se encontró el token para marcar como usado');
+    try {
+      const response = await fetch(`${this.backendUrl}/app_touch/api/qr/mark-used/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        console.log('✅ Token marcado como usado en backend:', result);
+        return true;
+      } else {
+        console.error('❌ Error marcando token como usado:', result.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error de conexión marcando token:', error);
+      return false;
     }
   }
 
@@ -143,11 +168,39 @@ class TokenManager {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(validTokens));
   }
 
-  // Obtener URL con token
-  getTokenizedUrl(baseUrl) {
-    // Generar token único para esta URL
-    const token = this.createUUID();
-    return `${baseUrl}?token=${token}`;
+  // Obtener URL con token (ahora crea token en backend)
+  async getTokenizedUrl(baseUrl) {
+    console.log('🆕 Creando token QR en backend...');
+    
+    try {
+      const response = await fetch(`${this.backendUrl}/app_touch/api/qr/create/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          base_url: baseUrl,
+          device_info: this.getDeviceInfo()
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.token) {
+        console.log('✅ Token QR creado en backend:', result.token);
+        return result.qr_url;
+      } else {
+        console.error('❌ Error creando token QR:', result.error);
+        // Fallback: crear token local si el backend falla
+        const token = this.createUUID();
+        return `${baseUrl}?token=${token}`;
+      }
+    } catch (error) {
+      console.error('❌ Error de conexión creando token QR:', error);
+      // Fallback: crear token local si no hay conexión
+      const token = this.createUUID();
+      return `${baseUrl}?token=${token}`;
+    }
   }
 
   // Generar y guardar token cuando el dispositivo accede

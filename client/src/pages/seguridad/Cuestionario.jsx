@@ -26,51 +26,37 @@ export default function SurveyApp() {
     // Agregar clase para permitir scroll en móviles
     document.body.classList.add('cuestionario-page');
 
-    console.log('🚀 Iniciando validación de token...');
-    
-    // Validar token
-    const token = tokenManager.extractTokenFromUrl();
-    console.log('🔍 Token extraído de URL:', token);
-    setCurrentToken(token); // Guardar token para mostrar
-    
-    if (token) {
-      // Primero validar si el token ya existe
-      const validation = tokenManager.validateToken(token);
+    const validateAndSetToken = async () => {
+      console.log('🚀 Iniciando validación de token...');
       
-      if (validation.valid) {
-        console.log('✅ Token válido, esperando para marcar como usado...');
-        setTokenValid(validation);
-      } else {
-        // Si el token no existe, intentar generarlo y guardarlo
-        const tokens = tokenManager.getAllTokens();
-        const existingToken = tokens.find(t => t.token === token);
+      // Validar token
+      const token = tokenManager.extractTokenFromUrl();
+      console.log('🔍 Token extraído de URL:', token);
+      setCurrentToken(token); // Guardar token para mostrar
+      
+      if (token) {
+        // Validar con backend
+        const validation = await tokenManager.validateToken(token);
         
-        if (!existingToken) {
-          console.log('🆕 Token no existe, generando y guardando...');
-          const tokenData = tokenManager.generateAndSaveToken(token);
-          console.log('💾 Token guardado:', tokenData);
-          
-          // Validar el token recién guardado
-          const newValidation = tokenManager.validateToken(token);
-          setTokenValid(newValidation);
-          
-          if (newValidation.valid) {
-            console.log('✅ Nuevo token válido');
-          } else {
-            console.error('❌ Error al generar nuevo token:', newValidation.reason);
-          }
+        if (validation.valid) {
+          console.log('✅ Token válido - listo para usar');
+          setTokenValid(validation);
+          // NO marcar como usado inmediatamente para permitir navegación
         } else {
-          console.error('❌ Token ya existe pero está usado o expirado');
+          // Token inválido - acceso denegado
+          console.log('� Token inválido - acceso denegado:', validation.reason);
           setTokenValid(validation);
         }
+      } else {
+        // Acceso directo sin token (desarrollo)
+        console.log('🔓 Acceso directo sin token (modo desarrollo)');
+        setTokenValid({ valid: true, reason: 'Acceso directo' });
       }
-    } else {
-      // Acceso directo sin token (desarrollo)
-      console.log('🔓 Acceso directo sin token (modo desarrollo)');
-      setTokenValid({ valid: true, reason: 'Acceso directo' });
-    }
 
-    setLoading(false);
+      setLoading(false);
+    };
+
+    validateAndSetToken();
 
     return () => {
       // Limpiar clase al salir de la página
@@ -170,11 +156,16 @@ export default function SurveyApp() {
   };
 
   // Marcar token como usado cuando el usuario comience el cuestionario
-  const markTokenAsUsed = () => {
+  const markTokenAsUsed = async () => {
     if (currentToken && tokenValid?.valid && tokenValid?.token) {
       console.log('🔒 Marcando token como usado al comenzar cuestionario...');
-      tokenManager.markTokenAsUsed(tokenValid.token);
-      console.log('✅ Token marcado como usado exitosamente');
+      const success = await tokenManager.markTokenAsUsed(tokenValid.token);
+      
+      if (success) {
+        console.log('✅ Token marcado como usado exitosamente');
+      } else {
+        console.error('❌ Error marcando token como usado');
+      }
     }
   };
 
@@ -303,8 +294,8 @@ export default function SurveyApp() {
           
           {step === 1 && (
             <DatosPersonales
-              onContinue={(data) => {
-                markTokenAsUsed(); // Marcar token como usado aquí
+              onContinue={async (data) => {
+                await markTokenAsUsed(); // Marcar token como usado aquí
                 handleContinueToSurvey(data);
               }}
               onReset={resetForm}

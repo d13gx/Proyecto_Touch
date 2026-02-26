@@ -6,6 +6,7 @@ import time
 import threading
 import traceback
 from datetime import datetime, timedelta
+from django.utils import timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from functools import wraps
@@ -32,7 +33,7 @@ from ldap3 import Server, Connection, ALL, SIMPLE
 from ldap3.core.exceptions import LDAPException
 
 # Local imports
-from app_touch.models import Mapa, Ubicacion
+from app_touch.models import Mapa, Ubicacion, QRToken
 from app_touch.serializer import MapaSerializer, UbicacionSerializer
 
 # Configurar logger
@@ -2162,3 +2163,143 @@ def report_zoom_attempt(request):
     except Exception as e:
         logger.error(f"Error reportando zoom: {e}")
         return JsonResponse({'error': 'Error en el reporte'}, status=400)
+
+# ========== VISTAS PARA GESTIÓN DE TOKENS QR ==========
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_qr_token(request):
+    """Crear un nuevo token QR"""
+    try:
+        import uuid
+        from datetime import timedelta
+        
+        token = str(uuid.uuid4())
+        expires_at = timezone.now() + timedelta(minutes=2)  # 2 minutos de expiración
+        
+        qr_token = QRToken.objects.create(
+            token=token,
+            expires_at=expires_at,
+            device_info=request.data.get('device_info', {})
+        )
+        
+        logger.info(f"✅ Token QR creado: {token[:8]}... expires: {expires_at}")
+        
+        return Response({
+            'token': token,
+            'expires_at': expires_at.isoformat(),
+            'qr_url': f"{request.data.get('base_url', '')}?token={token}"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creando token QR: {e}")
+        return Response({'error': 'Error creando token'}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def validate_qr_token(request):
+    """Validar un token QR"""
+    try:
+        token = request.data.get('token', '').strip()
+        
+        if not token:
+            return Response({
+                'valid': False,
+                'reason': 'Token requerido'
+            }, status=400)
+        
+        # Buscar token válido
+        try:
+            qr_token = QRToken.objects.get(token=token)
+        except QRToken.DoesNotExist:
+            logger.warning(f"❌ Token no encontrado: {token[:8]}...")
+            return Response({
+                'valid': False,
+                'reason': 'Token no encontrado'
+            }, status=404)
+        
+        # Validar token
+        if not qr_token.is_valid():
+            if qr_token.used:
+                reason = 'Token ya utilizado'
+                logger.warning(f"🚫 Token ya usado: {token[:8]}...")
+            else:
+                reason = 'Token expirado'
+                logger.warning(f"⏰ Token expirado: {token[:8]}...")
+            
+            return Response({
+                'valid': False,
+                'reason': reason
+            }, status=400)
+        
+        logger.info(f"✅ Token válido: {token[:8]}...")
+        
+        return Response({
+            'valid': True,
+            'token_data': {
+                'token': qr_token.token,
+                'created_at': qr_token.created_at.isoformat(),
+                'expires_at': qr_token.expires_at.isoformat(),
+                'device_info': qr_token.device_info
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error validando token QR: {e}")
+        return Response({'error': 'Error en validación'}, status=500)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def mark_qr_token_used(request):
+    """Marcar token QR como usado"""
+    try:
+        token = request.data.get('token', '').strip()
+        
+        if not token:
+            return Response({'error': 'Token requerido'}, status=400)
+        
+        try:
+            qr_token = QRToken.objects.get(token=token, used=False)
+        except QRToken.DoesNotExist:
+            return Response({'error': 'Token no encontrado o ya usado'}, status=404)
+        
+        # Marcar como usado
+        qr_token.mark_as_used(request)
+        
+        logger.info(f"🔒 Token marcado como usado: {token[:8]}...")
+        
+        return Response({
+            'success': True,
+            'used_at': qr_token.used_at.isoformat(),
+            'ip_address': qr_token.ip_address,
+            'user_agent': qr_token.user_agent[:100] if qr_token.user_agent else None
+        })
+        
+    except Exception as e:
+        logger.error(f"Error marcando token QR como usado: {e}")
+        return Response({'error': 'Error marcando token'}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def qr_token_stats(request):
+    """Estadísticas de tokens QR (para debugging)"""
+    try:
+        from django.db.models import Count
+        
+        stats = {
+            'total_tokens': QRToken.objects.count(),
+            'used_tokens': QRToken.objects.filter(used=True).count(),
+            'available_tokens': QRToken.objects.filter(used=False, expires_at__gt=timezone.now()).count(),
+            'expired_tokens': QRToken.objects.filter(used=False, expires_at__lte=timezone.now()).count(),
+            'recent_tokens': list(
+                QRToken.objects.all()
+                .order_by('-created_at')[:10]
+                .values('token', 'used', 'created_at', 'expires_at', 'ip_address')
+            )
+        }
+        
+        return Response(stats)
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo estadísticas: {e}")
+        return Response({'error': 'Error obteniendo stats'}, status=500)

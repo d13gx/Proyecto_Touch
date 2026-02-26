@@ -1,4 +1,56 @@
 from django.db import models
+from django.utils import timezone
+
+# ---------------------------
+# Modelo QRToken para control de acceso
+# ---------------------------
+class QRToken(models.Model):
+    token = models.CharField(max_length=100, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False, db_index=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+    device_info = models.JSONField(default=dict, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['token', 'used']),
+            models.Index(fields=['expires_at', 'used']),
+        ]
+    
+    def __str__(self):
+        return f"{self.token[:8]}... ({'Usado' if self.used else 'Disponible'})"
+    
+    def is_valid(self):
+        """Verificar si el token es válido (no usado y no expirado)"""
+        return (
+            not self.used and 
+            self.expires_at > timezone.now()
+        )
+    
+    def mark_as_used(self, request=None):
+        """Marcar token como usado con información del dispositivo"""
+        self.used = True
+        self.used_at = timezone.now()
+        
+        if request:
+            self.ip_address = self.get_client_ip(request)
+            self.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
+        
+        self.save()
+    
+    @staticmethod
+    def get_client_ip(request):
+        """Obtener IP real del cliente"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 # ---------------------------
 # Modelo Departamento

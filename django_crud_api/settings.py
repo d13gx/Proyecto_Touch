@@ -139,6 +139,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",    
     "http://172.18.7.150:5173",
     "http://172.18.8.94:5173", #totem
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://172.18.7.150:3000",
+    "http://172.18.8.94:3000", #totem
+    "http://172.19.7.96:5173",
+    "http://172.19.7.96:3000",
 ]
 
 # Headers permitidos - AGREGAR MÁS HEADERS

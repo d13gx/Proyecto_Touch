@@ -43,6 +43,12 @@ urlpatterns = [
     
     # 2. Gestión de Cache (solo desarrollo/staff)
     path('api/admin/cache/limpiar-ldap/', views.limpiar_cache_ldap, name='limpiar_cache_ldap'),
+    
+    # ========== TOKENS QR ==========
+    path('api/qr/create/', views.create_qr_token, name='create_qr_token'),
+    path('api/qr/validate/', views.validate_qr_token, name='validate_qr_token'),
+    path('api/qr/mark-used/', views.mark_qr_token_used, name='mark_qr_token_used'),
+    path('api/qr/stats/', views.qr_token_stats, name='qr_token_stats'),
       
 
     # URLs de viewsets
