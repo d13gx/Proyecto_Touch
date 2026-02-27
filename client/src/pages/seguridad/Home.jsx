@@ -5,8 +5,8 @@ import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 're
 import { useState } from 'react';
 import carrusel1 from '../../assets/assets-seguridad/carrusel_1.webp';
 import carrusel2 from '../../assets/assets-seguridad/carrusel_2.webp';
-import carrusel3 from '../../assets/assets-seguridad/carrusel_3.webp';
-import carrusel4 from '../../assets/assets-seguridad/carrusel_4.webp';
+import carrusel3 from '../../assets/Foto_fachada.png';
+import carrusel4 from '../../assets/Brigadistas.png';
 import VideoButton from '../../components/components-seguridad/VideoButton';
 import PersonalModal from '../../components/PersonalModal';
 
@@ -36,9 +36,6 @@ function Home() {
               <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                 Bienvenido a Envases CMF   
               </h1>
-              <p className="text-blue-100 text-sm sm:text-lg md:text-xl mt-3 sm:mt-4 max-w-2xl mx-auto">
-                ¿En qué te podemos ayudar hoy?
-              </p>
             </div>
           </div>
           
@@ -95,9 +92,9 @@ function Home() {
                   </div>
                 </Link>
 
-                <div
-                  onClick={() => setShowPersonalModal(true)}
-                  className="group bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                <Link
+                  to="/departamentos"
+                  className="group bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <div className="bg-purple-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-600 transition-colors">
                     <FaBuilding className="text-white text-lg sm:text-xl" />
@@ -109,11 +106,11 @@ function Home() {
                       <FaArrowRight className="text-white text-xs" />
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div
-                  onClick={() => setShowPersonalModal(true)}
-                  className="group bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                <Link
+                  to="/trabajadores"
+                  className="group bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center border-l-4 border-green-500 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <div className="bg-green-500 rounded-full w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center mx-auto mb-3 group-hover:bg-green-600 transition-colors">
                     <FaUsers className="text-white text-lg sm:text-xl" />
@@ -125,7 +122,7 @@ function Home() {
                       <FaArrowRight className="text-white text-xs" />
                     </div>
                   </div>
-                </div>
+                </Link>
 
                 <Link
                   to="/informaciones"
@@ -144,8 +141,7 @@ function Home() {
                 </Link>
               </div>
 
-              <BotSaludoAnimado />
-            </div>
+                          </div>
             
             {/* Modal de Personal */}
             <PersonalModal 

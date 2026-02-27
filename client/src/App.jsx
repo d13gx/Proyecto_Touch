@@ -368,8 +368,12 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Navigate to="/seguridad/home" replace />} />
+          <Route element={<Nav hideHeader />}>
+            <Route path="/seguridad/home" element={<SeguridadHome />} />
+          </Route>
+
           <Route element={<Nav />}>
-            <Route path="/" element={<Navigate to="/seguridad/home" />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/trabajadores" element={<Trab_List />} />
             <Route path="/departamentos" element={<Depto_List />} />
@@ -377,13 +381,13 @@ function App() {
             <Route path="/mapa" element={<Mapa_Cmf />} />
             <Route path="/depto-detail" element={<Depto_Detail />} />
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
-            <Route path="/seguridad/home" element={<SeguridadHome />} />
             <Route path="/seguridad/video-seguridad" element={<VideoSeguridad />} />
             <Route path="/Keyboard" element={<Keyboard />} />
-            <Route path="*" element={<Navigate to="/home" replace />} />
           </Route>
           {/* Rutas sin header/layout principal */}
           <Route path="/cuestionario" element={<Cuestionario />} />
+
+          <Route path="*" element={<Navigate to="/seguridad/home" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

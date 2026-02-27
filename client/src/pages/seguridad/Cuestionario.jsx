@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config/api.js'; 
-import Footer from '../../components/components-seguridad/Footer.jsx';
 import DatosPersonales from '../../components/components-seguridad/DatosPersonales.jsx';
 import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario.jsx';
 import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado.jsx';

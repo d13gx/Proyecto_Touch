@@ -50,10 +50,6 @@ urlpatterns = [
     path('api/qr/mark-used/', views.mark_qr_token_used, name='mark_qr_token_used'),
     path('api/qr/stats/', views.qr_token_stats, name='qr_token_stats'),
     
-    # ========== DETECCIÓN IP ==========
-    path('api/server-ip/', views.get_server_ip, name='get_server_ip'),
-      
-
     # URLs de viewsets
     path('api/', include(router.urls)),
 ]
