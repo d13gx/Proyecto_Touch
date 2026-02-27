@@ -44,7 +44,7 @@ export default function VideoSeguridad() {
 
             const cuestionarioUrl = `${baseUrl}/cuestionario`;
             const tokenizedUrl = await tokenManager.getTokenizedUrl(cuestionarioUrl);
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tokenizedUrl)}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(tokenizedUrl)}`;
 
             console.log('🔗 URL del cuestionario:', cuestionarioUrl);
             console.log('� URL tokenizada:', tokenizedUrl);
@@ -400,10 +400,10 @@ export default function VideoSeguridad() {
                         
                         <div style={{ 
                             backgroundColor: 'white', 
-                            padding: '40px', 
-                            borderRadius: '16px', 
-                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                            maxWidth: '400px',
+                            padding: '80px', 
+                            borderRadius: '24px', 
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                            maxWidth: '800px',
                             margin: '0 auto 40px'
                         }}>
                             {generatingQR ? (
@@ -425,8 +425,8 @@ export default function VideoSeguridad() {
                                         src={qrUrl} 
                                         alt="Código QR" 
                                         style={{ 
-                                            width: '256px', 
-                                            height: '256px',
+                                            width: '600px', 
+                                            height: '600px',
                                             marginBottom: '20px',
                                             display: 'block',
                                             margin: '0 auto 20px'

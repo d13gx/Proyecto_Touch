@@ -48,10 +48,8 @@ function Home() {
                   <div className="text-center">
                     <h3 className="text-base sm:text-lg font-semibold text-blue-800">Conoce nuestras instalaciones</h3>
                   </div>
-                  <div className="bg-gray-900 rounded-md overflow-hidden w-full">
-                    <div className="w-full h-full">
-                      <Carousel images={carouselImages} />
-                    </div>
+                  <div className="w-full">
+                    <Carousel images={carouselImages} />
                   </div>
                 </div>
               </div>
