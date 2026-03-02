@@ -3,6 +3,7 @@ import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
 import { useState, useEffect, useRef } from 'react';
 import tokenManager from '../../utils/tokenManager';
 import BotSaludoAnimado from '../../components/components-seguridad/BotSaludoAnimado';
+import { FaVideo } from 'react-icons/fa';
 
 export default function VideoSeguridad() {
     const [showQR, setShowQR] = useState(false);
@@ -16,8 +17,8 @@ export default function VideoSeguridad() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [showCustomControls, setShowCustomControls] = useState(true);
-    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showCustomControls, setShowCustomControls] = useState(false);
+    const [controlsTimeout, setControlsTimeout] = useState(null);
     const videoRef = useRef(null);
     
     // Limpiar tokens expirados al cargar
@@ -78,7 +79,10 @@ export default function VideoSeguridad() {
     };
 
     // Funciones para controles personalizados
-    const togglePlayPause = () => {
+    const togglePlayPause = (e) => {
+        if (e) e.stopPropagation();
+        handleControlInteraction(e);
+        
         if (videoRef.current) {
             if (isPlaying) {
                 videoRef.current.pause();
@@ -90,62 +94,15 @@ export default function VideoSeguridad() {
         }
     };
 
-    const toggleMute = () => {
+    const toggleMute = (e) => {
+        if (e) e.stopPropagation();
+        handleControlInteraction(e);
+        
         if (videoRef.current) {
             videoRef.current.muted = !isMuted;
             setIsMuted(!isMuted);
         }
     };
-
-    const toggleFullscreen = () => {
-        if (videoRef.current) {
-            if (!isFullscreen) {
-                // Entrar en pantalla completa con el contenedor personalizado
-                const container = videoRef.current.parentElement;
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.mozRequestFullScreen) {
-                    container.mozRequestFullScreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
-                }
-                setIsFullscreen(true);
-            } else {
-                // Salir de pantalla completa
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                setIsFullscreen(false);
-            }
-        }
-    };
-
-    // Escuchar cambios de pantalla completa
-    useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
-
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-        return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
-            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-            document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-            document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-        };
-    }, []);
 
     const handleSeek = (e) => {
         if (videoRef.current) {
@@ -163,24 +120,102 @@ export default function VideoSeguridad() {
         setIsPlaying(false);
     };
 
-    // Forzar estado inicial del video
+    // Funciones para manejar la visibilidad de controles
+    const showControls = () => {
+        setShowCustomControls(true);
+        
+        // Limpiar timeout existente
+        if (controlsTimeout) {
+            clearTimeout(controlsTimeout);
+            setControlsTimeout(null);
+        }
+        
+        // No establecer timeout automático para que los controles permanezcan visibles
+        // hasta que no haya interacción por 2 segundos
+    };
+
+    const handleVideoInteraction = () => {
+        showControls();
+        
+        // Establecer timeout para ocultar después de 2 segundos de inactividad
+        if (controlsTimeout) {
+            clearTimeout(controlsTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+            setShowCustomControls(false);
+        }, 2000);
+        
+        setControlsTimeout(timeout);
+    };
+
+    const handleControlInteraction = (e) => {
+        e.stopPropagation(); // Evitar que se propague al video
+        showControls();
+    };
+
+    // Forzar estado inicial del video y reproducción automática
     useEffect(() => {
         const video = videoRef.current;
         if (video) {
             // Escuchar eventos del video para sincronizar estado
             const syncPlayState = () => {
-                setIsPlaying(!video.paused);
+                const isCurrentlyPlaying = !video.paused;
+                setIsPlaying(isCurrentlyPlaying);
+                console.log('🎬 Video state changed:', isCurrentlyPlaying ? 'playing' : 'paused');
             };
             
             video.addEventListener('play', syncPlayState);
             video.addEventListener('pause', syncPlayState);
+            video.addEventListener('playing', syncPlayState);
+            
+            // Eventos para mostrar controles
+            video.addEventListener('click', handleVideoInteraction);
+            video.addEventListener('touchstart', handleVideoInteraction);
+            video.addEventListener('mousemove', handleVideoInteraction);
+            
+            // Intentar reproducir automáticamente
+            const attemptAutoplay = async () => {
+                try {
+                    await video.play();
+                    console.log('🎬 Video iniciado automáticamente');
+                    // Forzar sincronización del estado después de reproducir
+                    setTimeout(() => {
+                        setIsPlaying(true);
+                    }, 100);
+                } catch (error) {
+                    console.log('⚠️ No se pudo reproducir automáticamente:', error);
+                    // Si no se puede reproducir automáticamente, mostrar controles
+                    setIsPlaying(false);
+                }
+            };
+            
+            // Esperar a que el video esté listo para reproducir
+            if (video.readyState >= 3) {
+                attemptAutoplay();
+            } else {
+                video.addEventListener('canplay', attemptAutoplay, { once: true });
+            }
             
             return () => {
                 video.removeEventListener('play', syncPlayState);
                 video.removeEventListener('pause', syncPlayState);
+                video.removeEventListener('playing', syncPlayState);
+                video.removeEventListener('click', handleVideoInteraction);
+                video.removeEventListener('touchstart', handleVideoInteraction);
+                video.removeEventListener('mousemove', handleVideoInteraction);
             };
         }
     }, []);
+
+    // Cleanup del timeout al desmontar
+    useEffect(() => {
+        return () => {
+            if (controlsTimeout) {
+                clearTimeout(controlsTimeout);
+            }
+        };
+    }, [controlsTimeout]);
 
     // Actualizar progreso y bloquear controles nativos
     useEffect(() => {
@@ -272,8 +307,23 @@ export default function VideoSeguridad() {
     }, []);
 
     return (
-        <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 min-h-screen">
-            <main className="max-w-7xl mx-auto px-8 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header principal */}
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6">
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 h-24 sm:h-32 flex items-center justify-between px-6 sm:px-8 lg:px-10">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                            <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-4 border-white/30 bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-2xl">
+                                <FaVideo className="text-xl sm:text-2xl md:text-3xl" />
+                            </div>
+                            <div className="text-white">
+                                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Video de Seguridad</h1>
+                                <p className="text-sm sm:text-base text-blue-100">Información importante para visitantes</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 {/* Video Player - solo se muestra cuando el video no ha terminado */}
                 {!showQR ? (
                     <div className="bg-white rounded-lg shadow h-full overflow-hidden">
@@ -302,12 +352,13 @@ export default function VideoSeguridad() {
                                 {/* Overlay para capturar clicks */}
                                 <div 
                                     className="absolute inset-0 z-10"
-                                    onClick={togglePlayPause}
+                                    onClick={handleVideoInteraction}
+                                    onMouseMove={handleVideoInteraction}
                                     style={{ pointerEvents: 'auto' }}
                                 />
                                 
                                 {/* Controles personalizados para tótem - siempre visibles */}
-                                <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 ${isFullscreen ? 'fixed bottom-195' : ''}`} style={{ zIndex: 9999 }}>
+                                <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showCustomControls ? 'opacity-100' : 'opacity-0'}`} style={{ zIndex: 9999 }}>
                                     <div className="flex items-center gap-4">
                                         <button
                                             onClick={togglePlayPause}
@@ -324,13 +375,16 @@ export default function VideoSeguridad() {
                                             }
                                         </button>
                                         
-                                        <div className="flex-1" style={{ pointerEvents: 'auto' }}>
+                                        <div className="flex-1" style={{ pointerEvents: 'auto' }} onClick={handleControlInteraction}>
                                             <input
                                                 type="range"
                                                 min="0"
                                                 max="100"
                                                 value={progress}
-                                                onChange={handleSeek}
+                                                onChange={(e) => {
+                                                    handleSeek(e);
+                                                    handleControlInteraction(e);
+                                                }}
                                                 className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
                                             />
                                         </div>
@@ -349,26 +403,81 @@ export default function VideoSeguridad() {
                                                 </svg>
                                             }
                                         </button>
-                                        
-                                        <button
-                                            onClick={toggleFullscreen}
-                                            className="text-white hover:text-blue-400 transition-colors bg-black/50 rounded-full p-2"
-                                            style={{ pointerEvents: 'auto' }}
-                                        >
-                                            {isFullscreen ? 
-                                                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
-                                                </svg> :
-                                                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                                                </svg>
-                                            }
-                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            {/* Botón adicional abajo del video */}
-                            
+                            {/* Botón animado fijo debajo del video */}
+                            <div className="mt-25 mb-22 flex justify-center">
+                                <div style={{ 
+                                    position: 'relative !important',
+                                    bottom: 'auto !important',
+                                    right: 'auto !important',
+                                    top: 'auto !important',
+                                    left: 'auto !important',
+                                    margin: '0 auto',
+                                    transform: 'scale(1.8)',
+                                    zIndex: 'auto !important',
+                                    animation: 'none !important'
+                                }}>
+                                    <style jsx>{`
+                                        .bot-saludo-avatar {
+                                            position: relative !important;
+                                            bottom: auto !important;
+                                            right: auto !important;
+                                            top: 'auto !important;
+                                            left: 'auto !important;
+                                            margin: 0 auto;
+                                            transform: scale(1.8);
+                                            z-index: auto !important;
+                                            animation: none !important;
+                                            opacity: 1 !important;
+                                            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%) !important;
+                                            box-shadow: 0 30px 60px rgba(79, 70, 229, 0.25) !important;
+                                            border: 2px solid #e0e7ff !important;
+                                        }
+                                        .avatar-bot {
+                                            border-color: #6366f1 !important;
+                                            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5) !important;
+                                        }
+                                        .fade {
+                                            opacity: 1 !important;
+                                            transform: none !important;
+                                            transition: none !important;
+                                        }
+                                        .fade.visible {
+                                            opacity: 1 !important;
+                                            transform: none !important;
+                                        }
+                                        .fade.hidden {
+                                            opacity: 1 !important;
+                                            transform: none !important;
+                                        }
+                                        .bot-saludo-avatar div {
+                                            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                                            animation: wordChange 0.8s ease-in-out !important;
+                                        }
+                                        @keyframes wordChange {
+                                            0% {
+                                                opacity: 0.3;
+                                                transform: translateY(-5px) scale(0.95);
+                                            }
+                                            50% {
+                                                opacity: 0.8;
+                                                transform: translateY(2px) scale(1.02);
+                                            }
+                                            100% {
+                                                opacity: 1;
+                                                transform: translateY(0) scale(1);
+                                            }
+                                        }
+                                        .bot-saludo-avatar div:hover {
+                                            transform: scale(1.05);
+                                            color: #4f46e5;
+                                        }
+                                    `}</style>
+                                    <BotSaludoAnimado />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ) : (
@@ -448,43 +557,16 @@ export default function VideoSeguridad() {
                         </div>
                         
                         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <button
-                                onClick={() => navigate('/seguridad/home')}
-                                style={{
-                                    padding: '12px 24px',
-                                    backgroundColor: '#6b7280',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Volver al inicio
-                            </button>
-                            <button
-                                onClick={() => navigate('/seguridad/mapa')}
-                                style={{
-                                    padding: '12px 24px',
-                                    backgroundColor: '#3b82f6',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Ver mapa
-                            </button>
+                    
                             <button
                                 onClick={handleVideoReplay}
                                 style={{
-                                    padding: '12px 24px',
+                                    padding: '20px 130px',
                                     backgroundColor: '#10b981',
                                     color: 'white',
                                     border: 'none',
-                                    borderRadius: '12px',
-                                    fontWeight: '600',
+                                    borderRadius: '20px',
+                                    fontWeight: '700',
                                     cursor: 'pointer'
                                 }}
                             >
@@ -511,7 +593,9 @@ export default function VideoSeguridad() {
                         `}</style>
                     </div>
                 )}
-            </main>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

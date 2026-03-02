@@ -312,24 +312,39 @@ const MapaCmf = () => {
   const mapRef = useRef();
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/mapas/4/`, {
+    const requestOptions = {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
       }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setMapa(data);
-      const img = new Image();
-      img.src = data.imagen;
+    };
+
+    fetch(`${API_BASE_URL}/api/mapas/`, requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then((mapas) => {
+        const mapaCmf = Array.isArray(mapas) ? mapas.find(m => m?.nombre === 'Mapa_Cmf') : null;
+        if (!mapaCmf?.id) {
+          throw new Error('No se encontró el mapa "Mapa_Cmf"');
+        }
+        return fetch(`${API_BASE_URL}/api/mapas/${mapaCmf.id}/`, requestOptions);
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setMapa(data);
+        const img = new Image();
+        img.src = data.imagen;
         img.onload = () => {
           const newBounds = [[0, 0], [img.height, img.width]];
           setBounds(newBounds);

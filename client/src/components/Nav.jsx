@@ -11,7 +11,7 @@ export function Nav({ hideHeader = false }) {
     { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
     { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
     { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
-    { path: "/seguridad/home", icon: FaVideo, label: "Seguridad", color: "red" },
+    { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
     { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" }
   ];
 
@@ -100,7 +100,7 @@ export function Nav({ hideHeader = false }) {
       )}
 
       {/* CONTENIDO PRINCIPAL */}
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
         <Outlet />
       </main>
 
