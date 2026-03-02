@@ -1,19 +1,17 @@
 @echo off
-title Proyecto Touch - Iniciar Servidores
+title Proyecto Touch - Inicio Manual
 color 0A
 cls
- 
+
 echo ========================================
-echo     PROYECTO TOUCH - INICIAR SERVIDORES
+echo     PROYECTO TOUCH - INICIO MANUAL
 echo ========================================
 echo.
-echo Este script iniciara los servidores asumiendo
-echo que las dependencias ya estan instaladas.
+echo Este script iniciara automaticamente:
+echo   1. Backend Django (API de Datos)
+echo   2. Backend Node.js (API Server)  
+echo   3. Frontend React (Aplicacion)
 echo.
-echo Si es la primera vez, ejecuta:
-echo   1. npm install (en client/)
-echo   2. npm install (en client/backend/)
-echo   3. pip install -r requirements.txt
 echo.
 echo ========================================
 echo.
@@ -21,23 +19,44 @@ echo.
 :: Cambiar al directorio principal
 cd /d "%~dp0"
  
-:: Activar entorno virtual
-echo [1/3] Activando entorno virtual...
+:: Verificar entorno virtual
+echo [1/3] Verificando entorno virtual...
 if exist "venv\Scripts\activate.bat" (
-    call venv\Scripts\activate.bat
-    echo [OK] Entorno virtual activado
+    echo [OK] Entorno virtual encontrado
 ) else (
-    echo [!] No se encontro entorno virtual, creandolo...
+    echo [!] Creando entorno virtual...
     python -m venv venv
-    call venv\Scripts\activate.bat
-    echo [OK] Entorno virtual creado y activado
+    echo [OK] Entorno virtual creado
+)
+ 
+:: Activar entorno virtual y verificar Django
+echo [2/3] Verificando Django...
+call venv\Scripts\activate.bat
+ 
+python -c "import django" 2>nul
+if %errorlevel% neq 0 (
+    echo [!] Instalando Django y dependencias...
+    pip install django djangorestframework django-cors-headers || echo [!] Error en Django, continuando...
+    echo [OK] Django procesado
+) else (
+    echo [OK] Django ya esta instalado
+)
+
+:: Instalar dependencias de Python desde requirements.txt
+echo [Python] Instalando dependencias desde requirements.txt...
+if exist "requirements.txt" (
+    pip install -r requirements.txt || echo [!] Error en requirements.txt, continuando...
+    echo [OK] Dependencias de Python procesadas
+) else (
+    echo [!] No se encontro requirements.txt, omitiendo instalacion de dependencias
 )
 
 :: Ejecutar migraciones
-echo [2/3] Ejecutando migraciones...
-python manage.py migrate --noinput || echo [!] Error en migraciones, pero continuando...
- 
+echo [OK] Ejecutando migraciones...
+python manage.py migrate --noinput || echo [!] Error en migraciones, continuando...
+
 :: Iniciar servidores
+echo.
 echo [3/3] Iniciando servidores...
 echo.
  
@@ -60,17 +79,17 @@ if exist "client\backend\server.js" (
 timeout /t 2 /nobreak >nul
  
 :: Iniciar React (puerto 5173)
-echo [React] Iniciando aplicación React en puerto 5173...
+echo [React] Iniciando aplicacion React en puerto 5173...
 if exist "client\package.json" (
     start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
-) else (
+) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
  
 :: Mensaje final
 echo.
 echo ========================================
-echo     SERVIDORES INICIADOS!
+echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
 echo   SERVICIOS ACTIVOS:
@@ -90,3 +109,12 @@ echo automaticamente. NO las cierres.
 echo.
 echo Presiona cualquier tecla para salir...
 pause >nul
+goto :end
+
+:exit_script
+echo.
+echo [INFO] Saliendo sin iniciar el proyecto...
+echo Presiona cualquier tecla para salir...
+pause >nul
+
+:end

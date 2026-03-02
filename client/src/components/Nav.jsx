@@ -121,7 +121,7 @@ export function Nav({ hideHeader = false }) {
             <div className="text-center lg:text-right flex-1">
               <div className="flex flex-col items-center lg:items-end gap-2">
                 <span className="text-blue-200 text-sm sm:text-base lg:text-lg font-medium">
-                  v1.0.0
+                  v2.0.0
                 </span>
               </div>
             </div>

@@ -368,22 +368,7 @@ export default function VideoSeguridad() {
                                 </div>
                             </div>
                             {/* Botón adicional abajo del video */}
-                            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="flex items-center justify-center gap-4">
-                                    <button
-                                        onClick={() => navigate('/seguridad/home')}
-                                        className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
-                                    >
-                                        Volver al inicio
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/seguridad/mapa')}
-                                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
-                                    >
-                                        Ver mapa
-                                    </button>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                 ) : (
@@ -507,12 +492,21 @@ export default function VideoSeguridad() {
                             </button>
                         </div>
                         
-                        <BotSaludoAnimado />
+                        <div className="mt-8 flex justify-center">
+                            <BotSaludoAnimado />
+                        </div>
                         
                         <style jsx>{`
                             @keyframes spin {
                                 0% { transform: rotate(0deg); }
                                 100% { transform: rotate(360deg); }
+                            }
+                            
+                            .bot-saludo-avatar {
+                                position: relative !important;
+                                bottom: auto !important;
+                                right: auto !important;
+                                margin: 0 auto;
                             }
                         `}</style>
                     </div>

@@ -1,11 +1,11 @@
 // Script para mostrar la IP de la máquina actual
-import { getServerIp } from './ipDetector.js';
+import ServerIPDetector from './serverIPDetector.js';
 
 export const showMyIP = async () => {
   console.log('🔍 Obteniendo IP de esta máquina...');
   
   try {
-    const ip = await getServerIp();
+    const ip = await ServerIPDetector.getServerIP();
     
     console.log('='.repeat(50));
     console.log('🖥️ INFORMACIÓN DE ESTA MÁQUINA (SERVIDOR TOTEM)');

@@ -20,6 +20,9 @@ export default function SurveyApp() {
   const [loading, setLoading] = useState(true);
   const [currentToken, setCurrentToken] = useState(null);
 
+  const VISITOR_SESSION_KEY = 'visitor_qr_mode';
+  const VISITOR_TOKEN_SESSION_KEY = 'visitor_qr_token';
+
   // Validar token al cargar el componente
   useEffect(() => {
     // Agregar clase para permitir scroll en móviles
@@ -34,6 +37,10 @@ export default function SurveyApp() {
       setCurrentToken(token); // Guardar token para mostrar
       
       if (token) {
+        // Si hay token en URL, asumimos que viene desde QR (visitante)
+        sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
+        sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, token);
+
         // Validar con backend
         const validation = await tokenManager.validateToken(token);
         
@@ -45,6 +52,10 @@ export default function SurveyApp() {
           // Token inválido - acceso denegado
           console.log('� Token inválido - acceso denegado:', validation.reason);
           setTokenValid(validation);
+
+          // Limpiar modo visitante si el token no es válido
+          sessionStorage.removeItem(VISITOR_SESSION_KEY);
+          sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
         }
       } else {
         // Acceso directo sin token - generar uno nuevo automáticamente

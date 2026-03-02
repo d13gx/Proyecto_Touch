@@ -2,6 +2,34 @@
 title Proyecto Touch - Inicio Automatico
 color 0A
 cls
+
+:: Verificar si se ejecuta con privilegios de administrador
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [!] Este script necesita privilegios de administrador para configurar el inicio automatico
+    echo [!] Por favor, ejecuta como administrador o presiona cualquier tecla para continuar sin configurar inicio automatico
+    pause >nul
+    goto :normal_start
+)
+
+:: Configurar inicio automatico
+echo [CONFIG] Configurando inicio automatico del sistema...
+set "startup_folder=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+set "shortcut_path=%startup_folder%\Proyecto_Touch.lnk"
+set "batch_path=%~dp0%~nx0"
+
+:: Crear acceso directo en la carpeta de inicio
+echo [CONFIG] Creando acceso directo en carpeta de inicio...
+powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%shortcut_path%'); $Shortcut.TargetPath = '%batch_path%'; $Shortcut.WorkingDirectory = '%~dp0'; $Shortcut.Description = 'Iniciar Proyecto Touch automaticamente'; $Shortcut.Save()"
+
+if exist "%shortcut_path%" (
+    echo [OK] Acceso directo creado correctamente en: %startup_folder%
+    echo [OK] El proyecto se iniciara automaticamente al encender el PC
+) else (
+    echo [!] Error al crear acceso directo, el inicio automatico no se configurara
+)
+
+:normal_start
  
 echo ========================================
 echo     PROYECTO TOUCH - INICIO COMPLETO
@@ -12,6 +40,14 @@ echo   1. Backend Django (API de Datos)
 echo   2. Backend Node.js (API Server)  
 echo   3. Frontend React (Aplicacion)
 echo.
+echo Opciones disponibles:
+echo   - Presiona 'Q' para salir sin iniciar
+echo   - Presiona 'R' para remover inicio automatico
+echo   - Presiona cualquier otra tecla para iniciar normalmente
+echo.
+choice /c QR /n /m "Presiona una tecla..."
+if errorlevel 2 goto :remove_autostart
+if errorlevel 1 goto :exit_script
 echo ========================================
 echo.
  
@@ -78,10 +114,10 @@ if exist "client\backend\server.js" (
 timeout /t 2 /nobreak >nul
  
 :: Iniciar React (puerto 5173)
-echo [React] Iniciando aplicación React en puerto 5173...
+echo [React] Iniciando aplicacion React en puerto 5173...
 if exist "client\package.json" (
     start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
-) else (
+) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
  
@@ -108,3 +144,29 @@ echo automaticamente. NO las cierres.
 echo.
 echo Presiona cualquier tecla para salir...
 pause >nul
+goto :end
+
+:remove_autostart
+echo.
+echo [CONFIG] Removiendo inicio automatico...
+set "startup_folder=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+set "shortcut_path=%startup_folder%\Proyecto_Touch.lnk"
+
+if exist "%shortcut_path%" (
+    del "%shortcut_path%"
+    echo [OK] Inicio automatico removido correctamente
+) else (
+    echo [!] No se encontro acceso directo para remover
+)
+echo.
+echo Presiona cualquier tecla para salir...
+pause >nul
+goto :end
+
+:exit_script
+echo.
+echo [INFO] Saliendo sin iniciar el proyecto...
+echo Presiona cualquier tecla para salir...
+pause >nul
+
+:end

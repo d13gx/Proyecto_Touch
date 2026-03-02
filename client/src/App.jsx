@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Nav } from "./components/Nav";
 import { HomePage } from "./pages/HomePage";
 import { Trab_List } from "./pages/Trab_List";
@@ -14,6 +14,35 @@ import SeguridadHome from "./pages/seguridad/Home";
 import VideoSeguridad from "./pages/seguridad/VideoSeguridad";
 import Cuestionario from "./pages/seguridad/Cuestionario";
 import { initIPDetection } from "./utils/showMyIP.js";
+
+function VisitorOnlyGuard({ children }) {
+  const location = useLocation();
+  const storedToken = sessionStorage.getItem('visitor_qr_token');
+  const isVisitor = sessionStorage.getItem('visitor_qr_mode') === '1' || !!storedToken;
+
+  if (!isVisitor) {
+    return children;
+  }
+
+  if (location.pathname === '/cuestionario') {
+    if (storedToken) {
+      const urlToken = new URLSearchParams(location.search).get('token');
+      if (!urlToken) {
+        return (
+          <Navigate
+            to={`/cuestionario?token=${encodeURIComponent(storedToken)}`}
+            replace
+          />
+        );
+      }
+    }
+
+    return children;
+  }
+
+  const to = storedToken ? `/cuestionario?token=${encodeURIComponent(storedToken)}` : '/cuestionario';
+  return <Navigate to={to} replace />;
+}
 
 function App() {
   const [isStandalone, setIsStandalone] = useState(false);
@@ -368,12 +397,19 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/seguridad/home" replace />} />
-          <Route element={<Nav hideHeader />}>
+          <Route
+            path="/"
+            element={
+              <VisitorOnlyGuard>
+                <Navigate to="/seguridad/home" replace />
+              </VisitorOnlyGuard>
+            }
+          />
+          <Route element={<VisitorOnlyGuard><Nav hideHeader /></VisitorOnlyGuard>}>
             <Route path="/seguridad/home" element={<SeguridadHome />} />
           </Route>
 
-          <Route element={<Nav />}>
+          <Route element={<VisitorOnlyGuard><Nav /></VisitorOnlyGuard>}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/trabajadores" element={<Trab_List />} />
             <Route path="/departamentos" element={<Depto_List />} />
@@ -387,7 +423,14 @@ function App() {
           {/* Rutas sin header/layout principal */}
           <Route path="/cuestionario" element={<Cuestionario />} />
 
-          <Route path="*" element={<Navigate to="/seguridad/home" replace />} />
+          <Route
+            path="*"
+            element={
+              <VisitorOnlyGuard>
+                <Navigate to="/seguridad/home" replace />
+              </VisitorOnlyGuard>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
