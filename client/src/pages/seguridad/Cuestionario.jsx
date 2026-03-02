@@ -36,6 +36,11 @@ export default function SurveyApp() {
       const urlParams = new URLSearchParams(window.location.search);
       const cameFromQr = urlParams.get('qr') === '1';
 
+      if (cameFromQr) {
+        sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
+        localStorage.setItem(VISITOR_SESSION_KEY, '1');
+      }
+
       const baseDebug = {
         href: window.location.href,
         pathname: window.location.pathname,
@@ -81,10 +86,9 @@ export default function SurveyApp() {
           setDebugInfo(invalidDebug);
           sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
-          // Limpiar modo visitante si el token no es válido
-          sessionStorage.removeItem(VISITOR_SESSION_KEY);
+          // Mantener modo visitante para seguir bloqueando otras rutas.
+          // Solo limpiar el token almacenado para evitar redirecciones con token inválido.
           sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
-          localStorage.removeItem(VISITOR_SESSION_KEY);
           localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
         }
       } else {
@@ -131,9 +135,7 @@ export default function SurveyApp() {
               sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
               if (cameFromQr) {
-                sessionStorage.removeItem(VISITOR_SESSION_KEY);
                 sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
-                localStorage.removeItem(VISITOR_SESSION_KEY);
                 localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
               }
             }
@@ -164,9 +166,7 @@ export default function SurveyApp() {
           sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
           if (cameFromQr) {
-            sessionStorage.removeItem(VISITOR_SESSION_KEY);
             sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
-            localStorage.removeItem(VISITOR_SESSION_KEY);
             localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
           }
         }
