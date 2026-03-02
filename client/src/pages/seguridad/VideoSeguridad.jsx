@@ -42,12 +42,12 @@ export default function VideoSeguridad() {
             const baseUrl = tokenManager.getBaseUrlForToken();
             setBaseUrlForQR(baseUrl);
 
-            const cuestionarioUrl = `${baseUrl}/cuestionario`;
-            const tokenizedUrl = await tokenManager.getTokenizedUrl(cuestionarioUrl);
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(tokenizedUrl)}`;
+            // IMPORTANTE: el QR NO debe contener un token fijo.
+            // El QR apunta a una URL de entrada y cada dispositivo genera su propio token al abrirla.
+            const cuestionarioEntryUrl = `${baseUrl}/cuestionario?qr=1`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(cuestionarioEntryUrl)}`;
 
-            console.log('🔗 URL del cuestionario:', cuestionarioUrl);
-            console.log('� URL tokenizada:', tokenizedUrl);
+            console.log('🔗 URL de entrada al cuestionario (sin token):', cuestionarioEntryUrl);
             console.log('📱 URL del QR:', qrUrl);
 
             setQrUrl(qrUrl);

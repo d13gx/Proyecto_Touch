@@ -31,6 +31,9 @@ export default function SurveyApp() {
     const validateAndSetToken = async () => {
       console.log('🚀 Iniciando validación de token...');
       
+      const urlParams = new URLSearchParams(window.location.search);
+      const cameFromQr = urlParams.get('qr') === '1';
+
       // Validar token
       const token = tokenManager.extractTokenFromUrl();
       console.log('🔍 Token extraído de URL:', token);
@@ -58,8 +61,10 @@ export default function SurveyApp() {
           sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
         }
       } else {
-        // Acceso directo sin token - generar uno nuevo automáticamente
-        console.log('🔓 Acceso directo sin token - generando token único...');
+        // Acceso sin token
+        // Si viene desde QR (qr=1), cada dispositivo debe generar SU PROPIO token
+        // y quedar en modo visitante.
+        console.log('🔓 Acceso sin token - generando token único...');
         try {
           const baseUrl = window.location.origin + '/cuestionario';
           const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
@@ -71,6 +76,11 @@ export default function SurveyApp() {
           if (newToken) {
             console.log('✅ Nuevo token generado:', newToken);
             setCurrentToken(newToken);
+
+            if (cameFromQr) {
+              sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
+              sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
+            }
             
             // Validar el nuevo token
             const validation = await tokenManager.validateToken(newToken);
@@ -80,6 +90,11 @@ export default function SurveyApp() {
               window.history.replaceState({}, '', tokenizedUrl);
             } else {
               setTokenValid({ valid: false, reason: 'Error generando token' });
+
+              if (cameFromQr) {
+                sessionStorage.removeItem(VISITOR_SESSION_KEY);
+                sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+              }
             }
           } else {
             setTokenValid({ valid: false, reason: 'No se pudo generar token' });
@@ -87,6 +102,11 @@ export default function SurveyApp() {
         } catch (error) {
           console.error('❌ Error generando token automático:', error);
           setTokenValid({ valid: false, reason: 'Error generando token' });
+
+          if (cameFromQr) {
+            sessionStorage.removeItem(VISITOR_SESSION_KEY);
+            sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+          }
         }
       }
 
