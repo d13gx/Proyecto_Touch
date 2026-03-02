@@ -12,7 +12,8 @@ export function Nav({ hideHeader = false }) {
     { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
     { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
     { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
-    { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" }
+    { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
+    { path: "/seguridad/home", icon: FaHome, label: "Inicio", color: "green" }
   ];
 
   const getColorClasses = (color) => {
@@ -50,18 +51,7 @@ export function Nav({ hideHeader = false }) {
               </div>
 
               <div className="flex items-center gap-3">
-                {!isHome && (
-                  <button
-                    onClick={() => navigate("/seguridad/home")}
-                    className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 
-                             hover:from-green-600 hover:to-green-700
-                             px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg text-sm sm:text-base font-semibold text-white
-                             transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-green-400"
-                  >
-                    <FaHome className="text-sm sm:text-base" />
-                    <span className="hidden sm:inline">Inicio</span>
-                  </button>
-                )}
+                {/* Espacio vacío para mantener el layout */}
               </div>
             </div>
 

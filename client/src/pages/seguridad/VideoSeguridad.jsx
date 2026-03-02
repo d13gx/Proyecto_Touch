@@ -65,10 +65,10 @@ export default function VideoSeguridad() {
 
     useEffect(() => {
         if (showQR) {
-            // Temporizador de 30 segundos para redirigir al HomePage
+            // Temporizador de 1 minuto para redirigir al HomePage
             const timer = setTimeout(() => {
                 navigate('/seguridad/home');
-            }, 30000); // 30 segundos
+            }, 60000); // 60 segundos (1 minuto)
 
             return () => clearTimeout(timer);
         }
