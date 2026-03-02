@@ -19,6 +19,7 @@ export default function VideoSeguridad() {
     const [progress, setProgress] = useState(0);
     const [showCustomControls, setShowCustomControls] = useState(false);
     const [controlsTimeout, setControlsTimeout] = useState(null);
+    const [pauseTimeout, setPauseTimeout] = useState(null);
     const videoRef = useRef(null);
     
     // Limpiar tokens expirados al cargar
@@ -114,10 +115,29 @@ export default function VideoSeguridad() {
 
     const handleVideoPlay = () => {
         setIsPlaying(true);
+        
+        // Limpiar timeout de pausa cuando el video se reanuda
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            setPauseTimeout(null);
+        }
     };
 
     const handleVideoPause = () => {
         setIsPlaying(false);
+        
+        // Limpiar timeout existente
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+        }
+        
+        // Establecer timeout para redirigir después de 5 segundos de pausa
+        const timeout = setTimeout(() => {
+            console.log('🏠 Video en pausa por 5 segundos, redirigiendo al home...');
+            navigate('/seguridad/home');
+        }, 5000); // 5 segundos
+        
+        setPauseTimeout(timeout);
     };
 
     // Funciones para manejar la visibilidad de controles
@@ -214,8 +234,11 @@ export default function VideoSeguridad() {
             if (controlsTimeout) {
                 clearTimeout(controlsTimeout);
             }
+            if (pauseTimeout) {
+                clearTimeout(pauseTimeout);
+            }
         };
-    }, [controlsTimeout]);
+    }, [controlsTimeout, pauseTimeout]);
 
     // Actualizar progreso y bloquear controles nativos
     useEffect(() => {
