@@ -2197,6 +2197,7 @@ def create_qr_token(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+# =============================================================================
 def validate_qr_token(request):
     """Validar un token QR con control de concurrencia"""
     def _safe_cache_get(key):
