@@ -70,7 +70,7 @@ export default function SurveyApp() {
           const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
           
           // Extraer el token de la URL generada
-          const urlObj = new URL(tokenizedUrl);
+          const urlObj = new URL(tokenizedUrl, window.location.origin);
           const newToken = urlObj.searchParams.get('token');
           
           if (newToken) {

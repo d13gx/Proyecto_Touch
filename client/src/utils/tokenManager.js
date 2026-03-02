@@ -232,18 +232,21 @@ class TokenManager {
       
       if (response.ok && result.token) {
         console.log('✅ Token QR creado en backend:', result.token);
-        return result.qr_url;
+        if (result.qr_url) {
+          return result.qr_url;
+        }
+        return `${baseUrl}?token=${encodeURIComponent(result.token)}`;
       } else {
         console.error('❌ Error creando token QR:', result.error);
         // Fallback: crear token local si el backend falla
         const token = this.createUUID();
-        return `${baseUrl}?token=${token}`;
+        return `${baseUrl}?token=${encodeURIComponent(token)}`;
       }
     } catch (error) {
       console.error('❌ Error de conexión creando token QR:', error);
       // Fallback: crear token local si no hay conexión
       const token = this.createUUID();
-      return `${baseUrl}?token=${token}`;
+      return `${baseUrl}?token=${encodeURIComponent(token)}`;
     }
   }
 
