@@ -2199,6 +2199,19 @@ def create_qr_token(request):
 @permission_classes([AllowAny])
 def validate_qr_token(request):
     """Validar un token QR con control de concurrencia"""
+    def _safe_cache_get(key):
+        try:
+            return cache.get(key)
+        except Exception as e:
+            logger.error(f"Error leyendo cache en validate_qr_token: {e}")
+            return None
+
+    def _safe_cache_set(key, value, timeout_seconds):
+        try:
+            cache.set(key, value, timeout_seconds)
+        except Exception as e:
+            logger.error(f"Error escribiendo cache en validate_qr_token: {e}")
+
     try:
         token = request.data.get('token', '').strip()
         
@@ -2217,7 +2230,7 @@ def validate_qr_token(request):
             if RequestLockManager.wait_for_lock(lock_key, max_wait=1.0):
                 # Intentar obtener resultado cacheado
                 cache_key = f"qr_token_validation_{token}"
-                cached_result = cache.get(cache_key)
+                cached_result = _safe_cache_get(cache_key)
                 if cached_result:
                     logger.info(f"✅ Resultado cacheado para token: {token[:8]}...")
                     return Response(cached_result)
@@ -2235,20 +2248,19 @@ def validate_qr_token(request):
                 qr_token = QRToken.objects.get(token=token)
             except QRToken.DoesNotExist:
                 logger.warning(f"❌ Token no encontrado: {token[:8]}...")
-                
-                # Cachear resultado negativo por 30 segundos
+
+                # Cachear resultado negativo por 30 segundos (best effort)
                 cache_key = f"qr_token_validation_{token}"
-                cache.set(cache_key, {
+                _safe_cache_set(cache_key, {
                     'valid': False,
                     'reason': 'Token no encontrado'
                 }, 30)
-                
-                RequestLockManager.release_lock(lock_key)
+
                 return Response({
                     'valid': False,
                     'reason': 'Token no encontrado'
                 }, status=404)
-            
+
             # Validar token
             if not qr_token.is_valid():
                 if qr_token.used:
@@ -2257,22 +2269,21 @@ def validate_qr_token(request):
                 else:
                     reason = 'Token expirado'
                     logger.warning(f"⏰ Token expirado: {token[:8]}...")
-                
-                # Cachear resultado negativo por 60 segundos
+
+                # Cachear resultado negativo por 60 segundos (best effort)
                 cache_key = f"qr_token_validation_{token}"
-                cache.set(cache_key, {
+                _safe_cache_set(cache_key, {
                     'valid': False,
                     'reason': reason
                 }, 60)
-                
-                RequestLockManager.release_lock(lock_key)
+
                 return Response({
                     'valid': False,
                     'reason': reason
                 }, status=400)
-            
+
             logger.info(f"✅ Token válido: {token[:8]}...")
-            
+
             result = {
                 'valid': True,
                 'token_data': {
@@ -2282,20 +2293,24 @@ def validate_qr_token(request):
                     'device_info': qr_token.device_info
                 }
             }
-            
-            # Cachear resultado positivo por 30 segundos
+
+            # Cachear resultado positivo por 30 segundos (best effort)
             cache_key = f"qr_token_validation_{token}"
-            cache.set(cache_key, result, 30)
-            
-            RequestLockManager.release_lock(lock_key)
+            _safe_cache_set(cache_key, result, 30)
+
             return Response(result)
-            
-        except Exception as e:
+
+        finally:
             RequestLockManager.release_lock(lock_key)
-            raise e
             
     except Exception as e:
         logger.error(f"Error validando token QR: {e}")
+        if getattr(settings, 'DEBUG', False):
+            return Response({
+                'error': 'Error en validación',
+                'detail': str(e),
+                'traceback': traceback.format_exc()
+            }, status=500)
         return Response({'error': 'Error en validación'}, status=500)
 
 @api_view(['POST'])
