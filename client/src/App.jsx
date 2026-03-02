@@ -17,8 +17,11 @@ import { initIPDetection } from "./utils/showMyIP.js";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
-  const storedToken = sessionStorage.getItem('visitor_qr_token');
-  const isVisitor = sessionStorage.getItem('visitor_qr_mode') === '1' || !!storedToken;
+  const storedToken = sessionStorage.getItem('visitor_qr_token') || localStorage.getItem('visitor_qr_token');
+  const isVisitor =
+    sessionStorage.getItem('visitor_qr_mode') === '1' ||
+    localStorage.getItem('visitor_qr_mode') === '1' ||
+    !!storedToken;
 
   if (!isVisitor) {
     return children;

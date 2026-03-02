@@ -57,6 +57,8 @@ export default function SurveyApp() {
         // Si hay token en URL, asumimos que viene desde QR (visitante)
         sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
         sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, token);
+        localStorage.setItem(VISITOR_SESSION_KEY, '1');
+        localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, token);
 
         // Validar con backend
         const validation = await tokenManager.validateToken(token);
@@ -82,6 +84,8 @@ export default function SurveyApp() {
           // Limpiar modo visitante si el token no es válido
           sessionStorage.removeItem(VISITOR_SESSION_KEY);
           sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+          localStorage.removeItem(VISITOR_SESSION_KEY);
+          localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
         }
       } else {
         // Acceso sin token
@@ -103,6 +107,8 @@ export default function SurveyApp() {
             if (cameFromQr) {
               sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
               sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
+              localStorage.setItem(VISITOR_SESSION_KEY, '1');
+              localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
             }
             
             // Validar el nuevo token
@@ -127,6 +133,8 @@ export default function SurveyApp() {
               if (cameFromQr) {
                 sessionStorage.removeItem(VISITOR_SESSION_KEY);
                 sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+                localStorage.removeItem(VISITOR_SESSION_KEY);
+                localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
               }
             }
           } else {
@@ -158,6 +166,8 @@ export default function SurveyApp() {
           if (cameFromQr) {
             sessionStorage.removeItem(VISITOR_SESSION_KEY);
             sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+            localStorage.removeItem(VISITOR_SESSION_KEY);
+            localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
           }
         }
       }
