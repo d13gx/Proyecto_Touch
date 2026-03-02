@@ -19,9 +19,11 @@ export default function SurveyApp() {
   const [tokenValid, setTokenValid] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentToken, setCurrentToken] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   const VISITOR_SESSION_KEY = 'visitor_qr_mode';
   const VISITOR_TOKEN_SESSION_KEY = 'visitor_qr_token';
+  const VISITOR_DEBUG_SESSION_KEY = 'visitor_qr_debug';
 
   // Validar token al cargar el componente
   useEffect(() => {
@@ -33,6 +35,18 @@ export default function SurveyApp() {
       
       const urlParams = new URLSearchParams(window.location.search);
       const cameFromQr = urlParams.get('qr') === '1';
+
+      const baseDebug = {
+        href: window.location.href,
+        pathname: window.location.pathname,
+        search: window.location.search,
+        cameFromQr,
+        backendUrl: tokenManager?.backendUrl || null,
+        storedVisitorMode: sessionStorage.getItem(VISITOR_SESSION_KEY),
+        storedVisitorToken: sessionStorage.getItem(VISITOR_TOKEN_SESSION_KEY)
+      };
+      setDebugInfo(baseDebug);
+      sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(baseDebug));
 
       // Validar token
       const token = tokenManager.extractTokenFromUrl();
@@ -55,6 +69,15 @@ export default function SurveyApp() {
           // Token inválido - acceso denegado
           console.log('� Token inválido - acceso denegado:', validation.reason);
           setTokenValid(validation);
+
+          const invalidDebug = {
+            ...baseDebug,
+            stage: 'validate_existing_token',
+            token,
+            validation
+          };
+          setDebugInfo(invalidDebug);
+          sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
           // Limpiar modo visitante si el token no es válido
           sessionStorage.removeItem(VISITOR_SESSION_KEY);
@@ -91,6 +114,16 @@ export default function SurveyApp() {
             } else {
               setTokenValid({ valid: false, reason: 'Error generando token' });
 
+              const invalidDebug = {
+                ...baseDebug,
+                stage: 'validate_new_token',
+                tokenizedUrl,
+                newToken,
+                validation
+              };
+              setDebugInfo(invalidDebug);
+              sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
+
               if (cameFromQr) {
                 sessionStorage.removeItem(VISITOR_SESSION_KEY);
                 sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
@@ -98,10 +131,29 @@ export default function SurveyApp() {
             }
           } else {
             setTokenValid({ valid: false, reason: 'No se pudo generar token' });
+
+            const invalidDebug = {
+              ...baseDebug,
+              stage: 'extract_token_from_tokenized_url',
+              tokenizedUrl
+            };
+            setDebugInfo(invalidDebug);
+            sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
           }
         } catch (error) {
           console.error('❌ Error generando token automático:', error);
           setTokenValid({ valid: false, reason: 'Error generando token' });
+
+          const invalidDebug = {
+            ...baseDebug,
+            stage: 'create_token_request',
+            error: {
+              message: error?.message,
+              name: error?.name
+            }
+          };
+          setDebugInfo(invalidDebug);
+          sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
           if (cameFromQr) {
             sessionStorage.removeItem(VISITOR_SESSION_KEY);
@@ -240,6 +292,16 @@ export default function SurveyApp() {
 
   // Pantalla de acceso denegado
   if (tokenValid && !tokenValid.valid) {
+    let storedDebug = null;
+    try {
+      const raw = sessionStorage.getItem(VISITOR_DEBUG_SESSION_KEY);
+      storedDebug = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      storedDebug = null;
+    }
+
+    const effectiveDebug = debugInfo || storedDebug;
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
@@ -257,6 +319,19 @@ export default function SurveyApp() {
                 ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
                 : 'No tienes permiso para acceder al cuestionario.'}
             </p>
+
+            <div className="text-left bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
+              <div className="text-xs text-gray-700 font-semibold mb-2">DEBUG</div>
+              <pre className="text-[10px] leading-snug text-gray-700 whitespace-pre-wrap break-words">
+{JSON.stringify({
+  tokenValid,
+  currentToken,
+  href: window.location.href,
+  backendUrl: tokenManager?.backendUrl || null,
+  debug: effectiveDebug
+}, null, 2)}
+              </pre>
+            </div>
           </div>
         </div>
       </div>
