@@ -77,7 +77,8 @@ export default function CuestionarioCompletado({
           </div>
         </div>
 
-        <div className="space-y-3">
+        {/* Botones de acción - SOLO DESARROLLO - Comentar en producción */}
+        {/* <div className="space-y-3">
           <button
             onClick={onNewSurvey}
             className="w-full bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
@@ -90,7 +91,7 @@ export default function CuestionarioCompletado({
           >
             Ver Todos los Cuestionarios 
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

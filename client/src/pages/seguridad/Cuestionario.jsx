@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config/api.js'; 
 import DatosPersonales from '../../components/components-seguridad/DatosPersonales.jsx';
 import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario.jsx';
 import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado.jsx';
@@ -330,7 +329,8 @@ export default function SurveyApp() {
                 : 'No tienes permiso para acceder al cuestionario.'}
             </p>
 
-            <div className="text-left bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
+            {/* Sección DEBUG - SOLO DESARROLLO - Comentar en producción */}
+            {/* <div className="text-left bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
               <div className="text-xs text-gray-700 font-semibold mb-2">DEBUG</div>
               <pre className="text-[10px] leading-snug text-gray-700 whitespace-pre-wrap break-words">
 {JSON.stringify({
@@ -341,7 +341,7 @@ export default function SurveyApp() {
   debug: effectiveDebug
 }, null, 2)}
               </pre>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -400,14 +400,14 @@ export default function SurveyApp() {
       
       <div className="flex-1 w-full px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Debug display para ver el estado del token */}
-          <TokenDebugDisplay 
+          {/* Debug display para ver el estado del token - SOLO DESARROLLO */}
+          {/* <TokenDebugDisplay 
             tokenValid={tokenValid} 
             token={currentToken} 
             loading={loading} 
-          />
+          /> */}
           
-          {/* Header con botón de admin */}
+          {/* Header con botón de admin 
           <div className="flex justify-end mb-4">
             <button
               onClick={() => {
@@ -422,7 +422,7 @@ export default function SurveyApp() {
               Panel de Administración
             </button>
           </div>
-
+*/}
           <div className="bg-white rounded-t-lg shadow-lg p-6">
             <div className="flex items-center gap-2 mt-4">
               <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-indigo-600' : 'bg-gray-200'}`}></div>

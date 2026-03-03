@@ -10,10 +10,9 @@ import Trab_Detail from "./pages/Trab_Detail";
 import Keyboard from "./components/Keyboard";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from './components/ThemeContext';
-import SeguridadHome from "./pages/seguridad/Home";
+import SeguridadHome from "./pages/Home";
 import VideoSeguridad from "./pages/seguridad/VideoSeguridad";
 import Cuestionario from "./pages/seguridad/Cuestionario";
-import { initIPDetection } from "./utils/showMyIP.js";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
@@ -52,9 +51,6 @@ function App() {
 
   useEffect(() => {
     console.log('📱 ACTIVANDO MODO APP NATIVA MEJORADO...');
-    
-    // Detectar IP del servidor (totem)
-    initIPDetection();
     
     // Detectar si está en modo standalone (PWA instalada)
     const checkDisplayMode = () => {
@@ -404,12 +400,12 @@ function App() {
             path="/"
             element={
               <VisitorOnlyGuard>
-                <Navigate to="/seguridad/home" replace />
+                <Navigate to="/home" replace />
               </VisitorOnlyGuard>
             }
           />
           <Route element={<VisitorOnlyGuard><Nav hideHeader /></VisitorOnlyGuard>}>
-            <Route path="/seguridad/home" element={<SeguridadHome />} />
+            <Route path="/home" element={<SeguridadHome />} />
           </Route>
 
           <Route element={<VisitorOnlyGuard><Nav /></VisitorOnlyGuard>}>
@@ -430,7 +426,7 @@ function App() {
             path="*"
             element={
               <VisitorOnlyGuard>
-                <Navigate to="/seguridad/home" replace />
+                <Navigate to="/home" replace />
               </VisitorOnlyGuard>
             }
           />

@@ -1,8 +1,36 @@
+/*
+ * TOKEN MANAGER - SISTEMA DE SEGURIDAD PARA CUESTIONARIO
+ * 
+ * FUNCIONALIDAD PRINCIPAL:
+ * - Genera tokens únicos y seguros para acceso al cuestionario vía QR
+ * - Valida tokens contra backend Django para verificar autenticidad
+ * - Controla el tiempo de vida de los tokens (expiración configurable)
+ * - Previene reutilización de tokens (uso único por dispositivo)
+ * - Gestiona almacenamiento local de información de tokens
+ * 
+ * FLUJO DE TRABAJO:
+ * 1. Usuario escanea QR → Sistema genera token único
+ * 2. Token se envía a backend para validación y registro
+ * 3. Token válido permite acceso al cuestionario
+ * 4. Token se marca como usado al comenzar el cuestionario
+ * 5. Token expira después del tiempo configurado (5 minutos)
+ * 
+ * SEGURIDAD:
+ * - Tokens UUID únicos por dispositivo
+ * - Validación en servidor central
+ * - Control de expiración automática
+ * - Prevención de acceso duplicado
+ * - No los deja ir por otras urls  
+ */
+
 // Gestor de tokens únicos para acceso al cuestionario
+// Este archivo genera el token y lo valida para el cuestionario
+// 
+
 class TokenManager {
   constructor() {
     this.STORAGE_KEY = 'qr_tokens';
-    this.TOKEN_EXPIRY_MINUTES = 2; // Tokens expiran en 2 minutos
+    this.TOKEN_EXPIRY_MINUTES = 5; // Tokens expiran en 5 minutos
     
     // Detectar si estamos en localhost o en red
     this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -209,7 +237,7 @@ class TokenManager {
 
   // Obtener URL con token (ahora crea token en backend)
   async getTokenizedUrl(baseUrl) {
-    console.log('🆕 Creando token QR en backend...');
+    console.log('🆕 Creando token QR en backend...');    
     
     // Si no se proporciona baseUrl, usar la detectada automáticamente
     if (!baseUrl) {

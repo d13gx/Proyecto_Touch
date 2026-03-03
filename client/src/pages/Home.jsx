@@ -1,14 +1,13 @@
-import Carousel from '../../components/components-seguridad/Carousel';
-import BotSaludoAnimado from '../../components/components-seguridad/BotSaludoAnimado';
+import Carousel from '../components/components-seguridad/Carousel';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 'react-icons/fa';
 import { useState } from 'react';
-import carrusel1 from '../../assets/assets-seguridad/carrusel_1.webp';
-import carrusel2 from '../../assets/assets-seguridad/carrusel_2.webp';
-import carrusel3 from '../../assets/Foto_fachada.png';
-import carrusel4 from '../../assets/Brigadistas.png';
-import VideoButton from '../../components/components-seguridad/VideoButton';
-import PersonalModal from '../../components/PersonalModal';
+import carrusel1 from '../assets/assets-seguridad/carrusel_1.webp';
+import carrusel2 from '../assets/assets-seguridad/carrusel_2.webp';
+import carrusel3 from '../assets/Foto_fachada.png';
+import carrusel4 from '../assets/Brigadistas.png';
+import VideoButton from '../components/components-seguridad/VideoButton';
+import PersonalModal from '../components/PersonalModal';
 
 function Home() {
   const carouselImages = [
