@@ -681,15 +681,6 @@ const Depto_List = () => {
                 </h1>
               </div>
             </div>
-
-            {/* Botón de regreso */}
-            <button 
-              onClick={() => navigate(-1)}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/30"
-            >
-              <FaArrowLeft className="text-sm" />
-              <span className="font-medium">Regresar</span>
-            </button>
           </div>
           
           <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
