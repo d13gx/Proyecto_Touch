@@ -345,7 +345,7 @@ export function Trab_List() {
               </div>
               <div className="text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Buscador de Trabajadores Envases CMF S.A.
+                  Buscador de Trabajadores  
                 </h1>
               </div>
             </div>

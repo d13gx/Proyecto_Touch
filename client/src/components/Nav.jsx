@@ -6,12 +6,13 @@ export function Nav({ hideHeader = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === "/seguridad/home";
+  const isVideoSeguridad = location.pathname === "/seguridad/video-seguridad";
 
   const quickLinks = [
+    { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
     { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
     { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
     { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
-    { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
     { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
     { path: "/seguridad/home", icon: FaHome, label: "Inicio", color: "green" }
   ];
@@ -61,7 +62,9 @@ export function Nav({ hideHeader = false }) {
                 <div className="px-4 sm:px-6 py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center sm:justify-end">
-                      {quickLinks.map((link) => {
+                      {quickLinks
+                        .filter(link => isVideoSeguridad ? link.path === "/seguridad/home" : true)
+                        .map((link) => {
                         const IconComponent = link.icon;
                         const isActive = location.pathname === link.path;
                         return (

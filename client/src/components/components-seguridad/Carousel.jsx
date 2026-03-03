@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-export default function Carousel({ images, autoPlayInterval = 5000 }) {
+export default function Carousel({ images, autoPlayInterval = 7000 }) { //7 segundos para cambiar de foto en el carrusel
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {

@@ -430,75 +430,80 @@ export default function VideoSeguridad() {
                                 </div>
                             </div>
                             {/* Botón animado fijo debajo del video */}
-                            <div className="mt-25 mb-22 flex justify-center">
-                                <div style={{ 
-                                    position: 'relative !important',
-                                    bottom: 'auto !important',
-                                    right: 'auto !important',
-                                    top: 'auto !important',
-                                    left: 'auto !important',
+                            <div className="mt-38 mb-36 flex justify-center">
+                                <div style={{
+                                    position: 'relative',
                                     margin: '0 auto',
-                                    transform: 'scale(1.8)',
-                                    zIndex: 'auto !important',
-                                    animation: 'none !important'
+                                    transform: 'scale(1.5)',
+                                    zIndex: 'auto',
+                                    animation: 'none',
+                                    opacity: '1',
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8faff 100%)',
+                                    boxShadow: '0 30px 60px rgba(79, 70, 229, 0.25)',
+                                    border: '2px solid #e0e7ff',
+                                    borderRadius: '30px',
+                                    padding: '40px 50px'
                                 }}>
-                                    <style jsx>{`
-                                        .bot-saludo-avatar {
-                                            position: relative !important;
-                                            bottom: auto !important;
-                                            right: auto !important;
-                                            top: 'auto !important;
-                                            left: 'auto !important;
-                                            margin: 0 auto;
-                                            transform: scale(1.8);
-                                            z-index: auto !important;
-                                            animation: none !important;
-                                            opacity: 1 !important;
-                                            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%) !important;
-                                            box-shadow: 0 30px 60px rgba(79, 70, 229, 0.25) !important;
-                                            border: 2px solid #e0e7ff !important;
-                                        }
-                                        .avatar-bot {
-                                            border-color: #6366f1 !important;
-                                            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5) !important;
-                                        }
-                                        .fade {
-                                            opacity: 1 !important;
-                                            transform: none !important;
-                                            transition: none !important;
-                                        }
-                                        .fade.visible {
-                                            opacity: 1 !important;
-                                            transform: none !important;
-                                        }
-                                        .fade.hidden {
-                                            opacity: 1 !important;
-                                            transform: none !important;
-                                        }
-                                        .bot-saludo-avatar div {
-                                            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                                            animation: wordChange 0.8s ease-in-out !important;
-                                            color: #4f46e5 !important;
-                                        }
-                                        @keyframes wordChange {
-                                            0% {
-                                                opacity: 0.3;
-                                                transform: translateY(-5px) scale(0.95);
+                                    <style>
+                                        {`
+                                            .bot-saludo-avatar {
+                                                position: relative !important;
+                                                bottom: auto !important;
+                                                right: auto !important;
+                                                top: auto !important;
+                                                left: auto !important;
+                                                margin: 0 auto !important;
+                                                transform: none !important;
+                                                z-index: auto !important;
+                                                animation: none !important;
+                                                opacity: 1 !important;
+                                                background: transparent !important;
+                                                box-shadow: none !important;
+                                                border: none !important;
+                                                padding: 0 !important;
                                             }
-                                            50% {
-                                                opacity: 0.8;
-                                                transform: translateY(2px) scale(1.02);
+                                            .avatar-bot {
+                                                border-color: #6366f1 !important;
+                                                box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5) !important;
                                             }
-                                            100% {
-                                                opacity: 1;
-                                                transform: translateY(0) scale(1);
+                                            .fade {
+                                                opacity: 1 !important;
+                                                transform: none !important;
+                                                transition: none !important;
                                             }
-                                        }
-                                        .bot-saludo-avatar div:hover {
-                                            transform: scale(1.05);
-                                            color: #4f46e5;
-                                        }
-                                    `}</style>
+                                            .fade.visible {
+                                                opacity: 1 !important;
+                                                transform: none !important;
+                                            }
+                                            .fade.hidden {
+                                                opacity: 1 !important;
+                                                transform: none !important;
+                                            }
+                                            .bot-saludo-avatar div {
+                                                transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                                                animation: wordChange 0.8s ease-in-out !important;
+                                                color: #4f46e5 !important;
+                                            }
+                                            @keyframes wordChange {
+                                                0% {
+                                                    opacity: 0.3;
+                                                    transform: translateY(-5px) scale(0.95);
+                                                }
+                                                50% {
+                                                    opacity: 0.8;
+                                                    transform: translateY(2px) scale(1.02);
+                                                }
+                                                100% {
+                                                    opacity: 1;
+                                                    transform: translateY(0) scale(1);
+                                                }
+                                            }
+                                            .bot-saludo-avatar div:hover {
+                                                transform: scale(1.05);
+                                                color: #4f46e5;
+                                            }
+                                        `}
+                                    </style>
                                     <BotSaludoAnimado />
                                 </div>
                             </div>
@@ -526,6 +531,14 @@ export default function VideoSeguridad() {
                         }}>
                             {generatingQR ? (
                                 <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                                    <style>
+                                        {`
+                                            @keyframes spin {
+                                                0% { transform: rotate(0deg); }
+                                                100% { transform: rotate(360deg); }
+                                            }
+                                        `}
+                                    </style>
                                     <div style={{ 
                                         width: '40px', 
                                         height: '40px', 
@@ -593,22 +606,15 @@ export default function VideoSeguridad() {
                         </div>
                         
                         <div className="mt-8 flex justify-center">
-                            <BotSaludoAnimado />
+                            <div style={{
+                                position: 'relative',
+                                bottom: 'auto',
+                                right: 'auto',
+                                margin: '0 auto'
+                            }}>
+                                <BotSaludoAnimado />
+                            </div>
                         </div>
-                        
-                        <style jsx>{`
-                            @keyframes spin {
-                                0% { transform: rotate(0deg); }
-                                100% { transform: rotate(360deg); }
-                            }
-                            
-                            .bot-saludo-avatar {
-                                position: relative !important;
-                                bottom: auto !important;
-                                right: auto !important;
-                                margin: 0 auto;
-                            }
-                        `}</style>
                     </div>
                 )}
                     </div>

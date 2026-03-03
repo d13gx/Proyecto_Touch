@@ -33,7 +33,7 @@ function Home() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-center">
             <div className="text-center text-white px-4">
               <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                Bienvenido a Envases CMF   
+                Bienvenido a Envases CMF S.A. 
               </h1>
             </div>
           </div>
@@ -44,9 +44,6 @@ function Home() {
               {/* Carrusel más pequeño */}
               <div className="animate-fade-in">
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 mb-6">
-                  <div className="text-center">
-                    <h3 className="text-base sm:text-lg font-semibold text-blue-800">Conoce nuestras instalaciones</h3>
-                  </div>
                   <div className="w-full">
                     <Carousel images={carouselImages} />
                   </div>

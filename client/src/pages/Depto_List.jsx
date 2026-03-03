@@ -677,7 +677,7 @@ const Depto_List = () => {
               </div>
               <div className="text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Estructura Organizacional Envases CMF S.A.
+                  Estructura Organizacional 
                 </h1>
               </div>
             </div>

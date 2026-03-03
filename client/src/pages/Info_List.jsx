@@ -103,7 +103,7 @@ export function Info_List() {
               </div>
               <div className="text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Información de Contacto Envases CMF S.A.
+                  Información de Contacto
                 </h1>
               </div>
             </div>

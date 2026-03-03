@@ -131,8 +131,8 @@ echo.
 echo Las ventanas de los servidores se abriran
 echo automaticamente. NO las cierres.
 echo.
-echo Presiona cualquier tecla para salir...
-pause >nul
+echo Este script se cerrara automaticamente en 5 segundos...
+timeout /t 5 /nobreak >nul
 goto :end
 
 :exit_script

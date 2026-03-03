@@ -9,14 +9,16 @@ function BotSaludoAnimado() {
   const [cicloActual, setCicloActual] = useState(0);
 
   const frasesSeguridadCMF = [
-    "¡Hola! La seguridad es nuestro compromiso. Recuerda usar tu EPP (Equipo de Protección Personal).",
-    "¡Bienvenido! Tu seguridad es prioridad. Reporta cualquier peligro inmediatamente.",
-    "¡Hola! En CMF Envases, la seguridad primero. Mantén tu área de trabajo limpia y ordenada.",
-    "¡Bienvenido a la planta! Recuerda: cero accidentes es nuestro objetivo.",
-    "¡Hola! Cada paso que das importa. Mantén una postura segura y respeta las normas.",
-    "¡Bienvenido! La seguridad no es negociable. Usa tus equipos de protección en todo momento.",
-    "¡Hola! Juntos cuidamos a nuestro equipo. Si ves algo inseguro, ¡dilo!",
-    "¡Bienvenido! Recuerda: una lesión es prevenible. Sigue los procedimientos siempre."
+    "¡La seguridad la hacemos todos!",
+    "Si necesitas atención médica, avísanos para ayudarte.",
+    "La seguridad es nuestro compromiso. Recuerda usar tu EPP (Equipo de Protección Personal).",
+    "Tu seguridad es prioridad. Reporta cualquier peligro inmediatamente.",
+    "En Envases CMF, la seguridad es primero. Mantén tu área de trabajo limpia y ordenada.",
+    "Cero accidentes es nuestro objetivo.",
+    "Cada paso que das importa. Mantén una postura segura y respeta las normas.",
+    "La seguridad no es negociable. Usa tus equipos de protección en todo momento.",
+    "Juntos cuidamos a nuestro equipo. Si ves algo inseguro, ¡dilo!",
+    "Una lesión es prevenible. Sigue los procedimientos siempre."
   ];
  
   useEffect(() => {
