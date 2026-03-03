@@ -66,17 +66,18 @@ export default function VideoSeguridad() {
 
     useEffect(() => {
         if (showQR) {
-            // Temporizador de 1 minuto para redirigir al HomePage
+            // Temporizador para redirigir al HomePage después de 45 segundos
             const timer = setTimeout(() => {
                 navigate('/seguridad/home');
-            }, 60000); // 60 segundos (1 minuto)
+            }, 40000); // 40 segundos
 
             return () => clearTimeout(timer);
         }
     }, [showQR, navigate]);
 
     const handleVideoReplay = () => {
-        setShowQR(false);
+        // Refrescar la página completa para reiniciar todo el estado
+        window.location.reload();
     };
 
     // Funciones para controles personalizados
@@ -114,30 +115,35 @@ export default function VideoSeguridad() {
     };
 
     const handleVideoPlay = () => {
+        console.log('▶️ Video reanudado - Cancelando contador de pausa');
         setIsPlaying(true);
         
         // Limpiar timeout de pausa cuando el video se reanuda
         if (pauseTimeout) {
             clearTimeout(pauseTimeout);
             setPauseTimeout(null);
+            console.log('✅ Timeout de pausa cancelado');
         }
     };
 
     const handleVideoPause = () => {
+        console.log('⏸️ Video pausado - Iniciando contador de 10 segundos');
         setIsPlaying(false);
         
         // Limpiar timeout existente
         if (pauseTimeout) {
             clearTimeout(pauseTimeout);
+            console.log('🧹 Timeout anterior limpiado');
         }
         
-        // Establecer timeout para redirigir después de 5 segundos de pausa
+        // Establecer timeout para redirigir después de 10 segundos de pausa
         const timeout = setTimeout(() => {
-            console.log('🏠 Video en pausa por 5 segundos, redirigiendo al home...');
+            console.log('🏠 Video detenido por 10 segundos, redirigiendo al home...');
             navigate('/seguridad/home');
-        }, 5000); // 5 segundos
+        }, 10000); // 10 segundos
         
         setPauseTimeout(timeout);
+        console.log('⏰ Nuevo timeout de 10 segundos establecido');
     };
 
     // Funciones para manejar la visibilidad de controles
@@ -156,6 +162,12 @@ export default function VideoSeguridad() {
 
     const handleVideoInteraction = () => {
         showControls();
+        
+        // Detectar si el video está en pausa y activar el contador
+        if (videoRef.current && videoRef.current.paused && !pauseTimeout) {
+            console.log('⏸️ Video detectado en pausa - Activando contador de 10 segundos');
+            handleVideoPause();
+        }
         
         // Establecer timeout para ocultar después de 2 segundos de inactividad
         if (controlsTimeout) {
@@ -341,7 +353,7 @@ export default function VideoSeguridad() {
                             </div>
                             <div className="text-white">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Video de Seguridad</h1>
-                                <p className="text-sm sm:text-base text-blue-100">Información importante para visitantes</p>
+                                <p className="text-sm sm:text-base text-blue-100">Información importante para visitas</p>
                             </div>
                         </div>
                     </div>
@@ -434,7 +446,7 @@ export default function VideoSeguridad() {
                                 <div style={{
                                     position: 'relative',
                                     margin: '0 auto',
-                                    transform: 'scale(1.5)',
+                                    transform: 'scale(1.2)',
                                     zIndex: 'auto',
                                     animation: 'none',
                                     opacity: '1',
@@ -513,12 +525,12 @@ export default function VideoSeguridad() {
                     /* QR Code Section - versión simplificada */
                     <div style={{ minHeight: '100vh', padding: '20px', paddingTop: '60px' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>
-                                ¡Video completado!
+                            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
+                                ¡Gracias por ver el video!
                             </h2>
-                            <p style={{ fontSize: '18px', color: '#6b7280' }}>
-                                Escanea este código QR para continuar
-                            </p>
+                            <h2 style={{ fontSize: '25px', color: '#4f46e5' }}>
+                                Te invito a responder un breve cuestionario escaneando el QR.
+                            </h2>
                         </div>
                         
                         <div style={{ 
@@ -556,8 +568,8 @@ export default function VideoSeguridad() {
                                         src={qrUrl} 
                                         alt="Código QR" 
                                         style={{ 
-                                            width: '600px', 
-                                            height: '600px',
+                                            width: '500px', 
+                                            height: '500px',
                                             marginBottom: '20px',
                                             display: 'block',
                                             margin: '0 auto 20px'
@@ -605,16 +617,7 @@ export default function VideoSeguridad() {
                             </button>
                         </div>
                         
-                        <div className="mt-8 flex justify-center">
-                            <div style={{
-                                position: 'relative',
-                                bottom: 'auto',
-                                right: 'auto',
-                                margin: '0 auto'
-                            }}>
-                                <BotSaludoAnimado />
-                            </div>
-                        </div>
+                        
                     </div>
                 )}
                     </div>
