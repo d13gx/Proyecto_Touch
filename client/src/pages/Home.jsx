@@ -1,11 +1,16 @@
 import Carousel from '../components/components-seguridad/Carousel';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 'react-icons/fa';
-import { useState } from 'react';
-import carrusel1 from '../assets/assets-seguridad/carrusel_1.webp';
+import { useState, useEffect } from 'react';
+import carrusel1 from '../assets/Brigada2.jpeg';
 import carrusel2 from '../assets/assets-seguridad/carrusel_2.webp';
 import carrusel3 from '../assets/Foto_fachada.png';
-import carrusel4 from '../assets/Brigadistas.png';
+import carrusel4 from '../assets/Brigada3.jpeg';
+import carrusel5 from '../assets/Brigada1.jpeg';
+import carrusel6 from '../assets/assets-seguridad/carrusel_1.webp';
+import logo from "../assets/logocmfblanco.jpg";
+
+
 import VideoButton from '../components/components-seguridad/VideoButton';
 import PersonalModal from '../components/PersonalModal';
 
@@ -14,11 +19,40 @@ function Home() {
     carrusel1,
     carrusel2,
     carrusel3,
-    carrusel4
+    carrusel4,
+    carrusel5,
+    carrusel6
   ];
 
   const [showPersonalModal, setShowPersonalModal] = useState(false);
   const navigate = useNavigate();
+
+  // Mensajes en diferentes idiomas
+  const messages = [
+    'Bienvenidos',
+    'Welcome',
+    'Bem-vindos',
+    'Bienvenue',
+    'Willkommen',
+    'Benvenuti',
+    'Bienvenido'
+  ];
+
+  const [currentMessage, setCurrentMessage] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      
+      setTimeout(() => {
+        setCurrentMessage((prev) => (prev + 1) % messages.length);
+        setIsAnimating(false);
+      }, 500);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [messages.length]);
 
   const handleVideoClick = () => {
     navigate('/seguridad/video-seguridad');
@@ -30,11 +64,21 @@ function Home() {
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6">
           {/* Header azul con título grande */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-center">
-            <div className="text-center text-white px-4">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                Bienvenido a Envases CMF S.A. 
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-start gap-4 pl-2 sm:pl-4">
+            <img
+                src={logo}
+                alt="Logo CMF"
+                className="h-20 w-20 rounded-xl shadow-lg border-2 border-white flex-shrink-0"/>
+            <div className="flex-1 text-center text-white overflow-hidden pr-4">
+              
+              <h1 
+                className={`text-2xl sm:text-6xl md:text-10xl lg:text-7xl tracking-tight leading-tight whitespace-nowrap font-['HALOHANDLETTER']
+                  ${isAnimating ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}
+                  transition-all duration-500 ease-in-out`}
+              >
+                {messages[currentMessage]}
               </h1>
+               
             </div>
           </div>
           

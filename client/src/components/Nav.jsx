@@ -10,10 +10,10 @@ export function Nav({ hideHeader = false }) {
 
   const quickLinks = [
     { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
-    { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
-    { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
-    { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
-    { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
+  //  { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
+  //  { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
+  //  { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
+  //  { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
     { path: "/seguridad/home", icon: FaHome, label: "Inicio", color: "green" }
   ];
 
@@ -37,7 +37,7 @@ export function Nav({ hideHeader = false }) {
         <nav className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-2xl">
           <div className="max-w-7xl mx-auto">
             {/* Header principal del nav */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 gap-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                   <img
@@ -51,43 +51,34 @@ export function Nav({ hideHeader = false }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Espacio vacío para mantener el layout */}
-              </div>
-            </div>
-
-            {/* Navegación rápida */}
-            {!isHome && (
-              <div className="border-t border-blue-400/30">
-                <div className="px-4 sm:px-6 py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center sm:justify-end">
-                      {quickLinks
-                        .filter(link => isVideoSeguridad ? link.path === "/seguridad/home" : true)
-                        .map((link) => {
-                        const IconComponent = link.icon;
-                        const isActive = location.pathname === link.path;
-                        return (
-                          <button
-                            key={link.path}
-                            onClick={() => navigate(link.path)}
-                            className={`
-                              flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white font-medium
-                              transition-all duration-300 border-2
-                              ${getColorClasses(link.color)}
-                              ${isActive ? 'ring-2 ring-white ring-opacity-50 scale-105' : ''}
-                            `}
-                          >
-                            <IconComponent className="text-sm" />
-                            <span className="hidden xs:inline text-xs sm:text-sm">{link.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+              {/* Botones de navegación rápida - arriba en móvil, derecha en desktop */}
+              {!isHome && (
+                <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center sm:justify-end">
+                  {quickLinks
+                    .filter(link => isVideoSeguridad ? link.path === "/seguridad/home" : true)
+                    .map((link) => {
+                    const IconComponent = link.icon;
+                    const isActive = location.pathname === link.path;
+                    return (
+                      <button
+                        key={link.path}
+                        onClick={() => navigate(link.path)}
+                        className={`
+                          flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white font-medium
+                          transition-all duration-300 border-2
+                          ${getColorClasses(link.color)}
+                          ${isActive ? 'ring-2 ring-white ring-opacity-50 scale-105' : ''}
+                          ${link.path === '/seguridad/home' ? 'px-4 sm:px-4 py-3 sm:py-3' : 'px-4 sm:px-4 py-3 sm:py-3'}
+                        `}
+                      >
+                        <IconComponent className={link.path === '/seguridad/home' ? 'text-2xl' : 'text-2xl'} />
+                        <span className="hidden xs:inline">{link.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </nav>
       )}
