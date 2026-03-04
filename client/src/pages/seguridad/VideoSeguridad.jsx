@@ -526,11 +526,8 @@ export default function VideoSeguridad() {
                     <div style={{ minHeight: '100vh', padding: '20px', paddingTop: '60px' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                             <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
-                                ¡Gracias por ver el video!
-                            </h2>
-                            <h2 style={{ fontSize: '25px', color: '#4f46e5' }}>
-                                Te invito a responder un breve cuestionario escaneando el QR.
-                            </h2>
+                                Te invitamos a responder un  breve cuestionario escaneando el QR.
+                            </h2>   
                         </div>
                         
                         <div style={{ 
@@ -609,15 +606,15 @@ export default function VideoSeguridad() {
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '20px',
-                                    fontWeight: '700',
+                                    fontWeight: '500',
+                                    fontSize: '30px', 
+                                    scale: '1.05',
                                     cursor: 'pointer'
                                 }}
                             >
                                 Ver video nuevamente
                             </button>
                         </div>
-                        
-                        
                     </div>
                 )}
                     </div>

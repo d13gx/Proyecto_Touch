@@ -1,8 +1,1 @@
 @import "tailwindcss";
-
-@font-face {
-  font-family: 'HALOHANDLETTER'; /* El nombre que usarás para llamarla en CSS */
-  src: url('./assets/fonts/HALOHANDLETT.OTF') format('truetype'); /* Ajusta la ruta y el nombre del archivo exacto */
-  font-weight: normal;
-  font-style: normal;
-}

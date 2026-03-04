@@ -64,11 +64,20 @@ export default function SurveyApp() {
 
       console.log('🚀 Iniciando validación de token...');
 
-      
-
       const urlParams = new URLSearchParams(window.location.search);
-
       const cameFromQr = urlParams.get('qr') === '1';
+      const isDenied = urlParams.get('denied') === '1';
+
+      // ---------------------------------------------------------------
+      // CASO: sesión marcada como expirada por VisitorOnlyGuard
+      // No intentar generar token nuevo — mostrar acceso denegado.
+      // ---------------------------------------------------------------
+      if (isDenied) {
+        console.log('🚫 Acceso denegado por sesión expirada (?denied=1)');
+        setTokenValid({ valid: false, reason: 'Sesión expirada o acceso denegado' });
+        setLoading(false);
+        return;
+      }
 
 
 
@@ -114,7 +123,7 @@ export default function SurveyApp() {
 
       setCurrentToken(token); // Guardar token para mostrar
 
-      
+
 
       if (token) {
 
@@ -134,7 +143,7 @@ export default function SurveyApp() {
 
         const validation = await tokenManager.validateToken(token);
 
-        
+
 
         if (validation.valid) {
 
@@ -148,11 +157,9 @@ export default function SurveyApp() {
 
           // Token inválido - acceso denegado
 
-          console.log('� Token inválido - acceso denegado:', validation.reason);
+          console.log('🚫 Token inválido - acceso denegado:', validation.reason);
 
           setTokenValid(validation);
-
-
 
           const invalidDebug = {
 
@@ -170,12 +177,12 @@ export default function SurveyApp() {
 
           sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
 
+          // Marcar la sesión como expirada para que VisitorOnlyGuard bloquee
+          // cualquier intento futuro de volver al cuestionario como usuario nuevo.
+          sessionStorage.setItem(VISITOR_SESSION_KEY, 'expired');
+          localStorage.setItem(VISITOR_SESSION_KEY, 'expired');
 
-
-          // Mantener modo visitante para seguir bloqueando otras rutas.
-
-          // Solo limpiar el token almacenado para evitar redirecciones con token inválido.
-
+          // Limpiar token almacenado — ya no es válido.
           sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
 
           localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
@@ -198,7 +205,7 @@ export default function SurveyApp() {
 
           const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
 
-          
+
 
           // Extraer el token de la URL generada
 
@@ -206,7 +213,7 @@ export default function SurveyApp() {
 
           const newToken = urlObj.searchParams.get('token');
 
-          
+
 
           if (newToken) {
 
@@ -228,7 +235,7 @@ export default function SurveyApp() {
 
             }
 
-            
+
 
             // Validar el nuevo token
 
@@ -558,7 +565,7 @@ export default function SurveyApp() {
 
       const success = await tokenManager.markTokenAsUsed(tokenValid.token);
 
-      
+
 
       if (success) {
 
@@ -646,15 +653,15 @@ export default function SurveyApp() {
 
             <p className="text-gray-600 mb-4">
 
-              {tokenValid.reason === 'Token no encontrado o ya usado' 
+              {tokenValid.reason === 'Token no encontrado o ya usado'
 
                 ? 'Este enlace ya ha sido utilizado o no es válido.'
 
                 : tokenValid.reason === 'Token expirado'
 
-                ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
+                  ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
 
-                : 'No tienes permiso para acceder al cuestionario.'}
+                  : 'No tienes permiso para acceder al cuestionario.'}
 
             </p>
 
@@ -746,7 +753,7 @@ export default function SurveyApp() {
 
     const lastSurvey = savedSurveys[savedSurveys.length - 1];
 
-    
+
 
     return (
 
@@ -796,7 +803,7 @@ export default function SurveyApp() {
 
       <CuestionarioHeader />
 
-      
+
 
       <div className="flex-1 w-full px-4 py-8">
 
@@ -814,7 +821,7 @@ export default function SurveyApp() {
 
           /> */}
 
-          
+
 
           {/* Header con botón de admin 
 
@@ -868,7 +875,7 @@ export default function SurveyApp() {
 
           </div>
 
-          
+
 
           {step === 1 && (
 

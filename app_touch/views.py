@@ -2175,7 +2175,9 @@ def create_qr_token(request):
         from datetime import timedelta
         
         token = str(uuid.uuid4())
-        expires_at = timezone.now() + timedelta(minutes=2)  # 2 minutos de expiración
+        # Configuración de tiempo de vida del token (5 minutos para coincidir con frontend)
+        TOKEN_EXPIRY_MINUTES = 5
+        expires_at = timezone.now() + timedelta(minutes=TOKEN_EXPIRY_MINUTES)
         
         qr_token = QRToken.objects.create(
             token=token,
@@ -2199,7 +2201,9 @@ def create_qr_token(request):
 @permission_classes([AllowAny])
 # =============================================================================
 def validate_qr_token(request):
-    """Validar un token QR con control de concurrencia"""
+    """
+    Validar un token QR con control de concurrencia y binding de device fingerprint.
+    """
     def _safe_cache_get(key):
         try:
             return cache.get(key)
@@ -2215,6 +2219,7 @@ def validate_qr_token(request):
 
     try:
         token = request.data.get('token', '').strip()
+        device_fingerprint = request.data.get('device_fingerprint', '').strip()
         
         if not token:
             return Response({
@@ -2230,7 +2235,7 @@ def validate_qr_token(request):
             # Esperar un momento y verificar cache
             if RequestLockManager.wait_for_lock(lock_key, max_wait=1.0):
                 # Intentar obtener resultado cacheado
-                cache_key = f"qr_token_validation_{token}"
+                cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
                 cached_result = _safe_cache_get(cache_key)
                 if cached_result:
                     logger.info(f"✅ Resultado cacheado para token: {token[:8]}...")
@@ -2246,12 +2251,12 @@ def validate_qr_token(request):
         try:
             # Buscar token
             try:
-                qr_token = QRToken.objects.get(token=token)
+                qr_token = QRToken.objects.select_for_update().get(token=token)
             except QRToken.DoesNotExist:
                 logger.warning(f"❌ Token no encontrado: {token[:8]}...")
 
                 # Cachear resultado negativo por 30 segundos (best effort)
-                cache_key = f"qr_token_validation_{token}"
+                cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
                 _safe_cache_set(cache_key, {
                     'valid': False,
                     'reason': 'Token no encontrado'
@@ -2272,7 +2277,7 @@ def validate_qr_token(request):
                     logger.warning(f"⏰ Token expirado: {token[:8]}...")
 
                 # Cachear resultado negativo por 60 segundos (best effort)
-                cache_key = f"qr_token_validation_{token}"
+                cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
                 _safe_cache_set(cache_key, {
                     'valid': False,
                     'reason': reason
@@ -2282,6 +2287,40 @@ def validate_qr_token(request):
                     'valid': False,
                     'reason': reason
                 }, status=400)
+
+            # =========================================================
+            # VALIDACIÓN DE DEVICE FINGERPRINT (Anti-compartir URL)
+            # =========================================================
+            # El campo device_fingerprint en el modelo QRToken actúa como
+            # "propietario" del token. Si está vacío, el dispositivo actual
+            # lo reclama. Si ya tiene valor, debe coincidir.
+            if device_fingerprint:
+                if qr_token.device_fingerprint:
+                    # Token ya reclamado — verificar que sea el mismo dispositivo
+                    if qr_token.device_fingerprint != device_fingerprint:
+                        reason = 'Acceso denegado: este enlace pertenece a otro dispositivo'
+                        logger.warning(
+                            f"� Fingerprint mismatch token={token[:8]}... "
+                            f"stored={qr_token.device_fingerprint[:8]}... "
+                            f"received={device_fingerprint[:8]}..."
+                        )
+                        cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
+                        _safe_cache_set(cache_key, {
+                            'valid': False,
+                            'reason': reason
+                        }, 120)
+                        return Response({
+                            'valid': False,
+                            'reason': reason
+                        }, status=403)
+                    logger.info(f"✅ Fingerprint verificado para token: {token[:8]}...")
+                else:
+                    # Primera validación: ligar este token al dispositivo actual
+                    qr_token.device_fingerprint = device_fingerprint
+                    qr_token.save(update_fields=['device_fingerprint'])
+                    logger.info(
+                        f"🔒 Token {token[:8]}... ligado a dispositivo: {device_fingerprint[:8]}..."
+                    )
 
             logger.info(f"✅ Token válido: {token[:8]}...")
 
@@ -2296,7 +2335,7 @@ def validate_qr_token(request):
             }
 
             # Cachear resultado positivo por 30 segundos (best effort)
-            cache_key = f"qr_token_validation_{token}"
+            cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
             _safe_cache_set(cache_key, result, 30)
 
             return Response(result)
@@ -2307,6 +2346,7 @@ def validate_qr_token(request):
     except Exception as e:
         logger.error(f"Error validando token QR: {e}")
         if getattr(settings, 'DEBUG', False):
+            import traceback
             return Response({
                 'error': 'Error en validación',
                 'detail': str(e),

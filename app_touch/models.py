@@ -13,6 +13,10 @@ class QRToken(models.Model):
     device_info = models.JSONField(default=dict, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
+    # Fingerprint del primer dispositivo que validó el token.
+    # Una vez asignado, cualquier otro dispositivo que intente validar el mismo
+    # token será rechazado (anti-compartir URL).
+    device_fingerprint = models.CharField(max_length=255, blank=True, default='')
     
     class Meta:
         ordering = ['-created_at']

@@ -48,8 +48,8 @@ function Home() {
       setTimeout(() => {
         setCurrentMessage((prev) => (prev + 1) % messages.length);
         setIsAnimating(false);
-      }, 500);
-    }, 2000);
+      }, 1000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [messages.length]);
@@ -72,9 +72,9 @@ function Home() {
             <div className="flex-1 text-center text-white overflow-hidden pr-4">
               
               <h1 
-                className={`text-2xl sm:text-6xl md:text-10xl lg:text-7xl tracking-tight leading-tight whitespace-nowrap font-['HALOHANDLETTER']
+                className={`text-2xl sm:text-6xl md:text-10xl lg:text-6xl tracking-tight leading-tight whitespace-nowrap font-bold
                   ${isAnimating ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}
-                  transition-all duration-500 ease-in-out`}
+                  transition-all duration-1000 ease-in-out`}
               >
                 {messages[currentMessage]}
               </h1>

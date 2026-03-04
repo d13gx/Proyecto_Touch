@@ -17,10 +17,28 @@ import Cuestionario from "./pages/seguridad/Cuestionario";
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
   const storedToken = sessionStorage.getItem('visitor_qr_token') || localStorage.getItem('visitor_qr_token');
-  const isVisitor =
-    sessionStorage.getItem('visitor_qr_mode') === '1' ||
-    localStorage.getItem('visitor_qr_mode') === '1' ||
-    !!storedToken;
+
+  // Detectar si este dispositivo ya consumeó o expiró su sesión de visita.
+  // Cuando Cuestionario.jsx detecta un token inválido marca el modo como 'expired'.
+  const qrMode = sessionStorage.getItem('visitor_qr_mode') || localStorage.getItem('visitor_qr_mode');
+  const isExpiredSession = qrMode === 'expired';
+
+  const isVisitor = qrMode === '1' || !!storedToken;
+
+  // Si la sesión expiró, dirigir siempre a la pantalla de acceso denegado.
+  if (isExpiredSession) {
+    if (location.pathname === '/cuestionario') {
+      // Dejar que Cuestionario.jsx muestre la pantalla de acceso denegado.
+      // Pasamos ?denied=1 para que sepa que no debe intentar generar un token nuevo.
+      const urlParams = new URLSearchParams(location.search);
+      if (urlParams.get('denied') !== '1') {
+        return <Navigate to="/cuestionario?denied=1" replace />;
+      }
+      return children;
+    }
+    // Cualquier otra ruta -> redirigir al cuestionario con denied
+    return <Navigate to="/cuestionario?denied=1" replace />;
+  }
 
   if (!isVisitor) {
     return children;
@@ -51,16 +69,16 @@ function App() {
 
   useEffect(() => {
     console.log('📱 ACTIVANDO MODO APP NATIVA MEJORADO...');
-    
+
     // Detectar si está en modo standalone (PWA instalada)
     const checkDisplayMode = () => {
       const isInStandaloneMode = () =>
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true ||
         document.referrer.includes('android-app://');
-      
+
       setIsStandalone(isInStandaloneMode());
-      
+
       if (isInStandaloneMode()) {
         console.log('✅ Ejecutando en modo PWA standalone');
         document.body.classList.add('pwa-standalone');
@@ -78,10 +96,10 @@ function App() {
         viewportMeta.name = 'viewport';
         document.head.appendChild(viewportMeta);
       }
-      
+
       // CONFIGURACIÓN MÁS ESTRICTA PARA BLOQUEAR ZOOM
       viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no, minimum-scale=1.0';
-      
+
       const advancedMetaTags = [
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
@@ -93,7 +111,7 @@ function App() {
         { name: 'application-name', content: 'CMF App' },
         { name: 'format-detection', content: 'telephone=no' }
       ];
-      
+
       advancedMetaTags.forEach(tag => {
         let meta = document.querySelector(`meta[name="${tag.name}"]`);
         if (!meta) {
@@ -201,7 +219,7 @@ function App() {
           }
         </style>
       `;
-      
+
       if (!document.querySelector('#app-native-styles')) {
         document.head.insertAdjacentHTML('beforeend', styles);
       }
@@ -234,7 +252,7 @@ function App() {
           e.preventDefault();
           return false;
         }
-        
+
         // Detectar gestos de pellizco en touch
         if (e.touches && e.touches.length > 1) {
           e.preventDefault();
@@ -268,8 +286,8 @@ function App() {
     const setupEssentialBlocking = () => {
       // SOLO bloquear zoom con Ctrl+rueda en contenido general
       const blockAccidentalZoom = (e) => {
-        if ((e.ctrlKey || e.metaKey) && 
-            (e.key === '+' || e.key === '-' || e.key === '0' || e.key === '=')) {
+        if ((e.ctrlKey || e.metaKey) &&
+          (e.key === '+' || e.key === '-' || e.key === '0' || e.key === '=')) {
           e.preventDefault();
           return false;
         }
@@ -287,9 +305,9 @@ function App() {
       // BLOQUEO DE CLICK DERECHO SUAVE
       const blockContextMenu = (e) => {
         // NO bloquear en inputs, textareas o elementos específicos
-        if (e.target.tagName === 'INPUT' || 
-            e.target.tagName === 'TEXTAREA' ||
-            e.target.closest('[data-allow-context-menu="true"]')) {
+        if (e.target.tagName === 'INPUT' ||
+          e.target.tagName === 'TEXTAREA' ||
+          e.target.closest('[data-allow-context-menu="true"]')) {
           return;
         }
         e.preventDefault();
@@ -330,7 +348,7 @@ function App() {
       // 5. BLOQUEO MEJORADO DEL BOTÓN ATRÁS
       const setupSmartBackButton = () => {
         const originalPushState = history.pushState;
-        history.pushState = function(state, title, url) {
+        history.pushState = function (state, title, url) {
           const newState = { ...state, reactRouter: true };
           return originalPushState.call(this, newState, title, url);
         };
@@ -339,7 +357,7 @@ function App() {
           if (event.state && event.state.reactRouter) {
             return; // Permitir navegación interna
           }
-          
+
           event.preventDefault();
           event.stopPropagation();
           window.history.pushState({ reactRouter: true }, '', window.location.href);
@@ -347,7 +365,7 @@ function App() {
 
         window.history.replaceState({ reactRouter: true }, '', window.location.href);
         window.addEventListener('popstate', handlePopState);
-        
+
         return () => {
           window.removeEventListener('popstate', handlePopState);
           history.pushState = originalPushState;
@@ -376,15 +394,15 @@ function App() {
         events.forEach(([event, handler, options]) => {
           document.removeEventListener(event, handler, options);
         });
-        
+
         if (cleanupZoomBlocking) cleanupZoomBlocking();
         if (cleanupBackButton) cleanupBackButton();
-        
+
         const injectedStyles = document.querySelector('#app-native-styles');
         if (injectedStyles) {
           injectedStyles.remove();
         }
-        
+
         document.body.classList.remove('pwa-standalone', 'pwa-browser');
       };
     };
