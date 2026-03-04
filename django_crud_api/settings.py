@@ -12,37 +12,66 @@ SECRET_KEY = 'django-insecure-w1+=z-%g&&+_+hpv%6x^=4nl9l@bckayr%wgc*kv81ip6q3lnc
 
 DEBUG = True
 
-# Allow all hosts for development (not recommended for production)
+# =============================================================================
+# CONFIGURACIÓN DE SEGURIDAD (CORS, CSRF, SESIONES)
+# =============================================================================
+
+# ALLOWED_HOSTS - Permitir todos para desarrollo
 ALLOWED_HOSTS = ['*']
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://172.18.7.150:5173",
-    "http://172.18.8.94:5173", #totem
-    "http://172.19.7.96:5173", #diego
-    "http://172.18.0.0/16",  # Rango de red local
-    "http://172.19.0.0/16",  # Rango de red local
-    "http://192.168.0.0/16", # Rango de red local
-    "http://10.0.0.0/8"      # Rango de red local
+    "http://172.18.8.94:5173", # totem
+    "http://172.19.7.96:5173", # diego
 ]
 
-# Configuración de seguridad para desarrollo (ajustar en producción)
+# Headers y Métodos permitidos para CORS
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'pragma',
+    'cache-control',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://172.18.8.94:5173', #totem
+    'http://172.18.8.94:5173', # totem
     'http://172.18.7.150:5173',
-    'http://172.19.7.96:5173'  #diego
+    'http://172.19.7.96:5173'  # diego
 ]
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False  # Para que JS pueda leerlo
+CSRF_USE_SESSIONS = False
 
-# Configuración de sesión
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True  # Requiere HTTPS en producción
-CSRF_COOKIE_SECURE = True  # Requiere HTTPS en producción
+# Session settings
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600  # 1 hora
 
 # Application definition
 INSTALLED_APPS = [
@@ -125,69 +154,7 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# =============================================================================
-# CONFIGURACIÓN CORS - CRÍTICA PARA EL FRONTEND
-# =============================================================================
-
-# Configuración CORS para desarrollo
-# Configuración CORS para desarrollo
-CORS_ALLOW_ALL_ORIGINS = True  # ← CAMBIAR A True temporalmente
-CORS_ALLOW_CREDENTIALS = True  # IMPORTANTE: Permitir cookies
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",    
-    "http://172.18.7.150:5173",
-    "http://172.18.8.94:5173", #totem
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://172.18.7.150:3000",
-    "http://172.18.8.94:3000", #totem
-    "http://172.19.7.96:5173",
-    "http://172.19.7.96:3000",
-]
-
-# Headers permitidos - AGREGAR MÁS HEADERS
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'pragma',  # ← AGREGAR ESTO
-    'cache-control',  # ← AGREGAR ESTO
-]
-
-# Métodos HTTP permitidos
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-
-# Configuración de cookies para desarrollo
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_AGE = 3600  # 1 hora
-
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False  # Debe ser False para que JS pueda leerlo
-CSRF_USE_SESSIONS = False
-CSRF_TRUSTED_ORIGINS = [  # AGREGAR ESTO
-    "http://172.18.7.150:5173",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://172.18.8.94:5173", #totem
-]
+# [CORS/CSRF settings moved to upper section]
 
 # =============================================================================
 # CONFIGURACIÓN REST FRAMEWORK - ACTUALIZADA

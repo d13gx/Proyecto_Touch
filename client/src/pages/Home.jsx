@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import carrusel1 from '../assets/Brigada2.jpeg';
-import carrusel2 from '../assets/assets-seguridad/carrusel_2.webp';
-import carrusel3 from '../assets/Foto_fachada.png';
+import carrusel2 from '../assets/assets-seguridad/carrusel_1.webp';
+import carrusel3 from '../assets/assets-seguridad/epp.jpg';
 import carrusel4 from '../assets/Brigada3.jpeg';
 import carrusel5 from '../assets/Brigada1.jpeg';
-import carrusel6 from '../assets/assets-seguridad/carrusel_1.webp';
 import logo from "../assets/logocmfblanco.jpg";
+
 
 
 import VideoButton from '../components/components-seguridad/VideoButton';
@@ -21,7 +21,6 @@ function Home() {
     carrusel3,
     carrusel4,
     carrusel5,
-    carrusel6
   ];
 
   const [showPersonalModal, setShowPersonalModal] = useState(false);
@@ -34,8 +33,7 @@ function Home() {
     'Bem-vindos',
     'Bienvenue',
     'Willkommen',
-    'Benvenuti',
-    'Bienvenido'
+    'Benvenuti'
   ];
 
   const [currentMessage, setCurrentMessage] = useState(0);
@@ -44,7 +42,7 @@ function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIsAnimating(true);
-      
+
       setTimeout(() => {
         setCurrentMessage((prev) => (prev + 1) % messages.length);
         setIsAnimating(false);
@@ -66,22 +64,22 @@ function Home() {
           {/* Header azul con título grande */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-start gap-4 pl-2 sm:pl-4">
             <img
-                src={logo}
-                alt="Logo CMF"
-                className="h-20 w-20 rounded-xl shadow-lg border-2 border-white flex-shrink-0"/>
+              src={logo}
+              alt="Logo CMF"
+              className="h-20 w-20 rounded-xl shadow-lg border-2 border-white flex-shrink-0" />
             <div className="flex-1 text-center text-white overflow-hidden pr-4">
-              
-              <h1 
+
+              <h1
                 className={`text-2xl sm:text-6xl md:text-10xl lg:text-6xl tracking-tight leading-tight whitespace-nowrap font-bold
                   ${isAnimating ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'}
                   transition-all duration-1000 ease-in-out`}
               >
                 {messages[currentMessage]}
               </h1>
-               
+
             </div>
           </div>
-          
+
           {/* Contenido principal */}
           <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="space-y-12">
@@ -94,23 +92,23 @@ function Home() {
                 </div>
               </div>
 
-          <div className="space-y-8">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200">
-              <div className="flex items-center justify-between gap-8">
-                <div className="flex-1">
-                  <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
-                    ¿Visitarás nuestra planta?
-                  </h2>
-                  <p className="text-gray-600 text-lg">
-                    Descubre cómo mantenemos un ambiente seguro y productivo
-                  </p>
-                </div>
-                <div className="animate-fade-in-delay">
-                  <VideoButton onClick={handleVideoClick} />
+              <div className="space-y-8">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg border border-blue-200">
+                  <div className="flex items-center justify-between gap-8">
+                    <div className="flex-1">
+                      <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
+                        ¿Visitarás nuestra planta?
+                      </h2>
+                      <p className="text-gray-600 text-lg">
+                        Descubre cómo mantenemos un ambiente seguro y productivo
+                      </p>
+                    </div>
+                    <div className="animate-fade-in-delay">
+                      <VideoButton onClick={handleVideoClick} />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
               {/* Grid de acciones principales */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
@@ -179,15 +177,15 @@ function Home() {
                 </Link>
               </div>
 
-                          </div>
-            
+            </div>
+
             {/* Modal de Personal */}
-            <PersonalModal 
-              isOpen={showPersonalModal} 
-              onClose={() => setShowPersonalModal(false)} 
+            <PersonalModal
+              isOpen={showPersonalModal}
+              onClose={() => setShowPersonalModal(false)}
             />
           </div>
-        </div>     
+        </div>
       </div>
     </div>
   );

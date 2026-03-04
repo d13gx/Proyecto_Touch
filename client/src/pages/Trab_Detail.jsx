@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { API_BASE_URL } from '../config';
+import InfoCard from "../components/InfoCard";
 import TouchKeyboard from "../components/Keyboard";
 import TimeoutRedirect from "../components/TimeoutRedirect";
 import {
@@ -21,11 +22,11 @@ export default function Trab_Detail() {
   const [showSupervisados, setShowSupervisados] = useState(false);
   const [error, setError] = useState(null);
   const [cacheInfo, setCacheInfo] = useState({ hits: 0, misses: 0 });
-  
+
   // Estados para el proceso de contacto
   const [contactStep, setContactStep] = useState('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   // Estados para autenticación
   const [loginData, setLoginData] = useState({
     username: "",
@@ -72,9 +73,9 @@ export default function Trab_Detail() {
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
-      
+
       console.log('Solicitando token CSRF a:', `${API_BASE_URL}/api/auth/csrf/`);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/auth/csrf/`, {
         method: 'GET',
         credentials: 'include',
@@ -84,17 +85,17 @@ export default function Trab_Detail() {
         },
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       console.log('Respuesta de CSRF - Estado:', response.status);
-      
+
       if (response.ok) {
         const data = await response.json().catch(err => {
           console.error('Error al parsear respuesta CSRF:', err);
           return {};
         });
-        
+
         if (data && data.csrfToken) {
           console.log('Token CSRF obtenido exitosamente');
           return data.csrfToken;
@@ -109,16 +110,16 @@ export default function Trab_Detail() {
       }
     } catch (error) {
       console.error("Error obteniendo CSRF token:", error);
-      
+
       // Detectar específicamente errores de conexión
-      if (error.name === 'AbortError' || 
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('NetworkError') ||
-          error.message.includes('Network request failed') ||
-          error.message.includes('ERR_INTERNET_DISCONNECTED') ||
-          error.message.includes('ERR_CONNECTION_REFUSED') ||
-          error.message === 'CONNECTION_ERROR' ||
-          !navigator.onLine) {
+      if (error.name === 'AbortError' ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('Network request failed') ||
+        error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+        error.message.includes('ERR_CONNECTION_REFUSED') ||
+        error.message === 'CONNECTION_ERROR' ||
+        !navigator.onLine) {
         throw new Error("CONNECTION_ERROR");
       }
     }
@@ -141,10 +142,10 @@ export default function Trab_Detail() {
     try {
       requestInProgress.current = true;
       lastRequestTime.current = now;
-      
+
       setLoading(true);
       setError(null);
-      
+
       if (!id) {
         setError("No se proporcionó un correo electrónico");
         setLoading(false);
@@ -154,12 +155,12 @@ export default function Trab_Detail() {
 
       const correoDecodificado = decodeURIComponent(id);
       console.log('🔍 Buscando trabajador con correo:', correoDecodificado);
-      
+
       const timestamp = Date.now();
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/ldap/trabajador/?correo=${encodeURIComponent(correoDecodificado)}&_t=${timestamp}`, {
         method: 'GET',
         credentials: 'include',
@@ -169,9 +170,9 @@ export default function Trab_Detail() {
         },
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         // Manejar errores de conexión específicos
         if (response.status === 503 || response.status === 0) {
@@ -203,19 +204,19 @@ export default function Trab_Detail() {
       }
     } catch (err) {
       console.error("🚨 Error cargando trabajador:", err);
-      
+
       // Manejar errores de red
       let errorMessage = err.message;
       if (err.name === 'AbortError' ||
-          err.message.includes('Failed to fetch') || 
-          err.message.includes('NetworkError') ||
-          err.message.includes('Network request failed') ||
-          err.message.includes('ERR_INTERNET_DISCONNECTED') ||
-          err.message.includes('ERR_CONNECTION_REFUSED') ||
-          !navigator.onLine) {
+        err.message.includes('Failed to fetch') ||
+        err.message.includes('NetworkError') ||
+        err.message.includes('Network request failed') ||
+        err.message.includes('ERR_INTERNET_DISCONNECTED') ||
+        err.message.includes('ERR_CONNECTION_REFUSED') ||
+        !navigator.onLine) {
         errorMessage = "❌ Error de conexión. Contacta con el departamento de TI.";
       }
-      
+
       setTrabajador(null);
       setError(errorMessage);
     } finally {
@@ -269,7 +270,7 @@ export default function Trab_Detail() {
         loading: false,
         readOnly: true
       });
-      
+
       // Establecer el foco en el mensaje y sincronizar con el teclado
       setKeyboardTarget('message');
       setKeyboardValue(defaultMessage);
@@ -314,7 +315,7 @@ export default function Trab_Detail() {
       default:
         break;
     }
-    
+
     setKeyboardValue(input);
   };
 
@@ -356,7 +357,7 @@ export default function Trab_Detail() {
       // Obtener token CSRF
       console.log('Obteniendo token CSRF para login...');
       const csrfToken = await getCsrfToken();
-      
+
       if (!csrfToken) {
         console.error('Error: No se pudo obtener el token CSRF para login');
         throw new Error("CONNECTION_ERROR");
@@ -367,7 +368,7 @@ export default function Trab_Detail() {
 
       console.log('Iniciando sesión con usuario:', loginData.username);
       console.log('URL de login:', `${API_BASE_URL}/api/auth/login/`);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
         method: 'POST',
         headers: {
@@ -384,9 +385,9 @@ export default function Trab_Detail() {
       });
 
       clearTimeout(timeoutId);
-      
+
       console.log('Respuesta de login - Estado:', response.status);
-      
+
       // Si la respuesta no es exitosa, manejar el error
       if (!response.ok) {
         let errorData = {};
@@ -396,7 +397,7 @@ export default function Trab_Detail() {
         } catch (e) {
           console.error('Error al parsear respuesta de error:', e);
         }
-        
+
         let errorMessage = 'Error de autenticación';
         if (response.status === 401) {
           errorMessage = 'Usuario o contraseña incorrectos';
@@ -405,14 +406,14 @@ export default function Trab_Detail() {
         } else if (response.status >= 500) {
           errorMessage = 'Error del servidor. Por favor, intente más tarde.';
         }
-        
+
         throw new Error(errorMessage);
       }
-      
+
       // Si llegamos aquí, el inicio de sesión fue exitoso
       const responseData = await response.json();
       console.log('Inicio de sesión exitoso:', responseData);
-      
+
       // Actualizar el estado para reflejar que el usuario está autenticado
       setLoginData(prev => ({
         ...prev,
@@ -420,35 +421,35 @@ export default function Trab_Detail() {
         loading: false,
         error: ""
       }));
-      
+
       // Continuar con el flujo de envío de correo si corresponde
       if (contactStep === 'login') {
         setContactStep('compose');
       }
-      
+
     } catch (error) {
       console.error("Error en login:", error);
-      
+
       // Manejar errores de red (fetch falla completamente)
       let errorMessage = error.message;
-      
+
       // Detectar específicamente errores de red
       if (error.message === 'CONNECTION_ERROR' ||
-          error.message.includes('Failed to fetch') || 
-          error.message.includes('NetworkError') ||
-          error.message.includes('Network request failed') ||
-          error.message.includes('ERR_INTERNET_DISCONNECTED') ||
-          error.message.includes('ERR_CONNECTION_REFUSED') ||
-          error.name === 'TypeError' ||
-          error.name === 'AbortError' ||
-          !navigator.onLine) {
-        
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('Network request failed') ||
+        error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+        error.message.includes('ERR_CONNECTION_REFUSED') ||
+        error.name === 'TypeError' ||
+        error.name === 'AbortError' ||
+        !navigator.onLine) {
+
         errorMessage = "❌ Error de conexión. Contacta con el departamento de TI.";
       }
-      
-      setLoginData(prev => ({ 
-        ...prev, 
-        loading: false, 
+
+      setLoginData(prev => ({
+        ...prev,
+        loading: false,
         error: errorMessage
       }));
     }
@@ -465,7 +466,7 @@ export default function Trab_Detail() {
 
     try {
       console.log('Iniciando envío de correo...');
-      
+
       // Verificar conexión a internet primero
       if (!navigator.onLine) {
         console.error('Error: Sin conexión a internet');
@@ -485,7 +486,7 @@ export default function Trab_Detail() {
 
       console.log('Enviando solicitud al servidor...');
       console.log('URL:', `${API_BASE_URL}/api/enviar-correo/`);
-      
+
       const response = await fetch(`${API_BASE_URL}/api/enviar-correo/`, {
         method: 'POST',
         headers: {
@@ -504,9 +505,9 @@ export default function Trab_Detail() {
       });
 
       clearTimeout(timeoutId);
-      
+
       console.log('Respuesta recibida, estado:', response.status);
-      
+
       // Intentar parsear la respuesta como JSON
       let data;
       try {
@@ -527,16 +528,16 @@ export default function Trab_Detail() {
         });
 
         await handleLogout();
-        
+
         setContactStep('success');
         hideKeyboard();
         setEmailData({ subject: "", message: "", loading: false });
         setLoginData(prev => ({ ...prev, password: "" }));
-        
+
       } else {
         // Manejar diferentes tipos de errores en el envío de correo
         let errorMessage = data.error || data.detail || `Error al enviar el correo (${response.status})`;
-        
+
         if (response.status === 401) {
           errorMessage = "Credenciales incorrectas. Por favor, verifica tu contraseña.";
         } else if (response.status === 400) {
@@ -546,23 +547,23 @@ export default function Trab_Detail() {
         } else if (response.status === 503) {
           errorMessage = "CONNECTION_ERROR";
         }
-        
+
         console.error('Error en la respuesta del servidor:', errorMessage);
         throw new Error(errorMessage);
       }
     } catch (error) {
       console.error("Error al enviar correo:", error);
-      
+
       // Manejar errores de red
       let errorMessage = error.message;
       if (error.message === 'CONNECTION_ERROR' ||
-          error.message.includes('Failed to fetch') || 
-          error.message.includes('NetworkError') ||
-          error.name === 'AbortError' ||
-          !navigator.onLine) {
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.name === 'AbortError' ||
+        !navigator.onLine) {
         errorMessage = "❌ Error de conexión. Contacta con el departamento de TI.";
       }
-      
+
       alert(`❌ Error al enviar el correo: ${errorMessage}`);
       setEmailData(prev => ({ ...prev, loading: false }));
     }
@@ -575,7 +576,7 @@ export default function Trab_Detail() {
       if (csrfToken) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
+
         await fetch(`${API_BASE_URL}/api/auth/logout/`, {
           method: 'POST',
           headers: {
@@ -585,7 +586,7 @@ export default function Trab_Detail() {
           credentials: 'include',
           signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
       }
       setIsAuthenticated(false);
@@ -613,13 +614,13 @@ export default function Trab_Detail() {
       const timestamp = Date.now();
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      
+
       const res = await fetch(`${API_BASE_URL}/api/ldap/search/?q=${encodeURIComponent(nombreJefe)}&_t=${timestamp}`, {
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       const data = await res.json();
       const jefeActivo = Array.isArray(data)
         ? data.find((j) => j.userAccountControl_enabled && j.mail)
@@ -642,7 +643,7 @@ export default function Trab_Detail() {
   // Función para obtener nombre del jefe
   const obtenerNombreJefe = (manager) => {
     if (!manager) return null;
-    
+
     try {
       if (typeof manager === 'string') {
         return manager.split(",")[0]?.replace("CN=", "")?.trim() || null;
@@ -682,16 +683,16 @@ export default function Trab_Detail() {
   };
 
   // Componente de input con cursor personalizado
-  const SearchInputWithCursor = ({ 
-    field, 
-    value, 
-    placeholder, 
-    onFocus, 
-    type = "text", 
+  const SearchInputWithCursor = ({
+    field,
+    value,
+    placeholder,
+    onFocus,
+    type = "text",
     showPasswordToggle = false,
     readOnly = false
   }) => {
-    const displayValue = showPasswordToggle && !loginData.showPassword ? 
+    const displayValue = showPasswordToggle && !loginData.showPassword ?
       value.replace(/./g, '•') : value;
 
     return (
@@ -707,29 +708,25 @@ export default function Trab_Detail() {
           }}
           readOnly
           value={value}
-          className={`w-full p-4 ${field === 'subject' || field === 'message' ? 'pl-4' : 'pl-12'} border-2 rounded-xl focus:ring-2 focus:outline-none text-lg bg-white transition-all duration-200 min-h-[60px] text-transparent caret-transparent ${
-            readOnly 
-              ? 'border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed' 
+          className={`w-full p-4 ${field === 'subject' || field === 'message' ? 'pl-4' : 'pl-12'} border-2 rounded-xl focus:ring-2 focus:outline-none text-lg bg-white transition-all duration-200 min-h-[60px] text-transparent caret-transparent ${readOnly
+              ? 'border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed'
               : 'border-blue-300 focus:ring-blue-400 focus:border-blue-400'
-          }`}
+            }`}
           style={{ fontSize: '18px' }}
           placeholder=""
         />
-        
+
         {field === 'username' ? (
-          <FaUser className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${
-            readOnly ? 'text-gray-500' : 'text-blue-500'
-          }`} />
+          <FaUser className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${readOnly ? 'text-gray-500' : 'text-blue-500'
+            }`} />
         ) : field === 'password' ? (
-          <FaKey className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${
-            readOnly ? 'text-gray-500' : 'text-blue-500'
-          }`} />
+          <FaKey className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-xl ${readOnly ? 'text-gray-500' : 'text-blue-500'
+            }`} />
         ) : null}
-        
-        <div 
-          className={`absolute ${field === 'subject' || field === 'message' ? 'left-4' : 'left-12'} top-1/2 transform -translate-y-1/2 text-lg pointer-events-none flex items-center w-[calc(100%-6rem)] overflow-hidden ${
-          readOnly ? 'text-gray-600' : 'text-gray-900'
-        }`}
+
+        <div
+          className={`absolute ${field === 'subject' || field === 'message' ? 'left-4' : 'left-12'} top-1/2 transform -translate-y-1/2 text-lg pointer-events-none flex items-center w-[calc(100%-6rem)] overflow-hidden ${readOnly ? 'text-gray-600' : 'text-gray-900'
+            }`}
           style={{ fontSize: '18px' }}
         >
           <span className="flex items-center">
@@ -739,7 +736,7 @@ export default function Trab_Detail() {
             )}
           </span>
         </div>
-        
+
         <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
           {showPasswordToggle && value && !readOnly && (
             <button
@@ -750,7 +747,7 @@ export default function Trab_Detail() {
               {loginData.showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
             </button>
           )}
-          
+
           {value && !readOnly && (
             <button
               onClick={() => {
@@ -765,7 +762,7 @@ export default function Trab_Detail() {
               <FaTimes className="text-lg" />
             </button>
           )}
-          
+
           {readOnly && (
             <div className="text-gray-400 p-2" title="Campo de solo lectura">
               <FaCheckCircle className="text-lg" />
@@ -809,27 +806,27 @@ export default function Trab_Detail() {
 
   // Función segura para extraer valores
   const getSafeValue = (value, defaultValue = "No registrado") => {
-    if (value === null || value === undefined || value === "" || 
-        value === " " || (Array.isArray(value) && value.length === 0)) {
+    if (value === null || value === undefined || value === "" ||
+      value === " " || (Array.isArray(value) && value.length === 0)) {
       return defaultValue;
     }
-    
+
     if (Array.isArray(value) && value.length > 0) {
       const firstValue = value[0];
       return getSafeValue(firstValue, defaultValue);
     }
-    
+
     return value;
   };
 
   // Función para teléfono
   const getTelefonoValue = (telephoneNumber) => {
     const value = getSafeValue(telephoneNumber, "Sin Anexo registrado");
-    
+
     if (!value || value === " " || value === "" || value === "No registrado") {
       return "Sin Anexo registrado";
     }
-    
+
     return value;
   };
 
@@ -843,12 +840,12 @@ export default function Trab_Detail() {
   // Generar color único basado en el nombre
   const generateAvatarColor = (name) => {
     if (!name) return "#4F46E5";
-    
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     const hue = hash % 360;
     return `hsl(${hue}, 70%, 60%)`;
   };
@@ -885,21 +882,20 @@ export default function Trab_Detail() {
       </div>
     );
   }
-  
+
   if (error || !trabajador) {
     return (
       <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden">
             <div className="text-center py-12 px-4">
-              <div className={`text-5xl mb-3 ${
-                error?.includes('conexión') || error?.includes('TI') ? '🔌' : '⚠️'
-              }`}></div>
+              <div className={`text-5xl mb-3 ${error?.includes('conexión') || error?.includes('TI') ? '🔌' : '⚠️'
+                }`}></div>
               <h3 className="text-lg font-bold text-gray-800 mb-2">
-                {error?.includes('conexión') || error?.includes('TI') 
-                  ? "Error de Conexión" 
-                  : error?.includes("no encontrado") || error?.includes("inactivo") 
-                    ? "Trabajador No Encontrado" 
+                {error?.includes('conexión') || error?.includes('TI')
+                  ? "Error de Conexión"
+                  : error?.includes("no encontrado") || error?.includes("inactivo")
+                    ? "Trabajador No Encontrado"
                     : "Error del Servidor"}
               </h3>
               <p className="text-gray-600 mb-4 text-sm max-w-md mx-auto">
@@ -913,7 +909,7 @@ export default function Trab_Detail() {
                 </div>
               )}
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <button 
+                <button
                   onClick={volverAtras}
                   className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
@@ -967,7 +963,7 @@ export default function Trab_Detail() {
           </div>
         </div>
       </div>
-      
+
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Avatar y botón Contactar */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-6 sm:mb-8">
@@ -1000,7 +996,7 @@ export default function Trab_Detail() {
                     <FaPaperPlane className="text-xl" />
                   </div>
                 </div>
-                
+
                 <div className="text-left">
                   <div className="text-lg font-bold tracking-wide drop-shadow-sm">¡CONTÁCTAME!</div>
                   <div className="text-sm opacity-90 font-semibold">Clic aquí enviar mensaje</div>
@@ -1012,34 +1008,34 @@ export default function Trab_Detail() {
 
         {/* Grid de información */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          <InfoCard 
-            icon={<FaUserTie className="text-lg" />} 
-            title="Cargo" 
-            value={getSafeValue(trabajador.title, "Sin cargo")} 
+          <InfoCard
+            icon={<FaUserTie className="text-lg" />}
+            title="Cargo"
+            value={getSafeValue(trabajador.title, "Sin cargo")}
           />
-          
-          <InfoCard 
-            icon={<FaBuilding className="text-lg" />} 
-            title="Departamento" 
-            value={getSafeValue(trabajador.department, "Sin departamento")} 
+
+          <InfoCard
+            icon={<FaBuilding className="text-lg" />}
+            title="Departamento"
+            value={getSafeValue(trabajador.department, "Sin departamento")}
           />
-          
-          <InfoCard 
-            icon={<FaEnvelope className="text-lg" />} 
-            title="Email" 
-            value={getSafeValue(trabajador.mail, "Sin email")} 
+
+          <InfoCard
+            icon={<FaEnvelope className="text-lg" />}
+            title="Email"
+            value={getSafeValue(trabajador.mail, "Sin email")}
           />
-          
-          <InfoCard 
-            icon={<FaPhone className="text-lg" />} 
-            title="Anexo" 
-            value={getTelefonoValue(trabajador.telephoneNumber)} 
+
+          <InfoCard
+            icon={<FaPhone className="text-lg" />}
+            title="Anexo"
+            value={getTelefonoValue(trabajador.telephoneNumber)}
           />
 
           {tieneJefe && (
-            <InfoCard 
-              icon={<FaCrown className="text-lg" />} 
-              title="Jefatura Directa" 
+            <InfoCard
+              icon={<FaCrown className="text-lg" />}
+              title="Jefatura Directa"
               value={nombreJefe}
               action={
                 <button
@@ -1054,9 +1050,9 @@ export default function Trab_Detail() {
           )}
 
           {tieneSupervisados && (
-            <InfoCard 
-              icon={<FaUsers className="text-lg" />} 
-              title="Supervisa a" 
+            <InfoCard
+              icon={<FaUsers className="text-lg" />}
+              title="Supervisa a"
               value={`${trabajador.supervisa_a.length} persona(s)`}
               action={
                 <button
@@ -1092,10 +1088,10 @@ export default function Trab_Detail() {
           </div>
         </div>
       </div>
-      
+
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto">
-          <HelpTips 
+          <HelpTips
             title="Información de autenticación:"
             tips={[
               "• Usa tu usuario corporativo (sin @cmf.cl)",
@@ -1117,7 +1113,7 @@ export default function Trab_Detail() {
                 onFocus={() => handleInputFocus('username', loginData.username)}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Contraseña de cuenta empresarial
@@ -1146,24 +1142,22 @@ export default function Trab_Detail() {
             {/* Teclado virtual */}
             {showKeyboard && (
               <div className="mt-4 p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
-                <TouchKeyboard 
+                <TouchKeyboard
                   onChange={handleKeyboardInput}
                   input={keyboardValue}
                 />
               </div>
             )}
-                    
+
             {loginData.error && (
-              <div className={`rounded-xl p-4 ${
-                loginData.error.includes('conexión') || loginData.error.includes('TI') 
-                  ? 'bg-yellow-50 border border-yellow-200' 
+              <div className={`rounded-xl p-4 ${loginData.error.includes('conexión') || loginData.error.includes('TI')
+                  ? 'bg-yellow-50 border border-yellow-200'
                   : 'bg-red-50 border border-red-200'
-              }`}>
-                <p className={`text-sm flex items-center gap-2 ${
-                  loginData.error.includes('conexión') || loginData.error.includes('TI') 
-                    ? 'text-yellow-700' 
-                    : 'text-red-700'
                 }`}>
+                <p className={`text-sm flex items-center gap-2 ${loginData.error.includes('conexión') || loginData.error.includes('TI')
+                    ? 'text-yellow-700'
+                    : 'text-red-700'
+                  }`}>
                   <span>{loginData.error.includes('conexión') || loginData.error.includes('TI') ? '🔌' : '❌'}</span>
                   <span>{loginData.error}</span>
                 </p>
@@ -1225,10 +1219,10 @@ export default function Trab_Detail() {
           </div>
         </div>
       </div>
-      
+
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
-          <HelpTips 
+          <HelpTips
             title="Consejos para tu mensaje:"
             tips={[
               "• Sé claro y conciso en tu comunicación",
@@ -1241,7 +1235,7 @@ export default function Trab_Detail() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Mensaje: 
+                Mensaje:
               </label>
               <TextareaWithCursor
                 value={emailData.message}
@@ -1264,7 +1258,7 @@ export default function Trab_Detail() {
             {/* Teclado virtual */}
             {showKeyboard && (
               <div className="mt-4 p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
-                <TouchKeyboard 
+                <TouchKeyboard
                   onChange={handleKeyboardInput}
                   input={keyboardValue}
                 />
@@ -1322,7 +1316,7 @@ export default function Trab_Detail() {
         </div>
 
         {/* Botón de regreso para escritorio */}
-        <button 
+        <button
           onClick={volverAlPerfil}
           className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/30"
         >
@@ -1330,12 +1324,12 @@ export default function Trab_Detail() {
           <span className="font-medium">Volver al Perfil</span>
         </button>
       </div>
-      
+
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
           {/* Botón de regreso para móviles */}
           <div className="mb-6 sm:hidden">
-            <button 
+            <button
               onClick={volverAlPerfil}
               className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl border-2 border-blue-200 w-full justify-center"
             >
@@ -1354,7 +1348,7 @@ export default function Trab_Detail() {
                     <div className="p-4 sm:p-5 flex flex-col h-full">
                       {/* Header con avatar y nombre */}
                       <div className="flex items-center gap-4 mb-4">
-                        <div 
+                        <div
                           className="h-16 w-16 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
                           style={{ backgroundColor: personaAvatarColor }}
                         >
@@ -1435,17 +1429,17 @@ export default function Trab_Detail() {
           </div>
         </div>
       </div>
-      
+
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto text-center">
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FaCheckCircle className="text-3xl sm:text-4xl text-green-600" />
           </div>
-          
+
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
             Mensaje entregado exitosamente
           </h2>
-          
+
           <p className="text-sm sm:text-base text-gray-600 mb-6">
             Tu mensaje ha sido enviado al correo corporativo de {trabajador.givenName}.
           </p>
@@ -1456,12 +1450,12 @@ export default function Trab_Detail() {
                 <div className="text-xs font-medium text-gray-500">De:</div>
                 <div className="text-sm font-semibold text-gray-800">{emailSummary.remitente}</div>
               </div>
-              
+
               <div>
                 <div className="text-xs font-medium text-gray-500">Para:</div>
                 <div className="text-sm font-semibold text-gray-800">{emailSummary.destinatario}</div>
               </div>
-              
+
               <div>
                 <div className="text-xs font-medium text-gray-500">Asunto:</div>
                 <div className="text-sm font-semibold text-gray-800">{emailSummary.asunto}</div>
@@ -1494,7 +1488,7 @@ export default function Trab_Detail() {
       <div className="max-w-7xl mx-auto">
         {/* Botón de regreso para móviles */}
         <div className="mb-4 sm:mb-6 sm:hidden">
-          <button 
+          <button
             onClick={volverAtras}
             className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl border-2 border-blue-200 w-full justify-center"
           >
