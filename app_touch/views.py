@@ -2173,6 +2173,7 @@ def create_qr_token(request):
     try:
         import uuid
         from datetime import timedelta
+        from django.utils import timezone
         
         token = str(uuid.uuid4())
         # Configuración de tiempo de vida del token (5 minutos para coincidir con frontend)
@@ -2185,7 +2186,7 @@ def create_qr_token(request):
             device_info=request.data.get('device_info', {})
         )
         
-        logger.info(f"✅ Token QR creado: {token[:8]}... expires: {expires_at}")
+        logger.info(f"✅ Token QR creado: {token}... expires: {expires_at}")
         
         return Response({
             'token': token,

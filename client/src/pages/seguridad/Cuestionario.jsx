@@ -667,31 +667,19 @@ export default function SurveyApp() {
 
 
 
-            {/* Sección DEBUG - SOLO DESARROLLO - Comentar en producción */}
-
-            {/* <div className="text-left bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
-
+            {/* Sección DEBUG - SOLO DESARROLLO */}
+            <div className="text-left bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
               <div className="text-xs text-gray-700 font-semibold mb-2">DEBUG</div>
-
               <pre className="text-[10px] leading-snug text-gray-700 whitespace-pre-wrap break-words">
-
-{JSON.stringify({
-
-  tokenValid,
-
-  currentToken,
-
-  href: window.location.href,
-
-  backendUrl: tokenManager?.backendUrl || null,
-
-  debug: effectiveDebug
-
-}, null, 2)}
-
+                {JSON.stringify({
+                  tokenValid,
+                  currentToken,
+                  href: window.location.href,
+                  backendUrl: tokenManager?.backendUrl || null,
+                  debug: effectiveDebug
+                }, null, 2)}
               </pre>
-
-            </div> */}
+            </div>
 
           </div>
 
