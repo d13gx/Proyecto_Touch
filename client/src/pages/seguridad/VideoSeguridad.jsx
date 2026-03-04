@@ -19,7 +19,7 @@ export default function VideoSeguridad() {
     const [progress, setProgress] = useState(0);
     const [showCustomControls, setShowCustomControls] = useState(false);
     const [controlsTimeout, setControlsTimeout] = useState(null);
-    const [pauseTimeout, setPauseTimeout] = useState(null);
+    const pauseTimerRef = useRef(null);
     const videoRef = useRef(null);
 
     // Limpiar tokens expirados al cargar
@@ -66,14 +66,40 @@ export default function VideoSeguridad() {
 
     useEffect(() => {
         if (showQR) {
-            // Temporizador para redirigir al HomePage después de 45 segundos
+            // Temporizador para redirigir al HomePage después de 40 segundos
             const timer = setTimeout(() => {
                 navigate('/home');
-            }, 40000); // 40 segundos
+            }, 40000);
 
             return () => clearTimeout(timer);
         }
     }, [showQR, navigate]);
+
+    // Timer de redirección por pausa inactiva (10 segundos)
+    useEffect(() => {
+        // Solo si el video está visible (no en pantalla QR)
+        if (!showQR) {
+            if (!isPlaying) {
+                console.log('⏰ Iniciando contador de 10 segundos por pausa');
+                pauseTimerRef.current = setTimeout(() => {
+                    console.log('🏠 Video detenido por 10 segundos, redirigiendo al home...');
+                    navigate('/home');
+                }, 10000);
+            } else {
+                if (pauseTimerRef.current) {
+                    console.log('▶️ Video reanudado - Cancelando contador de pausa');
+                    clearTimeout(pauseTimerRef.current);
+                    pauseTimerRef.current = null;
+                }
+            }
+        }
+
+        return () => {
+            if (pauseTimerRef.current) {
+                clearTimeout(pauseTimerRef.current);
+            }
+        };
+    }, [isPlaying, showQR, navigate]);
 
     const handleVideoReplay = () => {
         // Refrescar la página completa para reiniciar todo el estado
@@ -115,35 +141,11 @@ export default function VideoSeguridad() {
     };
 
     const handleVideoPlay = () => {
-        console.log('▶️ Video reanudado - Cancelando contador de pausa');
         setIsPlaying(true);
-
-        // Limpiar timeout de pausa cuando el video se reanuda
-        if (pauseTimeout) {
-            clearTimeout(pauseTimeout);
-            setPauseTimeout(null);
-            console.log('✅ Timeout de pausa cancelado');
-        }
     };
 
     const handleVideoPause = () => {
-        console.log('⏸️ Video pausado - Iniciando contador de 10 segundos');
         setIsPlaying(false);
-
-        // Limpiar timeout existente
-        if (pauseTimeout) {
-            clearTimeout(pauseTimeout);
-            console.log('🧹 Timeout anterior limpiado');
-        }
-
-        // Establecer timeout para redirigir después de 10 segundos de pausa
-        const timeout = setTimeout(() => {
-            console.log('🏠 Video detenido por 10 segundos, redirigiendo al home...');
-            navigate('/home');
-        }, 10000); // 10 segundos
-
-        setPauseTimeout(timeout);
-        console.log('⏰ Nuevo timeout de 10 segundos establecido');
     };
 
     // Funciones para manejar la visibilidad de controles
@@ -163,11 +165,8 @@ export default function VideoSeguridad() {
     const handleVideoInteraction = () => {
         showControls();
 
-        // Detectar si el video está en pausa y activar el contador
-        if (videoRef.current && videoRef.current.paused && !pauseTimeout) {
-            console.log('⏸️ Video detectado en pausa - Activando contador de 10 segundos');
-            handleVideoPause();
-        }
+        // Mostrar controles
+        showControls();
 
         // Establecer timeout para ocultar después de 2 segundos de inactividad
         if (controlsTimeout) {
@@ -240,17 +239,16 @@ export default function VideoSeguridad() {
         }
     }, []);
 
-    // Cleanup del timeout al desmontar
     useEffect(() => {
         return () => {
             if (controlsTimeout) {
                 clearTimeout(controlsTimeout);
             }
-            if (pauseTimeout) {
-                clearTimeout(pauseTimeout);
+            if (pauseTimerRef.current) {
+                clearTimeout(pauseTimerRef.current);
             }
         };
-    }, [controlsTimeout, pauseTimeout]);
+    }, [controlsTimeout]);
 
     // Actualizar progreso y bloquear controles nativos
     useEffect(() => {
@@ -262,15 +260,15 @@ export default function VideoSeguridad() {
             setProgress(progress);
         };
 
-        // Bloquear controles nativos agresivamente
+        // Bloquear controles nativos agresivamente pero permitir eventos de estado
         const blockNativeControls = () => {
             // Eliminar atributos de controles
             video.removeAttribute('controls');
             video.controls = false;
 
-            // Prevenir eventos de controles
-            const events = ['play', 'pause', 'seeking', 'seeked', 'volumechange'];
-            events.forEach(event => {
+            // Prevenir eventos de controles que podrían disparar UI nativa
+            const blockedEvents = ['seeking', 'seeked', 'volumechange'];
+            blockedEvents.forEach(event => {
                 video.addEventListener(event, (e) => {
                     if (e.target === video && !e.customTriggered) {
                         e.preventDefault();
@@ -342,7 +340,7 @@ export default function VideoSeguridad() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
+        <div>
             <div className="max-w-7xl mx-auto">
                 {/* Header principal */}
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6">
@@ -442,7 +440,7 @@ export default function VideoSeguridad() {
                                         </div>
                                     </div>
                                     {/* Botón animado fijo debajo del video */}
-                                    <div className="mt-38 mb-36 flex justify-center">
+                                    <div className="mt-32 mb-32 flex justify-center">
                                         <div style={{
                                             position: 'relative',
                                             margin: '0 auto',
@@ -523,7 +521,7 @@ export default function VideoSeguridad() {
                             </div>
                         ) : (
                             /* QR Code Section - versión simplificada */
-                            <div style={{ minHeight: '100vh', padding: '20px', paddingTop: '60px' }}>
+                            <div style={{ padding: '20px', paddingTop: '40px' }}>
                                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                                     <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
                                         Te invitamos a responder un  breve cuestionario escaneando el QR.
