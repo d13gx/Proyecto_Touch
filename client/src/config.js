@@ -1,5 +1,6 @@
 // Configuración de la aplicación
-export const API_BASE_URL = "http://127.0.0.1:8000/app_touch";
+const API_HOST = typeof window !== 'undefined' ? window.location.hostname : '127.0.0.1';
+export const API_BASE_URL = `http://${API_HOST}:8000/app_touch`;
 
 // Configuración de Axios (si estás usando axios)
 import axios from 'axios';
