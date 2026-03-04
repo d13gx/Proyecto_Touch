@@ -20,6 +20,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.utils.timezone import make_aware
+from django.db import transaction
 
 # Django REST Framework imports
 from rest_framework import viewsets, status
@@ -2200,7 +2201,7 @@ def create_qr_token(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-# =============================================================================
+@transaction.atomic
 def validate_qr_token(request):
     """
     Validar un token QR con control de concurrencia y binding de device fingerprint.
@@ -2346,17 +2347,14 @@ def validate_qr_token(request):
             
     except Exception as e:
         logger.error(f"Error validando token QR: {e}")
-        if getattr(settings, 'DEBUG', False):
-            import traceback
-            return Response({
-                'error': 'Error en validación',
-                'detail': str(e),
-                'traceback': traceback.format_exc()
-            }, status=500)
-        return Response({'error': 'Error en validación'}, status=500)
+        return Response({
+            'valid': False,
+            'reason': f'Error en validación: {str(e)}' if getattr(settings, 'DEBUG', False) else 'Error interno del servidor'
+        }, status=500)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@transaction.atomic
 def mark_qr_token_used(request):
     """Marcar token QR como usado con control de concurrencia"""
     try:
