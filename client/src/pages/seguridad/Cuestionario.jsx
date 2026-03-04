@@ -13,6 +13,7 @@ import CuestionarioHeader from '../../components/components-seguridad/Cuestionar
 import TokenDebugDisplay from '../../components/components-seguridad/TokenDebugDisplay.jsx';
 
 import tokenManager from '../../utils/tokenManager';
+import TimeoutRedirect from '../../components/TimeoutRedirect';
 
 
 
@@ -649,7 +650,9 @@ export default function SurveyApp() {
 
             </div>
 
-            <h1 className="text-2xl font-bold text-red-800 mb-2">Acceso Denegado</h1>
+            <h1 className="text-2xl font-bold text-red-800 mb-2">
+              {tokenValid?.reason?.toLowerCase().includes('expira') ? 'Tiempo Terminado' : 'Acceso Denegado'}
+            </h1>
 
             <p className="text-gray-600 mb-4">
 
@@ -664,6 +667,13 @@ export default function SurveyApp() {
                   : 'No tienes permiso para acceder al cuestionario.'}
 
             </p>
+
+            <button
+              onClick={() => window.location.href = 'https://www.cmf.cl'}
+              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors mt-2"
+            >
+              Volver a CMF.cl
+            </button>
 
 
 
@@ -790,6 +800,10 @@ export default function SurveyApp() {
       {/* Header simple sin navegación */}
 
       <CuestionarioHeader />
+      <TimeoutRedirect
+        timeout={tokenManager.TOKEN_EXPIRY_MINUTES * 60 * 1000}
+        redirectTo="/"
+      />
 
 
 
@@ -905,7 +919,7 @@ export default function SurveyApp() {
 
       </div>
 
-    </div>
+    </div >
 
   );
 

@@ -6,13 +6,13 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
 
   useEffect(() => {
     let timeoutId;
-    
+
     const resetTimer = () => {
       // Limpiar el timeout anterior
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       // Establecer nuevo timeout
       timeoutId = setTimeout(() => {
         console.log('⏰ Timeout: Redirigiendo al home por inactividad');

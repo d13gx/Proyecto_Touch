@@ -1,0 +1,14 @@
+﻿12 objects imported automatically (use -v 2 for details).
+
+Tomas Vigouroux | Gerencia Administraci¾n y Finanzas | Gerente de Adm y Finanzas
+Ariel Duhalde | [] | Gerente RRHH y Calidad
+Carla Slier | Subgerencia Administraci¾n y Finanzas | Subgerente de Administraci¾n y Finanzas
+Gabriel Lopez | Gerencia Tecnica | Gerente Tecnico
+Matias Mackenna | Gerencia General | Gerente General
+Jose Sassi | Gerencia Operaciones | Gerente de Operaciones
+Alvaro Alvear | Gerencia Comercial | Gerente Comercial
+Manuel Silva | Subgerencia Operaciones | Subgerente de Produccion
+Alina Azua Astudillo | [] | Subgerente
+Diana Delfin | Subgerencia Calidad | Subgerente Aseguramiento de Calidad
+Bernardita Camus | Gerencia Personas | Gerente de Personas
+Michelle Hahn Rojas | Subgerencia Supply Chain | Subgerente de Supply Chain

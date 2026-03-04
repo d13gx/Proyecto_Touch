@@ -1,0 +1,46 @@
+﻿12 objects imported automatically (use -v 2 for details).
+
+Administraci¾n de Operaciones
+Bienestar
+Calidad
+Contabilidad
+Contabilidad y Finanzas
+Control de gestion
+Cuentas Claves
+Desarrollo Organizacional
+Desarrollo y Servicios
+Extrusi¾n Soplado
+Extrusi¾n Soplado, Termoformado y Reciclado
+Gerencia Administraci¾n y Finanzas
+Gerencia Comercial
+Gerencia General
+Gerencia Operaciones
+Gerencia Personas
+Gerencia Tecnica
+Gesti¾n Ventas
+Gobierno Corporativo, Riesgos y Cumplimiento
+Informatica
+Ingenieria
+Iny. Tapas
+Inyeccion Pet
+Inyecci¾n Convencional
+Inyecci¾n Tapas, Cajas y Convencional
+Inyecto Soplado
+Logistica
+Mantenimiento
+Mantenimiento Planificado
+Nuevos Negocios
+Personas
+Planificaci¾n
+Prevencion de Riesgos
+Proyectos e Innovaci¾n
+SGI
+Soplado
+Subgerencia Administraci¾n y Finanzas
+Subgerencia Calidad
+Subgerencia Operaciones
+Subgerencia Supply Chain
+Sustentabilidad
+Tapas KO
+TecnologÝa y Digitalizaci¾n
+Termoformado

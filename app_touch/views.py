@@ -1646,7 +1646,11 @@ def encontrar_jerarca_departamento(personas_departamento, todas_las_personas):
     logger.warning("❌ No se pudo encontrar ningún jerarca para el departamento")
     return None
 
-    
+def obtener_prioridad_jerarquia(titulo):
+    """Obtener prioridad numérica de un cargo para determinar el jerarca"""
+    if not titulo:
+        return 999
+        
     titulo_lower = titulo.lower()
     
     prioridades = {
@@ -1655,12 +1659,11 @@ def encontrar_jerarca_departamento(personas_departamento, todas_las_personas):
         'subgerente': 3,
         'jefe': 4,          
         'jefa': 4,          
-        'Especialista': 4,
+        'especialista': 4,
         'coordinador': 5,   
         'coordinadora': 5,  
         'encargado': 5,     
         'encargada': 5
-              
     }
     
     for cargo, prioridad in prioridades.items():
@@ -1746,43 +1749,83 @@ def construir_nodo_departamento_mejorado(nombre_departamento, personas_departame
 # ========== VISTAS ADICIONALES MEJORADAS ==========
 
 @api_view(['GET'])
-@cache_response(timeout=LDAP_CACHE_TIMEOUT, key_prefix="lista_departamentos")
+@cache_response(timeout=LDAP_CACHE_TIMEOUT, key_prefix="lista_departamentos_v2")
 def get_lista_departamentos(request):
-    """Obtener lista simple de todos los departamentos"""
+    """Obtener lista enriquecida de todos los departamentos con conteos de personas y subáreas"""
     try:
         conn = LDAPConnectionManager.get_connection()
         
+        # 1. Obtener todas las personas activas y sus relaciones
         search_filter = "(&(objectClass=person)(company=Envases CMF S.A.))"
-        
         conn.search(
             search_base=settings.LDAP_CONFIG['BASE_DN'],
             search_filter=search_filter,
-            attributes=['department']
+            attributes=['department', 'userAccountControl', 'manager', 'distinguishedName']
         )
 
-        departamentos = set()
+        deptos_info = {}
+        todas_las_personas = []
+        
         for entry in conn.entries:
             attrs = procesar_atributos_ldap(entry.entry_attributes_as_dict)
-            depto = attrs.get('department')
-            if depto and depto.strip():
-                # Normalizar el nombre del departamento
-                depto_normalizado = normalizar_nombre_departamento(depto.strip())
-                departamentos.add(depto_normalizado)
-        
+            if not is_account_enabled(attrs.get('userAccountControl')):
+                continue
+                
+            depto_raw = attrs.get('department')
+            if not depto_raw:
+                continue
+                
+            nombre_norm = normalizar_nombre_departamento(depto_raw)
+            
+            if nombre_norm not in deptos_info:
+                deptos_info[nombre_norm] = {
+                    'nombre': nombre_norm,
+                    'total_personas': 0,
+                    'subareas': 0
+                }
+            
+            deptos_info[nombre_norm]['total_personas'] += 1
+            
+            todas_las_personas.append({
+                'department': nombre_norm,
+                'manager': safe_strip(attrs.get('manager')),
+                'distinguishedName': safe_strip(attrs.get('distinguishedName'))
+            })
+
         conn.unbind()
+
+        # 2. Calcular subáreas (relaciones jerárquicas entre departamentos)
+        # Un departamento A es "padre" de B si alguien en B reporta a alguien en A
+        relaciones_vistas = set()
+        for persona in todas_las_personas:
+            if persona['manager']:
+                # Buscar al manager en la lista de personas
+                for potential_manager in todas_las_personas:
+                    if potential_manager['distinguishedName'] == persona['manager']:
+                        depto_padre = potential_manager['department']
+                        depto_hijo = persona['department']
+                        
+                        # Si reporta a alguien de otro departamento, es una relación de subárea
+                        if depto_padre != depto_hijo:
+                            relacion = (depto_padre, depto_hijo)
+                            if relacion not in relaciones_vistas:
+                                relaciones_vistas.add(relacion)
+                                if depto_padre in deptos_info:
+                                    deptos_info[depto_padre]['subareas'] += 1
+                        break
         
-        departamentos_ordenados = sorted(list(departamentos))
-        logger.info(f"📋 Lista departamentos: {len(departamentos_ordenados)} encontrados")
+        departamentos_finales = sorted(deptos_info.values(), key=lambda x: x['nombre'])
+        logger.info(f"📋 Lista departamentos enriquecida: {len(departamentos_finales)} encontrados")
         
         return Response({
-            'total_departamentos': len(departamentos_ordenados),
-            'departamentos': departamentos_ordenados
+            'total_departamentos': len(departamentos_finales),
+            'departamentos': departamentos_finales
         })
 
     except Exception as e:
-        logger.error(f"🚨 Error obteniendo departamentos: {e}")
-        return Response({'error': 'Error obteniendo departamentos'}, 
-                       status=status.HDTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"🚨 Error enriqueciendo lista de departamentos: {e}")
+        return Response({'error': 'Error obteniendo lista de departamentos'}, 
+                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def normalizar_nombre_departamento(nombre):
     """Normaliza el nombre del departamento para evitar duplicados por formato"""

@@ -13,7 +13,7 @@ const Depto_List = () => {
   const [navegacion, setNavegacion] = useState([{ nivel: 'raiz', departamentos: [] }]);
   const [nivelActual, setNivelActual] = useState(0);
   const [paginaActual, setPaginaActual] = useState(0);
-  
+
   const navigate = useNavigate();
 
   // Cache system
@@ -134,8 +134,8 @@ const Depto_List = () => {
       ...deptoData
     };
 
-    navigate('/depto-detail', { 
-      state: { 
+    navigate('/depto-detail', {
+      state: {
         departamento: datosParaDetalle
       }
     });
@@ -144,7 +144,7 @@ const Depto_List = () => {
   // 🧭 SISTEMA DE NAVEGACIÓN POR TARJETAS
   const navegarHaciaAdelante = (depto) => {
     const subdeptos = depto.subdepartamentos || depto.subordinados || [];
-    
+
     if (subdeptos.length > 0) {
       const nuevaNavegacion = [...navegacion.slice(0, nivelActual + 1)];
       nuevaNavegacion.push({
@@ -152,7 +152,7 @@ const Depto_List = () => {
         departamentos: subdeptos,
         departamentoPadre: depto
       });
-      
+
       setNavegacion(nuevaNavegacion);
       setNivelActual(nivelActual + 1);
     }
@@ -171,12 +171,12 @@ const Depto_List = () => {
   // Generar color único basado en el nombre
   const generateAvatarColor = (name) => {
     if (!name) return "#4F46E5";
-    
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     const hue = hash % 360;
     return `hsl(${hue}, 70%, 60%)`;
   };
@@ -188,14 +188,14 @@ const Depto_List = () => {
 
     departamentos.forEach(depto => {
       if (typeof depto === 'string') {
-        // Para lista de departamentos (strings)
+        // Para lista de departamentos (strings) - Compatibilidad hacia atrás
         const nombreNormalizado = depto.trim().toLowerCase();
         if (!nombresVistos.has(nombreNormalizado)) {
           nombresVistos.add(nombreNormalizado);
-          departamentosUnicos.push(depto);
+          departamentosUnicos.push({ nombre: depto, total_personas: 0, subareas: 0 });
         }
       } else if (depto && depto.nombre) {
-        // Para estructura jerárquica (objetos)
+        // Para estructura jerárquica u objetos enriquecidos
         const nombreNormalizado = depto.nombre.trim().toLowerCase();
         if (!nombresVistos.has(nombreNormalizado)) {
           nombresVistos.add(nombreNormalizado);
@@ -239,8 +239,8 @@ const Depto_List = () => {
             {nivelActual === 0 ? 'No hay departamentos' : 'No hay subáreas'}
           </h3>
           <p className="text-sm text-gray-500">
-            {nivelActual === 0 
-              ? 'No se encontraron departamentos para mostrar.' 
+            {nivelActual === 0
+              ? 'No se encontraron departamentos para mostrar.'
               : 'Este departamento no tiene subáreas asignadas.'
             }
           </p>
@@ -254,21 +254,21 @@ const Depto_List = () => {
       const subdeptos = depto.subdepartamentos || depto.subordinados || [];
       const jefe = depto.jefe;
       const tieneJefe = jefe?.nombre && !["No identificado", "Jefe por asignar"].includes(jefe.nombre);
-      
+
       const avatarColor = generateAvatarColor(depto.nombre);
       const initials = depto.nombre ? depto.nombre.substring(0, 2).toUpperCase() : "DP";
 
       return (
         <div className="bg-white rounded-xl border-2 border-gray-200 p-4 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group">
-                {/* 👇 AGREGAR COMPONENTE */}
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+          {/* 👇 AGREGAR COMPONENTE */}
+          <TimeoutRedirect timeout={60000} redirectTo="/" />
           {/* Header compacto */}
           <div className="flex items-start justify-between mb-3">
-            <div 
+            <div
               className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
               onClick={() => navegarHaciaAdelante(depto)}
             >
-              <div 
+              <div
                 className="h-12 w-12 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                 style={{ backgroundColor: avatarColor }}
               >
@@ -285,11 +285,10 @@ const Depto_List = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Indicador de navegación */}
-            <div className={`flex-shrink-0 transition-transform duration-300 ${
-              tieneSubdeptos ? 'group-hover:translate-x-1 text-blue-600' : 'text-gray-400'
-            }`}>
+            <div className={`flex-shrink-0 transition-transform duration-300 ${tieneSubdeptos ? 'group-hover:translate-x-1 text-blue-600' : 'text-gray-400'
+              }`}>
               {tieneSubdeptos ? (
                 <FaArrowRight className="text-lg" />
               ) : (
@@ -305,7 +304,7 @@ const Depto_List = () => {
               <span className="font-semibold text-blue-700">{depto.total_personas || 0}</span>
               <span className="text-gray-500 ml-1">personas</span>
             </div>
-            
+
             {tieneSubdeptos && (
               <div className="flex items-center gap-1 text-gray-600">
                 <FaSitemap className="text-green-500" />
@@ -324,7 +323,7 @@ const Depto_List = () => {
               <FaEye className="text-xs" />
               <span>Ver Detalle</span>
             </button>
-            
+
             {tieneSubdeptos && (
               <button
                 onClick={() => navegarHaciaAdelante(depto)}
@@ -352,7 +351,7 @@ const Depto_List = () => {
                 <FaHome className="text-sm" />
                 <span>Inicio</span>
               </button>
-              
+
               {navegacion.slice(1, nivelActual + 1).map((nivel, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-gray-400">/</span>
@@ -377,25 +376,25 @@ const Depto_List = () => {
                 <h2 className="text-xl sm:text-2xl font-bold mb-2">
                   {navegacion[nivelActual].departamentoPadre.nombre}
                 </h2>
-                
+
                 <div className="flex flex-wrap gap-4 text-sm">
-                  {navegacion[nivelActual].departamentoPadre.jefe?.nombre && 
+                  {navegacion[nivelActual].departamentoPadre.jefe?.nombre &&
                     !["No identificado", "Jefe por asignar"].includes(navegacion[nivelActual].departamentoPadre.jefe.nombre) && (
-                    <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
-                      <FaUserTie className="text-blue-200" />
-                      <span className="text-blue-100">
-                        Jefe: {navegacion[nivelActual].departamentoPadre.jefe.nombre}
-                      </span>
-                    </div>
-                  )}
-                  
+                      <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
+                        <FaUserTie className="text-blue-200" />
+                        <span className="text-blue-100">
+                          Jefe: {navegacion[nivelActual].departamentoPadre.jefe.nombre}
+                        </span>
+                      </div>
+                    )}
+
                   <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
                     <FaUsers className="text-blue-200" />
                     <span className="text-blue-100">
                       {navegacion[nivelActual].departamentoPadre.total_personas || 0} personas
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
                     <FaSitemap className="text-blue-200" />
                     <span className="text-blue-100">
@@ -404,7 +403,7 @@ const Depto_List = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleVerDetalle(navegacion[nivelActual].departamentoPadre)}
@@ -413,7 +412,7 @@ const Depto_List = () => {
                   <FaEye className="text-sm" />
                   <span>Ver Detalle</span>
                 </button>
-                
+
                 <button
                   onClick={() => navegarHaciaAtras(nivelActual - 1)}
                   className="flex items-center gap-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors font-medium text-sm border border-white/30"
@@ -468,8 +467,8 @@ const Depto_List = () => {
 
     // Ordenar y filtrar departamentos
     const departamentosFiltrados = normalizarYFiltrarDepartamentos(listaDepartamentos);
-    const departamentosOrdenados = [...departamentosFiltrados].sort((a, b) => 
-      a.localeCompare(b, 'es', { sensitivity: 'base' })
+    const departamentosOrdenados = [...departamentosFiltrados].sort((a, b) =>
+      a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
     );
 
     // Calcular paginación
@@ -496,7 +495,8 @@ const Depto_List = () => {
     };
 
     // Componente de tarjeta para lista de departamentos (MISMO DISEÑO QUE ESTRUCTURA)
-    const DeptoListCard = ({ nombre }) => {
+    const DeptoListCard = ({ depto }) => {
+      const { nombre, total_personas = 0, subareas = 0 } = depto;
       const avatarColor = generateAvatarColor(nombre);
       const initials = nombre ? nombre.substring(0, 2).toUpperCase() : "DP";
 
@@ -505,7 +505,7 @@ const Depto_List = () => {
           {/* Header compacto - Mismo diseño que estructura */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div 
+              <div
                 className="h-12 w-12 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                 style={{ backgroundColor: avatarColor }}
               >
@@ -517,7 +517,7 @@ const Depto_List = () => {
                 </h3>
               </div>
             </div>
-            
+
             {/* Indicador de acción - Mismo diseño que estructura */}
             <div className="flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1 text-blue-600">
               <FaEye className="text-lg" />
@@ -528,21 +528,21 @@ const Depto_List = () => {
           <div className="flex items-center justify-between text-xs mb-3">
             <div className="flex items-center gap-1 text-gray-600">
               <FaUsers className="text-blue-500" />
-              <span className="font-semibold text-blue-700">-</span>
-              <span className="text-gray-500 ml-1">personas</span>
+              <span className="font-semibold text-blue-700">{total_personas}</span>
+              <span className="text-gray-500 ml-1">{total_personas === 1 ? 'persona' : 'personas'}</span>
             </div>
-            
+
             <div className="flex items-center gap-1 text-gray-600">
               <FaSitemap className="text-green-500" />
-              <span className="font-semibold text-green-700">-</span>
-              <span className="text-gray-500 ml-1">subáreas</span>
+              <span className="font-semibold text-green-700">{subareas}</span>
+              <span className="text-gray-500 ml-1">{subareas === 1 ? 'subárea' : 'subáreas'}</span>
             </div>
           </div>
 
           {/* Botón de acción - Mismo diseño que estructura */}
           <div className="flex gap-2">
             <button
-              onClick={() => handleVerDetalle({ nombre })}
+              onClick={() => handleVerDetalle(depto)}
               className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors font-medium flex-1 justify-center"
             >
               <FaEye className="text-xs" />
@@ -563,7 +563,7 @@ const Depto_List = () => {
                 {departamentosOrdenados.length} departamentos únicos • Ordenados alfabéticamente
               </p>
             </div>
-            
+
             {/* Contador de páginas */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
               <span className="text-sm font-medium text-blue-700">
@@ -573,10 +573,9 @@ const Depto_List = () => {
           </div>
         </div>
 
-        {/* Grid de tarjetas - Mismo diseño que estructura */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {departamentosPagina.map((depto, index) => (
-            <DeptoListCard key={`${depto}-${inicio + index}`} nombre={depto} />
+            <DeptoListCard key={`${depto.nombre}-${inicio + index}`} depto={depto} />
           ))}
         </div>
 
@@ -594,11 +593,10 @@ const Depto_List = () => {
               <button
                 onClick={irAPaginaAnterior}
                 disabled={paginaActual === 0}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  paginaActual === 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${paginaActual === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                  }`}
               >
                 <FaChevronLeft className="text-sm" />
                 <span className="text-sm font-medium">Anterior</span>
@@ -622,11 +620,10 @@ const Depto_List = () => {
                     <button
                       key={pagina}
                       onClick={() => irAPagina(pagina)}
-                      className={`w-10 h-10 rounded-lg transition-colors text-sm font-medium ${
-                        pagina === paginaActual
+                      className={`w-10 h-10 rounded-lg transition-colors text-sm font-medium ${pagina === paginaActual
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {pagina + 1}
                     </button>
@@ -645,11 +642,10 @@ const Depto_List = () => {
               <button
                 onClick={irAPaginaSiguiente}
                 disabled={paginaActual === totalPaginas - 1}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  paginaActual === totalPaginas - 1
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${paginaActual === totalPaginas - 1
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                  }`}
               >
                 <span className="text-sm font-medium">Siguiente</span>
                 <FaChevronRight className="text-sm" />
@@ -664,8 +660,8 @@ const Depto_List = () => {
   // 🔄 COMPONENTE PRINCIPAL
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-    {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
-    <TimeoutRedirect timeout={60000} redirectTo="/" />
+      {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
+      <TimeoutRedirect timeout={60000} redirectTo="/" />
       <div className="max-w-7xl mx-auto">
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden mb-6 sm:mb-8">
@@ -677,12 +673,12 @@ const Depto_List = () => {
               </div>
               <div className="text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Estructura Organizacional 
+                  Estructura Organizacional
                 </h1>
               </div>
             </div>
           </div>
-          
+
           <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
             {/* Información de ayuda - Solo se muestra en el nivel raíz sin datos */}
             {!loading && !error && vistaActiva === 0 && nivelActual === 0 && navegacion[0]?.departamentos.length === 0 && <HelpTips />}
@@ -706,8 +702,8 @@ const Depto_List = () => {
                   }}
                   className={`
                     flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl transition-all duration-300 text-sm sm:text-base font-semibold flex-1 justify-center
-                    ${vistaActiva === index 
-                      ? 'bg-white text-blue-700 shadow-lg' 
+                    ${vistaActiva === index
+                      ? 'bg-white text-blue-700 shadow-lg'
                       : 'text-gray-600 hover:text-blue-600 hover:bg-white/50'
                     }
                   `}
@@ -735,7 +731,7 @@ const Depto_List = () => {
                   <p className="text-gray-600 mb-4 text-sm max-w-md mx-auto">
                     {error}
                   </p>
-                  <button 
+                  <button
                     onClick={cargarDatosVistaActiva}
                     className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >

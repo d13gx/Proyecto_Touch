@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-export default function CuestionarioCompletado({ 
-  lastSurvey, 
-  onNewSurvey, 
-  onViewAllSurveys 
+export default function CuestionarioCompletado({
+  lastSurvey,
+  onNewSurvey,
+  onViewAllSurveys
 }) {
   const score = lastSurvey?.score || 0;
   const totalQuestions = lastSurvey?.totalQuestions || 0;
   const results = lastSurvey?.results || [];
+
+  useEffect(() => {
+    // Redirigir a www.cmf.cl después de 1 minuto
+    const timer = setTimeout(() => {
+      console.log('⏰ Redirigiendo a www.cmf.cl por finalización de cuestionario');
+      window.location.href = 'https://www.cmf.cl';
+    }, 60000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
