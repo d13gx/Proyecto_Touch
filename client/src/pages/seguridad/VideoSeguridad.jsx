@@ -610,7 +610,7 @@ export default function VideoSeguridad() {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        Ver video nuevamente
+                                        Ver nuevamente
                                     </button>
                                 </div>
                             </div>

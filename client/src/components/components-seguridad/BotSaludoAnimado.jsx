@@ -20,16 +20,16 @@ function BotSaludoAnimado() {
     "Juntos cuidamos a nuestro equipo. Si ves algo inseguro, ¡dilo!",
     "Una lesión es prevenible. Sigue los procedimientos siempre."
   ];
- 
+
   useEffect(() => {
     setVisible(true); // Fade IN al montar
     const reloj = setInterval(() => setFechaHora(new Date()), 1000);
-    
+
     // Ciclo de desaparecer y aparecer con nueva frase
     const cicloAnimacion = setInterval(() => {
       // Desaparecer
       setVisible(false);
-      
+
       // Después de 500ms, cambiar frase y aparecer
       setTimeout(() => {
         setFraseActual((prev) => (prev + 1) % frasesSeguridadCMF.length);
@@ -43,21 +43,15 @@ function BotSaludoAnimado() {
       clearInterval(cicloAnimacion);
     };
   }, [frasesSeguridadCMF.length]);
- 
+
   return (
     <div className={`bot-saludo-avatar fade ${visible ? "visible" : "hidden"}`}>
-      <div className="avatar-container">
-        <img
-          src={botellaImg}
-          alt="Asistente virtual"
-          className="avatar-bot"
-        />
-      </div>
+
       <div>
         {frasesSeguridadCMF[fraseActual]}
       </div>
     </div>
   );
 }
- 
+
 export default BotSaludoAnimado;

@@ -5,8 +5,7 @@ import { useState, useEffect } from 'react';
 import carrusel1 from '../assets/Brigada2.jpeg';
 import carrusel2 from '../assets/assets-seguridad/carrusel_1.webp';
 import carrusel3 from '../assets/assets-seguridad/epp.jpg';
-import carrusel4 from '../assets/Brigada3.jpeg';
-import carrusel5 from '../assets/Brigada1.jpeg';
+import carrusel4 from '../assets/brigada6.jpg';
 import logo from "../assets/logocmfblanco.jpg";
 
 
@@ -20,7 +19,6 @@ function Home() {
     carrusel2,
     carrusel3,
     carrusel4,
-    carrusel5,
   ];
 
   const [showPersonalModal, setShowPersonalModal] = useState(false);

@@ -65,14 +65,48 @@ export default function SurveyApp() {
 
       console.log('🚀 Iniciando validación de token...');
 
+      // 1. Cargar encuestas primero para tenerlas disponibles
+      const surveysStr = localStorage.getItem('surveys');
+      const surveys = JSON.parse(surveysStr || '[]');
+      setSavedSurveys(surveys);
+
       const urlParams = new URLSearchParams(window.location.search);
       const cameFromQr = urlParams.get('qr') === '1';
       const isDenied = urlParams.get('denied') === '1';
 
-      // ---------------------------------------------------------------
-      // CASO: sesión marcada como expirada por VisitorOnlyGuard
-      // No intentar generar token nuevo — mostrar acceso denegado.
-      // ---------------------------------------------------------------
+
+
+
+      if (cameFromQr) {
+        sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
+        localStorage.setItem(VISITOR_SESSION_KEY, '1');
+      }
+
+      // 🔍 1. Extraer token (URL o LocalStorage)
+      const tokenFromUrl = tokenManager.extractTokenFromUrl();
+      const savedToken = localStorage.getItem(VISITOR_TOKEN_SESSION_KEY);
+      const token = tokenFromUrl || savedToken;
+
+      console.log('🔍 Token para validación:', token);
+      if (token) setCurrentToken(token);
+
+      // 🏆 2. VERIFICACIÓN CRÍTICA: ¿Ya completó el cuestionario para este token?
+      // Hacemos esto ANTES que cualquier otra validación para evitar "Acceso Denegado" al refrescar.
+      if (token) {
+        const surveyForThisToken = surveys.find(s => s.token === token);
+
+        if (surveyForThisToken) {
+          console.log('✨ Encuesta encontrada localmente para este token. Mostrando resultados.');
+          setTokenValid({ valid: true, reason: 'Already completed' });
+          setSubmitted(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 🚫 3. Caso: Sesión denegada por el Guard
+      // Si la sesión fue denegada PERO tenemos resultados, el check de arriba ya debería haber retornado.
+      // Si no tenemos resultados y está denegada, entonces sí mostramos el error.
       if (isDenied) {
         console.log('🚫 Acceso denegado por sesión expirada (?denied=1)');
         setTokenValid({ valid: false, reason: 'Sesión expirada o acceso denegado' });
@@ -80,71 +114,26 @@ export default function SurveyApp() {
         return;
       }
 
-
-
-      if (cameFromQr) {
-
-        sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
-
-        localStorage.setItem(VISITOR_SESSION_KEY, '1');
-
-      }
-
-
-
       const baseDebug = {
-
         href: window.location.href,
-
         pathname: window.location.pathname,
-
         search: window.location.search,
-
         cameFromQr,
-
         backendUrl: tokenManager?.backendUrl || null,
-
-        storedVisitorMode: sessionStorage.getItem(VISITOR_SESSION_KEY),
-
-        storedVisitorToken: sessionStorage.getItem(VISITOR_TOKEN_SESSION_KEY)
-
+        token
       };
 
       setDebugInfo(baseDebug);
-
       sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(baseDebug));
 
 
-
-      // Validar token
-
-      const token = tokenManager.extractTokenFromUrl();
-
-      console.log('🔍 Token extraído de URL:', token);
-
-      setCurrentToken(token); // Guardar token para mostrar
-
-
-
-      if (token) {
-
+      if (tokenFromUrl) {
         // Si hay token en URL, asumimos que viene desde QR (visitante)
-
-        sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
-
-        sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, token);
-
-        localStorage.setItem(VISITOR_SESSION_KEY, '1');
-
-        localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, token);
-
-
+        sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, tokenFromUrl);
+        localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, tokenFromUrl);
 
         // Validar con backend
-
-        const validation = await tokenManager.validateToken(token);
-
-
+        const validation = await tokenManager.validateToken(tokenFromUrl);
 
         if (validation.valid) {
 
@@ -374,30 +363,13 @@ export default function SurveyApp() {
 
 
 
-  // Cargar encuestas guardadas al iniciar
-
   useEffect(() => {
 
-    const surveys = localStorage.getItem('surveys');
-
-    if (surveys) {
-
-      setSavedSurveys(JSON.parse(surveys));
-
-    }
-
-    // Resetear estados al cargar la página
-
+    // Resetear estados al cargar la página (preservando lo necesario)
     setShowAdmin(false);
-
-    setSubmitted(false);
-
     setStep(1);
-
     setPersonalData(null);
-
     setErrors({});
-
   }, []);
 
 
@@ -513,11 +485,9 @@ export default function SurveyApp() {
   const handleSurveyComplete = (surveyData) => {
 
     const newSurvey = {
-
       id: Date.now(),
-
+      token: currentToken,
       ...surveyData
-
     };
 
 
@@ -657,13 +627,9 @@ export default function SurveyApp() {
             <p className="text-gray-600 mb-4">
 
               {tokenValid.reason === 'Token no encontrado o ya usado'
-
                 ? 'Este enlace ya ha sido utilizado o no es válido.'
-
                 : tokenValid.reason === 'Token expirado'
-
-                  ? 'Este enlace ha expirado. Por favor, solicita uno nuevo.'
-
+                  ? 'Para volver a contestar el cuestionario tienes que escanear el codigo QR nuevamente'
                   : 'No tienes permiso para acceder al cuestionario.'}
 
             </p>
@@ -672,7 +638,7 @@ export default function SurveyApp() {
               onClick={() => window.location.href = 'https://www.cmf.cl'}
               className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors mt-2"
             >
-              Volver a CMF.cl
+              Visita nuestra página
             </button>
 
 

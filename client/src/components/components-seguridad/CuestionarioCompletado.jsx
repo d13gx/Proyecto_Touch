@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import TimeoutRedirect from '../TimeoutRedirect';
 
 export default function CuestionarioCompletado({
   lastSurvey,
@@ -9,18 +10,13 @@ export default function CuestionarioCompletado({
   const totalQuestions = lastSurvey?.totalQuestions || 0;
   const results = lastSurvey?.results || [];
 
-  useEffect(() => {
-    // Redirigir a www.cmf.cl después de 1 minuto
-    const timer = setTimeout(() => {
-      console.log('⏰ Redirigiendo a www.cmf.cl por finalización de cuestionario');
-      window.location.href = 'https://www.cmf.cl';
-    }, 60000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      {/* Redirección automática a CMF.cl después de 1 minuto de inactividad */}
+      <TimeoutRedirect
+        timeout={60000}
+        redirectTo="https://www.cmf.cl"
+      />
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
         <div className="mb-6 text-center">
           <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

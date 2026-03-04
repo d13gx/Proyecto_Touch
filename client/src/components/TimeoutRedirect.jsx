@@ -15,8 +15,13 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
 
       // Establecer nuevo timeout
       timeoutId = setTimeout(() => {
-        console.log('⏰ Timeout: Redirigiendo al home por inactividad');
-        navigate(redirectTo);
+        console.log(`⏰ Timeout: Redirigiendo a ${redirectTo} por inactividad`);
+
+        if (redirectTo.startsWith('http')) {
+          window.location.href = redirectTo;
+        } else {
+          navigate(redirectTo);
+        }
       }, timeout);
     };
 
