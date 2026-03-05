@@ -3,8 +3,8 @@
 // Usuarios autorizados para acceder al panel administrativo
 const AUTHORIZED_USERS = [
   'jmadrid',  // Usuario principal autorizado
-  'rtorres',
-  'totem',
+  // Agregar aquí otros usuarios autorizados
+  'dreyes',
   // 'otro_usuario',
 ];
 
@@ -12,7 +12,7 @@ const AUTHORIZED_USERS = [
 const DEVELOPMENT_CONFIG = {
   // En desarrollo, permitir acceso al usuario de prueba
   allowTestUser: true,
-  testUser: '',
+  testUser: 'dreyes',
   
   // Mostrar información adicional de depuración
   showDebugInfo: true,

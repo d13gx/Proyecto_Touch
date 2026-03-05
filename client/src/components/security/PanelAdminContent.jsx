@@ -16,6 +16,8 @@ const PanelAdminContent = ({
   const [filterType, setFilterType] = useState('all'); // all, today, week, month, custom
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
 
   const itemsPerPage = 15;
 
@@ -107,9 +109,10 @@ const PanelAdminContent = ({
     } else if (filterType === 'week') {
       from = getWeekStartStr();
       to = today;
-    } else if (filterType === 'month') {
-      from = getMonthStartStr();
-      to = today;
+    } else if (filterType === 'month' && selectedMonth) {
+      // Usar las fechas del mes seleccionado (ya están en startDate y endDate)
+      from = startDate;
+      to = endDate;
     } else if (filterType === 'custom') {
       from = startDate;
       to = endDate;
@@ -125,12 +128,12 @@ const PanelAdminContent = ({
       if (to && dateStr > to) return false;
       return true;
     });
-  }, [allVisitantes, filterType, startDate, endDate]);
+  }, [allVisitantes, filterType, startDate, endDate, selectedMonth]);
 
   // Reset página cuando cambia el filtro
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterType, startDate, endDate]);
+  }, [filterType, startDate, endDate, selectedMonth]);
 
   // Visitantes de la página actual
   const visitantes = useMemo(() => {
@@ -159,10 +162,26 @@ const PanelAdminContent = ({
 
   const handleFilterType = (type) => {
     setFilterType(type);
-    if (type !== 'custom') {
+    if (type !== 'custom' && type !== 'month') {
       setStartDate('');
       setEndDate('');
+      setSelectedMonth('');
     }
+    if (type === 'month') {
+      setShowMonthDropdown(!showMonthDropdown);
+    } else {
+      setShowMonthDropdown(false);
+    }
+  };
+
+  const handleMonthSelect = (monthIndex, monthName) => {
+    setSelectedMonth(monthName);
+    const currentYear = new Date().getFullYear();
+    const firstDay = `${currentYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(currentYear, monthIndex + 1, 0).toISOString().split('T')[0];
+    setStartDate(firstDay);
+    setEndDate(lastDay);
+    setShowMonthDropdown(false);
   };
 
   const exportToCSV = () => {
@@ -248,7 +267,7 @@ const PanelAdminContent = ({
     all: 'Todos',
     today: 'Hoy',
     week: 'Esta semana',
-    month: 'Este mes',
+    month: selectedMonth || 'Mes',
     custom: 'Personalizado',
   };
 
@@ -261,7 +280,7 @@ const PanelAdminContent = ({
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           <p className="text-gray-600 text-sm">
-            Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitantes
+            Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
             {filterType !== 'all' && (
               <span className="ml-2 text-blue-600 font-medium">— Filtro: {filterLabel[filterType]}</span>
             )}
@@ -291,7 +310,7 @@ const PanelAdminContent = ({
             { key: 'all', label: 'Todos' },
             { key: 'today', label: 'Hoy' },
             { key: 'week', label: 'Esta semana' },
-            { key: 'month', label: 'Este mes' },
+            { key: 'month', label: 'Mes' },
             { key: 'custom', label: '📅 Personalizado' },
           ].map(({ key, label }) => (
             <button
@@ -305,8 +324,14 @@ const PanelAdminContent = ({
             >
               {label}
             </button>
+            
           ))}
+          
         </div>
+        <p className="text-gray-600 text-sm">
+            Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
+        </p>
+        
 
         {/* Rango personalizado */}
         {filterType === 'custom' && (
@@ -337,6 +362,58 @@ const PanelAdminContent = ({
               >
                 Limpiar fechas
               </button>
+            )}
+          </div>
+        )}
+
+        {/* Dropdown de meses */}
+        {showMonthDropdown && (
+          <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              {[
+                { index: 0, name: 'Enero' },
+                { index: 1, name: 'Febrero' },
+                { index: 2, name: 'Marzo' },
+                { index: 3, name: 'Abril' },
+                { index: 4, name: 'Mayo' },
+                { index: 5, name: 'Junio' },
+                { index: 6, name: 'Julio' },
+                { index: 7, name: 'Agosto' },
+                { index: 8, name: 'Septiembre' },
+                { index: 9, name: 'Octubre' },
+                { index: 10, name: 'Noviembre' },
+                { index: 11, name: 'Diciembre' },
+              ].map((month) => (
+                <button
+                  key={month.index}
+                  onClick={() => handleMonthSelect(month.index, month.name)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedMonth === month.name
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300'
+                  }`}
+                >
+                  {month.name}
+                </button>
+              ))}
+            </div>
+            {selectedMonth && (
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  Mes seleccionado: <strong>{selectedMonth}</strong>
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedMonth('');
+                    setStartDate('');
+                    setEndDate('');
+                    setFilterType('all');
+                  }}
+                  className="text-xs text-red-500 hover:text-red-700 underline"
+                >
+                  Limpiar selección
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -407,7 +484,6 @@ const PanelAdminContent = ({
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Visita</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUT</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
@@ -421,7 +497,6 @@ const PanelAdminContent = ({
               <tbody className="bg-white divide-y divide-gray-200">
                 {visitantes.map((visitante, index) => (
                   <tr key={visitante.IDEncuesta} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-4 py-3 text-sm text-gray-900 font-medium">{visitante.IDEncuesta}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{visitante.Nombre}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{visitante.RUT}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{visitante.Telefono}</td>

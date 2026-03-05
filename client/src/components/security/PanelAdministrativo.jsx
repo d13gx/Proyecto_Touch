@@ -20,8 +20,7 @@ const PanelAdministrativo = ({
                   <FaInfoCircle className="text-xl sm:text-2xl md:text-3xl" />
                 </div>
                 <div className="text-white">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Panel Administrativo</h1>
-                  <p className="text-blue-100 text-sm sm:text-base">Gestión de Cuestionarios</p>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Gestión de Visitas a Planta</h1>
                 </div>
               </div>
             </div>
