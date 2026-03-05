@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { FaHome, FaBuilding, FaUsers, FaMap, FaInfoCircle, FaVideo } from "react-icons/fa";
+import { FaHome, FaBuilding, FaUsers, FaMap, FaInfoCircle, FaVideo, FaCog } from "react-icons/fa";
 import logo from "../../assets/logo.jpg";
 
 export function Nav({ hideHeader = false }) {
@@ -10,6 +10,7 @@ export function Nav({ hideHeader = false }) {
 
   const quickLinks = [
     { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
+    { path: "/seguridad/cuestionario?admin=1", icon: FaCog, label: "Administrativo", color: "purple" },
     //  { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
     //  { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
     //  { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
@@ -55,7 +56,7 @@ export function Nav({ hideHeader = false }) {
               {!isHome && (
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center sm:justify-end">
                   {quickLinks
-                    .filter(link => isVideoSeguridad ? link.path === "/home" : true)
+                    .filter(link => isVideoSeguridad ? (link.path === "/home" || link.path.includes("admin=1")) : true)
                     .map((link) => {
                       const IconComponent = link.icon;
                       const isActive = location.pathname === link.path;

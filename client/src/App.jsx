@@ -447,6 +447,7 @@ function App() {
             <Route path="/depto-detail" element={<Depto_Detail />} />
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
             <Route path="/seguridad/video-seguridad" element={<VideoSeguridad />} />
+            <Route path="/seguridad/cuestionario" element={<Cuestionario />} />
             <Route path="/Keyboard" element={<Keyboard />} />
           </Route>
           {/* Rutas sin header/layout principal */}

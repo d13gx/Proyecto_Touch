@@ -29,10 +29,20 @@ export default function SurveyApp() {
     const validateAndSetToken = async () => {
       console.log('🚀 Iniciando validación de token...');
 
+      // Detectar si se solicita acceso al panel administrativo
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminMode = urlParams.get('admin') === '1';
+      
+      if (isAdminMode) {
+        console.log('🔧 Modo administrativo solicitado');
+        setShowAdmin(true);
+        setLoading(false);
+        return;
+      }
+
       const surveysStr = localStorage.getItem('surveys');
       const surveys = JSON.parse(surveysStr || '[]');
       setSavedSurveys(surveys);
-      const urlParams = new URLSearchParams(window.location.search);
       const cameFromQr = urlParams.get('qr') === '1';
       const isDenied = urlParams.get('denied') === '1';
 
@@ -168,10 +178,16 @@ export default function SurveyApp() {
   }, []);
 
   useEffect(() => {
-    setShowAdmin(false);
-    setStep(1);
-    setPersonalData(null);
-    setErrors({});
+    // Solo resetear si no estamos en modo administrativo
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminMode = urlParams.get('admin') === '1';
+    
+    if (!isAdminMode) {
+      setShowAdmin(false);
+      setStep(1);
+      setPersonalData(null);
+      setErrors({});
+    }
   }, []);
 
   const loadShuffledQuestions = () => {
@@ -304,21 +320,16 @@ export default function SurveyApp() {
   if (showAdmin) {
     loadShuffledQuestions();
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-        <CuestionarioHeader />
-        <div className="flex-1 w-full px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <PanelAdministrativo
-              onBack={() => {
-                setShowAdmin(false);
-                setStep(1);
-                setPersonalData(null);
-                setSubmitted(false);
-              }}
-              shuffledQuestions={shuffledQuestions}
-            />
-          </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <PanelAdministrativo
+          onBack={() => {
+            setShowAdmin(false);
+            setStep(1);
+            setPersonalData(null);
+            setSubmitted(false);
+          }}
+          shuffledQuestions={shuffledQuestions}
+        />
       </div>
     );
   }

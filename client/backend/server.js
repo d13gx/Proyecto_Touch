@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { connectDB } = require('./db.js');
+const os = require('os');
+const { isUserAuthorized, getConfig } = require('./config/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -90,7 +92,8 @@ app.get('/api/visitantes', async (req, res) => {
                 Telefono,
                 Email,
                 Empresa,
-                FORMAT(FechaEncuesta, 'dd/MM/yyyy HH:mm') as FechaEncuesta
+                FORMAT(FechaEncuesta, 'dd/MM/yyyy') as FechaEncuesta,
+                HoraEncuesta
             FROM Visitantes
             ORDER BY FechaEncuesta DESC;
         `;
@@ -224,6 +227,34 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         database: pool ? 'connected' : 'disconnected'
     });
+});
+
+// Endpoint para obtener usuario Windows actual y verificar acceso
+app.get('/api/auth/current-user', (req, res) => {
+    try {
+        // Obtener el nombre de usuario del sistema operativo
+        const username = os.userInfo().username;
+        
+        // Obtener configuración y verificar autorización
+        const config = getConfig();
+        const hasAccess = isUserAuthorized(username);
+        
+        res.json({
+            username: username,
+            isAuthorized: hasAccess,
+            authorizedUsers: config.authorizedUsers,
+            isDevelopment: config.isDevelopment,
+            showDebugInfo: config.showDebugInfo,
+            message: hasAccess ? 'Acceso concedido' : 'Acceso denegado'
+        });
+        
+    } catch (error) {
+        console.error('Error al obtener usuario actual:', error);
+        res.status(500).json({ 
+            error: 'Error al verificar usuario', 
+            details: error.message 
+        });
+    }
 });
 
 // Iniciar servidor
