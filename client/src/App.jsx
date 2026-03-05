@@ -16,6 +16,19 @@ import Cuestionario from "./pages/seguridad/Cuestionario";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const cameFromQr = urlParams.get('qr') === '1';
+
+  // Si viene desde un QR fresco (?qr=1), limpiar tokens antiguos para permitir una nueva sesión
+  if (cameFromQr) {
+    console.log('🔄 Escaneo de QR detectado - Limpiando sesión anterior...');
+    sessionStorage.removeItem('visitor_qr_token');
+    localStorage.removeItem('visitor_qr_token');
+    sessionStorage.removeItem('visitor_qr_mode');
+    localStorage.removeItem('visitor_qr_mode');
+    // No retornamos aquí, dejamos que el flujo siga para que se considere un "nuevo visitante"
+  }
+
   const storedToken = sessionStorage.getItem('visitor_qr_token') || localStorage.getItem('visitor_qr_token');
 
   // Detectar si este dispositivo ya consumeó o expiró su sesión de visita.
@@ -30,7 +43,6 @@ function VisitorOnlyGuard({ children }) {
     if (location.pathname === '/cuestionario') {
       // Dejar que Cuestionario.jsx muestre la pantalla de acceso denegado.
       // Pasamos ?denied=1 para que sepa que no debe intentar generar un token nuevo.
-      const urlParams = new URLSearchParams(location.search);
       if (urlParams.get('denied') !== '1') {
         return <Navigate to="/cuestionario?denied=1" replace />;
       }
@@ -46,7 +58,7 @@ function VisitorOnlyGuard({ children }) {
 
   if (location.pathname === '/cuestionario') {
     if (storedToken) {
-      const urlToken = new URLSearchParams(location.search).get('token');
+      const urlToken = urlParams.get('token');
       if (!urlToken) {
         return (
           <Navigate
