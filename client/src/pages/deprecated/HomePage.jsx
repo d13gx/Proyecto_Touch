@@ -1,16 +1,16 @@
-import { Link } from "react-router-dom";
+/* import { Link } from "react-router-dom";
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight, FaShieldAlt } from "react-icons/fa";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
-import carrusel_1 from "../assets/Foto_fachada-1.png";
-import carrusel_2 from "../assets/foto-lab2.png";
-import carrusel_3 from "../assets/Carrusel-3.png";
-import carrusel_4 from "../assets/Inyeccion-Soplado_2-1.png";
-import carrusel_5 from "../assets/innovacion-4.png";
-import carrusel_6 from "../assets/seguridad.png";
+import carrusel_1 from "../../assets/Foto_fachada-1.png";
+import carrusel_2 from "../../assets/foto-lab2.png";
+import carrusel_3 from "../../assets/Carrusel-3.png";
+import carrusel_4 from "../../assets/Inyeccion-Soplado_2-1.png";
+import carrusel_5 from "../../assets/innovacion-4.png";
+import carrusel_6 from "../../assets/seguridad.png";
 import { useState } from "react";
-import TimeoutRedirect from "../components/TimeoutRedirect"; // 👈 IMPORTAR
-import PersonalModal from "../components/PersonalModal"; // 👈 IMPORTAR MODAL
+import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
+import PersonalModal from "../../components/common/PersonalModal"; // 👈 IMPORTAR MODAL */
 
 
 export function HomePage() {
@@ -40,14 +40,14 @@ export function HomePage() {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-6 sm:py-8 flex items-center justify-center">
             <div className="text-center text-white px-4">
               <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-                Bienvenido a Envases CMF   
+                Bienvenido a Envases CMF
               </h1>
               <p className="text-blue-100 text-sm sm:text-lg md:text-xl mt-3 sm:mt-4 max-w-2xl mx-auto">
                 ¿En qué te podemos ayudar hoy?
               </p>
             </div>
           </div>
-          
+
           {/* Contenido principal */}
           <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             {/* Grid de acciones principal */}
@@ -130,7 +130,7 @@ export function HomePage() {
                   </h3>
                 </div>
               </div>
-              
+
               <div className="p-2">
                 <Carousel
                   autoPlay
@@ -188,19 +188,19 @@ export function HomePage() {
                     />
                   </div>
                 </Carousel>
-                
+
 
               </div>
             </div>
           </div>
-        </div>     
-        
+        </div>
+
         {/* Modal de Personal */}
-        <PersonalModal 
-          isOpen={showPersonalModal} 
-          onClose={() => setShowPersonalModal(false)} 
+        <PersonalModal
+          isOpen={showPersonalModal}
+          onClose={() => setShowPersonalModal(false)}
         />
       </div>
     </div>
   );
-}
+} 

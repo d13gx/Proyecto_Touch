@@ -1,5 +1,5 @@
 import React from 'react';
-import TimeoutRedirect from '../TimeoutRedirect';
+import TimeoutRedirect from '../common/TimeoutRedirect';
 
 export default function CuestionarioCompletado({
   lastSurvey,

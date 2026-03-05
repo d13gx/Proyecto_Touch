@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 import {
   MapContainer,
   ImageOverlay,
@@ -11,11 +11,11 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
-import TimeoutRedirect from "../components/TimeoutRedirect";
-import { 
-  FaMapMarkerAlt, 
-  FaCrosshairs, 
-  FaBars, 
+import TimeoutRedirect from "../../components/common/TimeoutRedirect";
+import {
+  FaMapMarkerAlt,
+  FaCrosshairs,
+  FaBars,
   FaArrowLeft
 } from "react-icons/fa";
 
@@ -46,7 +46,7 @@ const getFiltroTexto = (filtro) => {
 const getEmojiIcon = (emoji, zoom, categoria) => {
   const size = Math.max(24, Math.min(40, zoom * 5));
   const isInicio = categoria === 'inicio';
-  
+
   return L.divIcon({
     html: `
       <div style="
@@ -117,12 +117,11 @@ const SimpleMarker = ({ ubicacion, zoom }) => {
             </p>
           )}
           <div className="flex items-center justify-between">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-              ubicacion.categoria === 'inicio' ? 'bg-red-100 text-red-700 border border-red-300' :
-              ubicacion.categoria === 'casino' ? 'bg-pink-100 text-pink-700 border border-pink-300' :
-              ubicacion.categoria === 'cancha' ? 'bg-lime-100 text-lime-700 border border-lime-300' :
-              'bg-blue-100 text-blue-700 border border-blue-300'
-            }`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${ubicacion.categoria === 'inicio' ? 'bg-red-100 text-red-700 border border-red-300' :
+                ubicacion.categoria === 'casino' ? 'bg-pink-100 text-pink-700 border border-pink-300' :
+                  ubicacion.categoria === 'cancha' ? 'bg-lime-100 text-lime-700 border border-lime-300' :
+                    'bg-blue-100 text-blue-700 border border-blue-300'
+              }`}>
               {ubicacion.categoria}
             </span>
           </div>
@@ -133,13 +132,13 @@ const SimpleMarker = ({ ubicacion, zoom }) => {
 };
 
 // SidebarCategorias SIMPLIFICADO (sin jefatura)
-const SidebarCategorias = ({ 
-  isMobileOpen, 
-  onToggleMobile, 
+const SidebarCategorias = ({
+  isMobileOpen,
+  onToggleMobile,
   onFiltrarCategoria,
   categoriaActiva
 }) => {
-  
+
   // CATEGORÍAS ACTUALIZADAS (sin jefatura)
   const categorias = [
     { key: "inicio", nombre: "Punto de Inicio", icono: "📍", color: "red" },
@@ -207,11 +206,10 @@ const SidebarCategorias = ({
         {/* Botón para mostrar todas las ubicaciones */}
         <button
           onClick={mostrarTodas}
-          className={`w-full mb-4 p-3 rounded-lg border-2 text-sm font-medium transition-all flex-shrink-0 ${
-            !categoriaActiva 
-              ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
+          className={`w-full mb-4 p-3 rounded-lg border-2 text-sm font-medium transition-all flex-shrink-0 ${!categoriaActiva
+              ? 'bg-blue-600 text-white border-blue-600 shadow-lg'
               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          }`}
+            }`}
         >
           {!categoriaActiva ? '✅ Mostrando Todas' : '📋 Mostrar Todas las Ubicaciones'}
         </button>
@@ -224,11 +222,10 @@ const SidebarCategorias = ({
                 <div
                   key={cat.key}
                   onClick={() => handleFiltrar(cat.key)}
-                  className={`flex items-center gap-3 p-3 rounded-lg border-l-4 cursor-pointer transition-all ${
-                    categoriaActiva === cat.key 
-                      ? 'bg-blue-50 border-blue-500 shadow-sm' 
+                  className={`flex items-center gap-3 p-3 rounded-lg border-l-4 cursor-pointer transition-all ${categoriaActiva === cat.key
+                      ? 'bg-blue-50 border-blue-500 shadow-sm'
                       : getColorClass(cat.color)
-                  } hover:shadow-sm`}
+                    } hover:shadow-sm`}
                 >
                   <span className="text-lg flex-shrink-0">{cat.icono}</span>
                   <span className="text-sm font-medium flex-1">{cat.nombre}</span>
@@ -246,7 +243,7 @@ const SidebarCategorias = ({
 
       {/* Overlay para móviles */}
       {isMobileOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
           onClick={onToggleMobile}
         />
@@ -258,11 +255,11 @@ const SidebarCategorias = ({
 // Componente CenterButton CORREGIDO
 const CenterButton = ({ bounds }) => {
   const map = useMap();
-  
+
   const handleCenter = () => {
     if (bounds && bounds[1][0] !== 1000 && bounds[1][1] !== 1000) {
       map.invalidateSize();
-      map.fitBounds(bounds, { 
+      map.fitBounds(bounds, {
         padding: [10, 10],
         animate: true
       });
@@ -283,12 +280,12 @@ const CenterButton = ({ bounds }) => {
 // Componente MapController
 const MapController = ({ bounds, onMapReady }) => {
   const map = useMap();
-  
+
   useEffect(() => {
     if (bounds && bounds[1][0] !== 1000 && bounds[1][1] !== 1000) {
       setTimeout(() => {
         map.invalidateSize();
-        map.fitBounds(bounds, { 
+        map.fitBounds(bounds, {
           padding: [10, 10],
           animate: false
         });
@@ -396,19 +393,19 @@ const MapaCmf = () => {
               </div>
               <div className="text-white">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Mapa Interactivo  
+                  Mapa Interactivo
                 </h1>
                 <p className="text-blue-100 text-sm sm:text-base">
-                  {categoriaFiltrada === null 
-                    ? '📍 Mostrando todas las ubicaciones' 
-                    : categoriaFiltrada === 'inicio' 
-                      ? '📍 Mostrando punto de inicio' 
+                  {categoriaFiltrada === null
+                    ? '📍 Mostrando todas las ubicaciones'
+                    : categoriaFiltrada === 'inicio'
+                      ? '📍 Mostrando punto de inicio'
                       : `Filtrado: ${getFiltroTexto(categoriaFiltrada)}`}
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="h-full">
               {/* Encabezado de resultados */}
@@ -430,7 +427,7 @@ const MapaCmf = () => {
                 <div className="flex flex-col lg:flex-row h-full">
                   {/* Sidebar */}
                   <div className="lg:w-64 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200">
-                    <SidebarCategorias 
+                    <SidebarCategorias
                       isMobileOpen={sidebarMobileOpen}
                       onToggleMobile={() => setSidebarMobileOpen(!sidebarMobileOpen)}
                       onFiltrarCategoria={handleFiltrarCategoria}
@@ -453,9 +450,9 @@ const MapaCmf = () => {
                       }}
                     >
                       {mapa?.imagen && <ImageOverlay url={mapa.imagen} bounds={bounds} />}
-                      
+
                       <MapController bounds={bounds} onMapReady={handleMapReady} />
-                      
+
                       {/* Botón de centrar CORREGIDO - ahora recibe bounds como prop */}
                       <CenterButton bounds={bounds} />
 

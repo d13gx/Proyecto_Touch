@@ -1,20 +1,20 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { FaHome, FaBuilding, FaUsers, FaMap, FaInfoCircle, FaVideo } from "react-icons/fa";
-import logo from "../assets/logo.jpg";
+import logo from "../../assets/logo.jpg";
 
 export function Nav({ hideHeader = false }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHome = location.pathname === "/seguridad/home";
+  const isHome = location.pathname === "/home";
   const isVideoSeguridad = location.pathname === "/seguridad/video-seguridad";
 
   const quickLinks = [
     { path: "/seguridad/video-seguridad", icon: FaVideo, label: "Seguridad", color: "red" },
-  //  { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
-  //  { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
-  //  { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
-  //  { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
-    { path: "/seguridad/home", icon: FaHome, label: "Inicio", color: "green" }
+    //  { path: "/mapa", icon: FaMap, label: "Mapa", color: "blue" },
+    //  { path: "/departamentos", icon: FaBuilding, label: "Departamento", color: "purple" },
+    //  { path: "/trabajadores", icon: FaUsers, label: "Buscador", color: "teal" },
+    //  { path: "/informaciones", icon: FaInfoCircle, label: "Contacto", color: "yellow" },
+    { path: "/home", icon: FaHome, label: "Inicio", color: "green" }
   ];
 
   const getColorClasses = (color) => {
@@ -55,27 +55,27 @@ export function Nav({ hideHeader = false }) {
               {!isHome && (
                 <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-center sm:justify-end">
                   {quickLinks
-                    .filter(link => isVideoSeguridad ? link.path === "/seguridad/home" : true)
+                    .filter(link => isVideoSeguridad ? link.path === "/home" : true)
                     .map((link) => {
-                    const IconComponent = link.icon;
-                    const isActive = location.pathname === link.path;
-                    return (
-                      <button
-                        key={link.path}
-                        onClick={() => navigate(link.path)}
-                        className={`
+                      const IconComponent = link.icon;
+                      const isActive = location.pathname === link.path;
+                      return (
+                        <button
+                          key={link.path}
+                          onClick={() => navigate(link.path)}
+                          className={`
                           flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white font-medium
                           transition-all duration-300 border-2
                           ${getColorClasses(link.color)}
                           ${isActive ? 'ring-2 ring-white ring-opacity-50 scale-105' : ''}
-                          ${link.path === '/seguridad/home' ? 'px-4 sm:px-4 py-3 sm:py-3' : 'px-4 sm:px-4 py-3 sm:py-3'}
+                          ${link.path === '/home' ? 'px-4 sm:px-4 py-3 sm:py-3' : 'px-4 sm:px-4 py-3 sm:py-3'}
                         `}
-                      >
-                        <IconComponent className={link.path === '/seguridad/home' ? 'text-2xl' : 'text-2xl'} />
-                        <span className="hidden xs:inline">{link.label}</span>
-                      </button>
-                    );
-                  })}
+                        >
+                          <IconComponent className={link.path === '/home' ? 'text-2xl' : 'text-2xl'} />
+                          <span className="hidden xs:inline">{link.label}</span>
+                        </button>
+                      );
+                    })}
                 </div>
               )}
             </div>

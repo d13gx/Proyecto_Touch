@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBuilding, FaUsers, FaList, FaChartBar, FaArrowLeft, FaArrowRight, FaUserTie, FaSitemap, FaHome, FaLightbulb, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import api, { API_BASE_URL } from '../config';
-import TimeoutRedirect from "../components/TimeoutRedirect"; // 👈 IMPORTAR
+import api, { API_BASE_URL } from '../../config';
+import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
 
 const Depto_List = () => {
   const [vistaActiva, setVistaActiva] = useState(0);
@@ -594,8 +594,8 @@ const Depto_List = () => {
                 onClick={irAPaginaAnterior}
                 disabled={paginaActual === 0}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${paginaActual === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
               >
                 <FaChevronLeft className="text-sm" />
@@ -621,8 +621,8 @@ const Depto_List = () => {
                       key={pagina}
                       onClick={() => irAPagina(pagina)}
                       className={`w-10 h-10 rounded-lg transition-colors text-sm font-medium ${pagina === paginaActual
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
                       {pagina + 1}
@@ -643,8 +643,8 @@ const Depto_List = () => {
                 onClick={irAPaginaSiguiente}
                 disabled={paginaActual === totalPaginas - 1}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${paginaActual === totalPaginas - 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
               >
                 <span className="text-sm font-medium">Siguiente</span>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "./BotSaludoAnimado.css";
-import botellaImg from "../../assets/assets-seguridad/botellacmf.webp";
 
 function BotSaludoAnimado() {
   const [visible, setVisible] = useState(false);

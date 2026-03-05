@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api, { API_BASE_URL } from '../config';
-import InfoCard from "../components/InfoCard";
-import TouchKeyboard from "../components/Keyboard";
-import TimeoutRedirect from "../components/TimeoutRedirect";
+import api, { API_BASE_URL } from '../../config';
+import InfoCard from "../../components/common/InfoCard";
+import TouchKeyboard from "../../components/common/Keyboard";
+import TimeoutRedirect from "../../components/common/TimeoutRedirect";
 import {
   FaUser, FaEnvelope, FaPhone, FaLayerGroup,
   FaUserTie, FaUsers, FaArrowLeft, FaCrown,
@@ -709,8 +709,8 @@ export default function Trab_Detail() {
           readOnly
           value={value}
           className={`w-full p-4 ${field === 'subject' || field === 'message' ? 'pl-4' : 'pl-12'} border-2 rounded-xl focus:ring-2 focus:outline-none text-lg bg-white transition-all duration-200 min-h-[60px] text-transparent caret-transparent ${readOnly
-              ? 'border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed'
-              : 'border-blue-300 focus:ring-blue-400 focus:border-blue-400'
+            ? 'border-gray-300 bg-gray-100 text-gray-600 cursor-not-allowed'
+            : 'border-blue-300 focus:ring-blue-400 focus:border-blue-400'
             }`}
           style={{ fontSize: '18px' }}
           placeholder=""
@@ -1151,12 +1151,12 @@ export default function Trab_Detail() {
 
             {loginData.error && (
               <div className={`rounded-xl p-4 ${loginData.error.includes('conexión') || loginData.error.includes('TI')
-                  ? 'bg-yellow-50 border border-yellow-200'
-                  : 'bg-red-50 border border-red-200'
+                ? 'bg-yellow-50 border border-yellow-200'
+                : 'bg-red-50 border border-red-200'
                 }`}>
                 <p className={`text-sm flex items-center gap-2 ${loginData.error.includes('conexión') || loginData.error.includes('TI')
-                    ? 'text-yellow-700'
-                    : 'text-red-700'
+                  ? 'text-yellow-700'
+                  : 'text-red-700'
                   }`}>
                   <span>{loginData.error.includes('conexión') || loginData.error.includes('TI') ? '🔌' : '❌'}</span>
                   <span>{loginData.error}</span>

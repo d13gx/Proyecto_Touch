@@ -1,14 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
-  FaBuilding, FaUsers, FaUserTie, FaEnvelope, 
+  FaBuilding, FaUsers, FaUserTie, FaEnvelope,
   FaPhone, FaArrowLeft, FaCrown, FaMap,
   FaLayerGroup, FaUser, FaPaperPlane, FaCheckCircle,
   FaTimes, FaLightbulb, FaEye, FaEyeSlash, FaKeyboard,
   FaSignInAlt, FaEnvelopeOpen, FaArrowRight
 } from "react-icons/fa";
-import { API_BASE_URL } from '../config';
-import TimeoutRedirect from "../components/TimeoutRedirect"; // 👈 IMPORTAR
+import { API_BASE_URL } from '../../config';
+import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
 
 export default function Depto_Detail() {
   const location = useLocation();
@@ -55,24 +55,24 @@ export default function Depto_Detail() {
     try {
       requestInProgress.current = true;
       lastRequestTime.current = now;
-      
+
       setLoading(true);
       setError(null);
-      
+
       // ✅ Solo usar timestamp para forzar refresh
       const timestamp = forceRefresh ? `&_t=${Date.now()}` : '';
-      
+
       console.log(`🔍 Solicitando datos del departamento: ${nombreDepartamento}`);
       console.log(`🌐 URL de la API: ${API_BASE_URL}/api/departamento-completo/?nombre=${encodeURIComponent(nombreDepartamento)}${timestamp}`);
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos de timeout
-      
+
       let response;
       try {
         const url = `${API_BASE_URL}/api/departamento-completo/?nombre=${encodeURIComponent(nombreDepartamento)}${timestamp}`;
         console.log('🌐 Intentando conectar a:', url);
-        
+
         // Intentar con fetch primero
         try {
           response = await fetch(url, {
@@ -84,24 +84,24 @@ export default function Depto_Detail() {
             credentials: 'include',
             signal: controller.signal
           });
-          
+
           console.log('✅ Respuesta recibida. Estado:', response.status);
         } catch (fetchError) {
           // Si falla con fetch, intentar con XMLHttpRequest para mejor diagnóstico
           console.warn('⚠️ Falló fetch, intentando con XMLHttpRequest para diagnóstico...');
-          
+
           const xhr = new XMLHttpRequest();
           xhr.open('GET', url, false); // Sincrónico para mejor manejo de errores
           xhr.withCredentials = true;
-          
+
           try {
             xhr.send();
             console.log('📡 Estado XHR:', xhr.status, xhr.statusText);
-            
+
             if (xhr.status === 0) {
               throw new Error('BLOCKED_BY_EXTENSION');
             }
-            
+
             // Si XHR funciona, crear una respuesta compatible con fetch
             response = {
               ok: xhr.status >= 200 && xhr.status < 300,
@@ -114,7 +114,7 @@ export default function Depto_Detail() {
             };
           } catch (xhrError) {
             console.error('❌ Error en XHR:', xhrError);
-            
+
             if (xhr.status === 0 && !xhr.responseText && !navigator.onLine) {
               throw new Error('NO_INTERNET');
             } else if (xhr.status === 0) {
@@ -136,7 +136,7 @@ export default function Depto_Detail() {
           userAgent: navigator.userAgent,
           errorType: err.message === 'BLOCKED_BY_EXTENSION' ? 'EXTENSION_BLOCK' : 'NETWORK_ERROR'
         });
-        
+
         if (err.message === 'BLOCKED_BY_EXTENSION' || err.message.includes('Failed to fetch')) {
           const error = new Error('Parece que una extensión del navegador (como un bloqueador de anuncios) está bloqueando las solicitudes. Por favor, desactiva temporalmente las extensiones o configura una excepción para localhost:8000');
           error.name = 'ExtensionBlockError';
@@ -147,9 +147,9 @@ export default function Depto_Detail() {
           throw new Error('CONNECTION_ERROR');
         }
       }
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
       const data = await response.json();
@@ -169,7 +169,7 @@ export default function Depto_Detail() {
       } else if (data && Object.keys(data).length > 0) {
         // ✅ Guardar en cache local
         cacheData.current.set(nombreDepartamento, data);
-        
+
         setDepartamento(data);
         setTrabajadores(data.trabajadores || []);
         setError(null);
@@ -180,9 +180,9 @@ export default function Depto_Detail() {
     } catch (err) {
       console.error("🚨 Error cargando departamento:", err);
       setDepartamento(null);
-      
+
       let errorMessage = "Error al cargar la información del departamento";
-      
+
       if (err.message === 'CONNECTION_ERROR') {
         errorMessage = "Error de conexión. Por favor verifica tu conexión a internet o contacta al soporte técnico.";
       } else if (err.message.includes('Failed to fetch')) {
@@ -192,14 +192,14 @@ export default function Depto_Detail() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       console.error('Detalles del error:', {
         name: err.name,
         message: err.message,
         stack: err.stack,
         timestamp: new Date().toISOString()
       });
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -227,7 +227,7 @@ export default function Depto_Detail() {
         setLoading(true);
         setError(null);
       }
-      
+
       requestInProgress.current = false;
 
       requestTimeoutRef.current = setTimeout(() => {
@@ -282,39 +282,39 @@ export default function Depto_Detail() {
 
   // Función segura para extraer valores
   const getSafeValue = (value, defaultValue = "No registrado") => {
-    if (value === null || value === undefined || value === "" || 
-        value === " " || (Array.isArray(value) && value.length === 0)) {
+    if (value === null || value === undefined || value === "" ||
+      value === " " || (Array.isArray(value) && value.length === 0)) {
       return defaultValue;
     }
-    
+
     if (Array.isArray(value) && value.length > 0) {
       const firstValue = value[0];
       return getSafeValue(firstValue, defaultValue);
     }
-    
+
     return value;
   };
 
   // Función para teléfono
   const getTelefonoValue = (telephoneNumber) => {
     const value = getSafeValue(telephoneNumber, "Sin Anexo registrado");
-    
+
     if (!value || value === " " || value === "" || value === "No registrado") {
       return "Sin Anexo registrado";
     }
-    
+
     return value;
   };
 
   // Generar color único basado en el nombre
   const generateAvatarColor = (name) => {
     if (!name) return "#4F46E5";
-    
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     const hue = hash % 360;
     return `hsl(${hue}, 70%, 60%)`;
   };
@@ -377,7 +377,7 @@ export default function Depto_Detail() {
       </div>
     );
   }
-  
+
   if (error || !departamento) {
     return (
       <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
@@ -392,7 +392,7 @@ export default function Depto_Detail() {
                 {error || "El departamento solicitado no existe."}
               </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <button 
+                <button
                   onClick={volverAtras}
                   className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
@@ -431,9 +431,9 @@ export default function Depto_Detail() {
     const initials = departamento?.departamento ? departamento.departamento.substring(0, 2).toUpperCase() : "DP";
 
     // Extraer datos del departamento
-    const { 
-      departamento: nombre, 
-      jefe, 
+    const {
+      departamento: nombre,
+      jefe,
       jefe_completo,
       total_trabajadores = 0,
       trabajadores: listaTrabajadores = []
@@ -460,7 +460,7 @@ export default function Depto_Detail() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/30"
           >
@@ -468,7 +468,7 @@ export default function Depto_Detail() {
             <span className="font-medium">Regresar</span>
           </button>
         </div>
-        
+
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Avatar y botón Ver Equipo - MISMA DISPOSICIÓN QUE TRAB_DETAIL */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-6 sm:mb-8">
@@ -501,7 +501,7 @@ export default function Depto_Detail() {
                       <FaUsers className="text-xl" />
                     </div>
                   </div>
-                  
+
                   <div className="text-left">
                     <div className="text-lg font-bold tracking-wide drop-shadow-sm">VER EQUIPO COMPLETO</div>
                     <div className="text-sm opacity-90 font-semibold">Clic aquí para explorar</div>
@@ -531,34 +531,34 @@ export default function Depto_Detail() {
 
           {/* Grid de información del departamento - MISMA DISTRIBUCIÓN QUE TRAB_DETAIL */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            <InfoCard 
-              icon={<FaBuilding className="text-lg" />} 
-              title="Departamento" 
-              value={nombre} 
+            <InfoCard
+              icon={<FaBuilding className="text-lg" />}
+              title="Departamento"
+              value={nombre}
             />
-            
-            <InfoCard 
-              icon={<FaUserTie className="text-lg" />} 
-              title="Jefe de Departamento" 
-              value={jefeNombre} 
+
+            <InfoCard
+              icon={<FaUserTie className="text-lg" />}
+              title="Jefe de Departamento"
+              value={jefeNombre}
             />
-            
-            <InfoCard 
-              icon={<FaUsers className="text-lg" />} 
-              title="Total de Trabajadores" 
-              value={`${total_trabajadores} ${total_trabajadores === 1 ? 'persona' : 'personas'}`} 
+
+            <InfoCard
+              icon={<FaUsers className="text-lg" />}
+              title="Total de Trabajadores"
+              value={`${total_trabajadores} ${total_trabajadores === 1 ? 'persona' : 'personas'}`}
             />
-            
-            <InfoCard 
-              icon={<FaEnvelope className="text-lg" />} 
-              title="Email de Contacto" 
-              value={jefeEmail} 
+
+            <InfoCard
+              icon={<FaEnvelope className="text-lg" />}
+              title="Email de Contacto"
+              value={jefeEmail}
             />
-            
-            <InfoCard 
-              icon={<FaPhone className="text-lg" />} 
-              title="Anexo Telefónico" 
-              value={getTelefonoValue(jefeTelefono)} 
+
+            <InfoCard
+              icon={<FaPhone className="text-lg" />}
+              title="Anexo Telefónico"
+              value={getTelefonoValue(jefeTelefono)}
             />
           </div>
         </div>
@@ -570,7 +570,7 @@ export default function Depto_Detail() {
   const renderEquipoView = () => {
     if (!departamento) return null;
 
-    const { 
+    const {
       departamento: nombre,
       total_trabajadores = 0,
       trabajadores: listaTrabajadores = []
@@ -593,7 +593,7 @@ export default function Depto_Detail() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={volverAtras}
             className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/30"
           >
@@ -601,12 +601,12 @@ export default function Depto_Detail() {
             <span className="font-medium">Volver al Departamento</span>
           </button>
         </div>
-        
+
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto">
             {/* Botón de regreso para móviles */}
             <div className="mb-6 sm:hidden">
-              <button 
+              <button
                 onClick={volverAtras}
                 className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl border-2 border-blue-200 w-full justify-center"
               >
@@ -620,20 +620,20 @@ export default function Depto_Detail() {
                 {listaTrabajadores.map((persona, idx) => {
                   const personaAvatarColor = generateAvatarColor(`${persona.givenName} ${persona.sn}`);
                   const personaInitials = getInitials(persona.givenName, persona.sn);
-                  
+
                   // Función para obtener iniciales
                   function getInitials(givenName, sn) {
                     const firstName = getSafeValue(givenName, "").charAt(0).toUpperCase();
                     const lastName = getSafeValue(sn, "").charAt(0).toUpperCase();
                     return firstName + lastName;
                   }
-                  
+
                   return (
                     <div key={idx} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-100 overflow-hidden flex flex-col h-full min-h-[280px] group">
                       <div className="p-4 sm:p-5 flex flex-col h-full">
                         {/* Header con avatar y nombre */}
                         <div className="flex items-center gap-4 mb-4">
-                          <div 
+                          <div
                             className="h-16 w-16 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
                             style={{ backgroundColor: personaAvatarColor }}
                           >
@@ -662,7 +662,7 @@ export default function Depto_Detail() {
                               </div>
                             </div>
                           )}
-                          
+
                           {persona.mail && (
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border-l-4 border-green-500">
                               <FaEnvelope className="text-green-600 mt-0.5 flex-shrink-0" />
@@ -711,12 +711,12 @@ export default function Depto_Detail() {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-    {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
-    <TimeoutRedirect timeout={60000} redirectTo="/" />
+      {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
+      <TimeoutRedirect timeout={60000} redirectTo="/" />
       <div className="max-w-7xl mx-auto">
         {/* Botón de regreso para móviles */}
         <div className="mb-4 sm:mb-6 sm:hidden">
-          <button 
+          <button
             onClick={volverAtras}
             className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl border-2 border-blue-200 w-full justify-center"
           >

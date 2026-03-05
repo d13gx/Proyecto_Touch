@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
 import { useState, useEffect, useRef } from 'react';
 import tokenManager from '../../utils/tokenManager';
-import BotSaludoAnimado from '../../components/components-seguridad/BotSaludoAnimado';
+import BotSaludoAnimado from '../../components/security/BotSaludoAnimado';
 import { FaVideo } from 'react-icons/fa';
 
 export default function VideoSeguridad() {

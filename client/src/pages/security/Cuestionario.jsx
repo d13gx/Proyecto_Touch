@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import DatosPersonales from '../../components/components-seguridad/DatosPersonales.jsx';
-import PreguntasCuestionario from '../../components/components-seguridad/PreguntasCuestionario.jsx';
-import CuestionarioCompletado from '../../components/components-seguridad/CuestionarioCompletado.jsx';
-import PanelAdministrativo from '../../components/components-seguridad/PanelAdministrativo.jsx';
-import CuestionarioHeader from '../../components/components-seguridad/CuestionarioHeader.jsx';
-import TokenDebugDisplay from '../../components/components-seguridad/TokenDebugDisplay.jsx';
+import DatosPersonales from '../../components/security/DatosPersonales.jsx';
+import PreguntasCuestionario from '../../components/security/PreguntasCuestionario.jsx';
+import CuestionarioCompletado from '../../components/security/CuestionarioCompletado.jsx';
+import PanelAdministrativo from '../../components/security/PanelAdministrativo.jsx';
+import CuestionarioHeader from '../../components/security/CuestionarioHeader.jsx';
+import TokenDebugDisplay from '../../components/security/TokenDebugDisplay.jsx';
 import tokenManager from '../../utils/tokenManager';
-import TimeoutRedirect from '../../components/TimeoutRedirect';
+import TimeoutRedirect from '../../components/common/TimeoutRedirect';
 
 export default function SurveyApp() {
   const [step, setStep] = useState(1);

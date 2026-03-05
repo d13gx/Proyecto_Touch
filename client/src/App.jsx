@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { Nav } from "./components/Nav";
-import { HomePage } from "./pages/HomePage";
-import { Trab_List } from "./pages/Trab_List";
-import Depto_List from "./pages/Depto_List";
-import Info_List from "./pages/Info_List";
-import Mapa_Cmf from "./pages/Mapa_Cmf";
-import Depto_Detail from "./pages/Depto_Detail";
-import Trab_Detail from "./pages/Trab_Detail";
-import Keyboard from "./components/Keyboard";
+import { Nav } from "./components/layout/Nav";
+import { HomePage } from "./pages/deprecated/HomePage";
+import { Trab_List } from "./pages/workers/Trab_List";
+import Depto_List from "./pages/departments/Depto_List";
+import Info_List from "./pages/home/Info_List";
+import Mapa_Cmf from "./pages/home/Mapa_Cmf";
+import Depto_Detail from "./pages/departments/Depto_Detail";
+import Trab_Detail from "./pages/workers/Trab_Detail";
+import Keyboard from "./components/common/Keyboard";
 import { useEffect, useState } from "react";
-import { ThemeProvider } from './components/ThemeContext';
-import SeguridadHome from "./pages/Home";
-import VideoSeguridad from "./pages/seguridad/VideoSeguridad";
-import Cuestionario from "./pages/seguridad/Cuestionario";
+import { ThemeProvider } from './components/common/ThemeContext';
+import SeguridadHome from "./pages/security/Home";
+import VideoSeguridad from "./pages/security/VideoSeguridad";
+import Cuestionario from "./pages/security/Cuestionario";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
@@ -439,7 +439,7 @@ function App() {
           </Route>
 
           <Route element={<VisitorOnlyGuard><Nav /></VisitorOnlyGuard>}>
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/home" element={<SeguridadHome />} />
             <Route path="/trabajadores" element={<Trab_List />} />
             <Route path="/departamentos" element={<Depto_List />} />
             <Route path="/informaciones" element={<Info_List />} />
