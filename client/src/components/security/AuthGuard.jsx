@@ -19,7 +19,7 @@ const AuthGuard = ({ children, fallback = null }) => {
         setCurrentUser(authData.username);
         
         if (!authData.isAuthorized) {
-          setError(`Acceso denegado. Usuario actual: ${authData.username}. Usuarios autorizados: ${authData.authorizedUsers.join(', ')}`);
+          setError(`Usuarios autorizados: ${authData.authorizedUsers.join(', ')}`);
         }
         
       } catch (err) {
@@ -61,16 +61,13 @@ const AuthGuard = ({ children, fallback = null }) => {
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Acceso Denegado</h2>
             <p className="text-gray-600 mb-4">
-              No tienes permisos para acceder al Panel Administrativo.
+              El usuario <span className="font-medium">{currentUser || 'Desconocido'}</span> no tiene permisos para acceder a la lista de visitas
             </p>
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
-            <div className="text-sm text-gray-500">
-              <p>Usuario actual detectado: <span className="font-medium">{currentUser || 'Desconocido'}</span></p>
-            </div>
           </div>
         </div>
       </div>

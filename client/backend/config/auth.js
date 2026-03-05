@@ -3,16 +3,16 @@
 // Usuarios autorizados para acceder al panel administrativo
 const AUTHORIZED_USERS = [
   'jmadrid',  // Usuario principal autorizado
-  // Agregar aquí otros usuarios autorizados
-  'dreyes',
-  // 'otro_usuario@cmf.cl',
+  'rtorres',
+  'totem',
+  // 'otro_usuario',
 ];
 
 // Configuración de desarrollo
 const DEVELOPMENT_CONFIG = {
   // En desarrollo, permitir acceso al usuario de prueba
   allowTestUser: true,
-  testUser: 'dreyes',
+  testUser: '',
   
   // Mostrar información adicional de depuración
   showDebugInfo: true,
