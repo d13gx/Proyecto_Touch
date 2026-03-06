@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import carrusel1 from '../../assets/carrusel/Brigada2.jpeg';
-import carrusel2 from '../../assets/carrusel/carrusel_1.webp';
+import carrusel2 from '../../assets/carrusel/HombreSeguridad.png';
 import carrusel3 from '../../assets/carrusel/epp.jpg';
 import carrusel4 from '../../assets/carrusel/brigada6.jpg';
 import logo from "../../assets/logocmfblanco.jpg";
