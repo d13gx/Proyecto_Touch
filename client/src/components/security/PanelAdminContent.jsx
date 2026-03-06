@@ -171,11 +171,7 @@ const PanelAdminContent = ({
       setEndDate('');
       setSelectedMonth('');
     }
-    if (type === 'month') {
-      setShowMonthDropdown(!showMonthDropdown);
-    } else {
-      setShowMonthDropdown(false);
-    }
+    setShowMonthDropdown(false);
   };
 
   const handleMonthSelect = (monthIndex, monthName) => {
@@ -291,7 +287,6 @@ const PanelAdminContent = ({
     today: 'Hoy',
     week: 'Esta semana',
     month: selectedMonth || 'Mes',
-    custom: 'Personalizado',
   };
 
   return (
@@ -310,7 +305,96 @@ const PanelAdminContent = ({
             { key: 'all', label: 'Todos' },
             { key: 'today', label: 'Hoy' },
             { key: 'week', label: 'Esta semana' },
-            { key: 'month', label: 'Mes' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => handleFilterType(key)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+                filterType === key
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+          
+          {/* Dropdown de meses */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${
+                filterType === 'month'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {selectedMonth || 'Mes'}
+              <svg 
+                className={`w-3 h-3 transition-transform ${showMonthDropdown ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {showMonthDropdown && (
+              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                <div className="max-h-60 overflow-y-auto">
+                  {[
+                    { index: 0, name: 'Enero' },
+                    { index: 1, name: 'Febrero' },
+                    { index: 2, name: 'Marzo' },
+                    { index: 3, name: 'Abril' },
+                    { index: 4, name: 'Mayo' },
+                    { index: 5, name: 'Junio' },
+                    { index: 6, name: 'Julio' },
+                    { index: 7, name: 'Agosto' },
+                    { index: 8, name: 'Septiembre' },
+                    { index: 9, name: 'Octubre' },
+                    { index: 10, name: 'Noviembre' },
+                    { index: 11, name: 'Diciembre' },
+                  ].map((month) => (
+                    <button
+                      key={month.index}
+                      onClick={() => {
+                        setFilterType('month');
+                        handleMonthSelect(month.index, month.name);
+                        setShowMonthDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors ${
+                        selectedMonth === month.name
+                          ? 'bg-blue-100 text-blue-700 font-medium'
+                          : 'text-gray-700'
+                      }`}
+                    >
+                      {month.name}
+                    </button>
+                  ))}
+                </div>
+                {selectedMonth && (
+                  <div className="border-t border-gray-200 p-2">
+                    <button
+                      onClick={() => {
+                        setSelectedMonth('');
+                        setStartDate('');
+                        setEndDate('');
+                        setFilterType('all');
+                        setShowMonthDropdown(false);
+                      }}
+                      className="w-full text-left px-2 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                    >
+                      Limpiar selección
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {[
             { key: 'custom', label: '📅 Personalizado' },
           ].map(({ key, label }) => (
             <button
@@ -363,57 +447,7 @@ const PanelAdminContent = ({
           </div>
         )}
 
-        {/* Dropdown de meses */}
-        {showMonthDropdown && (
-          <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {[
-                { index: 0, name: 'Enero' },
-                { index: 1, name: 'Febrero' },
-                { index: 2, name: 'Marzo' },
-                { index: 3, name: 'Abril' },
-                { index: 4, name: 'Mayo' },
-                { index: 5, name: 'Junio' },
-                { index: 6, name: 'Julio' },
-                { index: 7, name: 'Agosto' },
-                { index: 8, name: 'Septiembre' },
-                { index: 9, name: 'Octubre' },
-                { index: 10, name: 'Noviembre' },
-                { index: 11, name: 'Diciembre' },
-              ].map((month) => (
-                <button
-                  key={month.index}
-                  onClick={() => handleMonthSelect(month.index, month.name)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedMonth === month.name
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300'
-                  }`}
-                >
-                  {month.name}
-                </button>
-              ))}
-            </div>
-            {selectedMonth && (
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  Mes seleccionado: <strong>{selectedMonth}</strong>
-                </span>
-                <button
-                  onClick={() => {
-                    setSelectedMonth('');
-                    setStartDate('');
-                    setEndDate('');
-                    setFilterType('all');
-                  }}
-                  className="text-xs text-red-500 hover:text-red-700 underline"
-                >
-                  Limpiar selección
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+    
       </div>
 
       {/* Acciones */}

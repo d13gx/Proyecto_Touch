@@ -80,7 +80,7 @@ echo.
  
 :: Iniciar Django (puerto 8000)
 echo [Django] Iniciando servidor Django en puerto 8000...
-start "Django API Server" cmd /k "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+start "Django API Server" cmd /k "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000 && echo Servidor Django detenido. Minimizando ventana... && powershell -command \"(Add-Type -Name User32 -Namespace Win32Functions -MemberDefinition '[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'); [Win32Functions]::ShowWindow((Get-Process -Id $PID).MainWindowHandle, 6)\""
  
 :: Esperar 3 segundos
 timeout /t 3 /nobreak >nul
@@ -88,7 +88,7 @@ timeout /t 3 /nobreak >nul
 :: Iniciar Node.js (puerto 3001)
 echo [Node.js] Iniciando servidor Node.js en puerto 3001...
 if exist "client\backend\server.js" (
-    start "Node.js API Server" cmd /k "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
+    start "Node.js API Server" cmd /k "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js && echo Servidor Node.js detenido. Minimizando ventana... && powershell -command \"(Add-Type -Name User32 -Namespace Win32Functions -MemberDefinition '[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'); [Win32Functions]::ShowWindow((Get-Process -Id $PID).MainWindowHandle, 6)\""
 ) else (
     echo [!] No se ha encontrado server.js, omitiendo Node.js
 )
@@ -99,7 +99,7 @@ timeout /t 2 /nobreak >nul
 :: Iniciar React (puerto 5173)
 echo [React] Iniciando aplicacion React en puerto 5173...
 if exist "client\package.json" (
-    start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
+    start "React Frontend" cmd /k "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host && echo Servidor React detenido. Minimizando ventana... && powershell -command \"(Add-Type -Name User32 -Namespace Win32Functions -MemberDefinition '[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'); [Win32Functions]::ShowWindow((Get-Process -Id $PID).MainWindowHandle, 6)\""
 ) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
