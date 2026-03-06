@@ -6,7 +6,7 @@ const AUTHORIZED_USERS = [
   // Agregar aquí otros usuarios autorizados
   'dreyes',
   'umartinez',
-  'totem'
+  'TOTEM CMF'
   // 'otro_usuario',
 ];
 
