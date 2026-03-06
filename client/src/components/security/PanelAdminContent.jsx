@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../../services/apiService';
-import * as XLSX from 'xlsx';
+
+// Import dinámico de XLSX con manejo de errores
+let XLSX = null;
+try {
+  XLSX = require('xlsx');
+} catch (error) {
+  console.warn('XLSX no está disponible. La función de exportación a Excel estará deshabilitada.');
+}
 
 const PanelAdminContent = ({
   onBack,
@@ -185,6 +192,12 @@ const PanelAdminContent = ({
   };
 
   const exportToExcel = () => {
+    // Verificar si XLSX está disponible
+    if (!XLSX) {
+      alert('La función de exportación a Excel no está disponible. Por favor, instale las dependencias con "npm install".');
+      return;
+    }
+
     const headers = ['Fecha', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Empresa'];
 
     const rows = filteredVisitantes.map(visitante => [
