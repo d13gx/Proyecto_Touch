@@ -13,6 +13,7 @@ import { ThemeProvider } from './components/common/ThemeContext';
 import SeguridadHome from "./pages/security/Home";
 import VideoSeguridad from "./pages/security/VideoSeguridad";
 import Cuestionario from "./pages/security/Cuestionario";
+import ListaVisita from "./pages/security/ListaVisita";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
@@ -448,6 +449,7 @@ function App() {
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
             <Route path="/seguridad/video-seguridad" element={<VideoSeguridad />} />
             <Route path="/seguridad/cuestionario" element={<Cuestionario />} />
+            <Route path="/ListaVisita" element={<ListaVisita />} />
             <Route path="/Keyboard" element={<Keyboard />} />
           </Route>
           {/* Rutas sin header/layout principal */}

@@ -1,0 +1,53 @@
+import React from 'react';
+import PanelAdminContent from '../../components/security/PanelAdminContent';
+import { FaArrowLeft, FaUsers, FaCalendarAlt } from 'react-icons/fa';
+
+const ListaVisita = () => {
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6 mt-10">
+      <div className="max-w-7xl mx-auto">
+        {/* Header principal */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6">
+          {/* Header azul con título y navegación */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleBack}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 sm:p-3 rounded-lg transition-all duration-300 group"
+                  title="Volver"
+                >
+                  <FaArrowLeft className="text-lg sm:text-xl group-hover:-translate-x-1 transition-transform" />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full border-3 border-white/30 bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-xl">
+                    <FaUsers className="text-lg sm:text-xl" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCalendarAlt className="text-white text-xl sm:text-2xl" />
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+                      Lista de Visitas
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Contenido principal */}
+          <div className="px-2 sm:px-3 lg:px-4 py-3 sm:py-4">
+            <div className="w-full">
+              <PanelAdminContent onBack={handleBack} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ListaVisita;

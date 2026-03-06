@@ -1,13 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../../services/apiService';
-
-// Import dinámico de XLSX con manejo de errores
-let XLSX = null;
-try {
-  XLSX = require('xlsx');
-} catch (error) {
-  console.warn('XLSX no está disponible. La función de exportación a Excel estará deshabilitada.');
-}
+import * as XLSX from 'xlsx';
 
 const PanelAdminContent = ({
   onBack,
@@ -22,12 +15,14 @@ const PanelAdminContent = ({
   const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
   const [deletedVisitantes, setDeletedVisitantes] = useState([]);
   const [showTrash, setShowTrash] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   // Filtros de fecha
-  const [filterType, setFilterType] = useState('all'); // all, today, week, month, custom
+  const [filterType, setFilterType] = useState('today'); // all, today, week, custom
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
 
   const itemsPerPage = 15;
@@ -120,7 +115,7 @@ const PanelAdminContent = ({
     } else if (filterType === 'week') {
       from = getWeekStartStr();
       to = today;
-    } else if (filterType === 'month' && selectedMonth) {
+    } else if (filterType === 'month' && startDate && endDate) {
       // Usar las fechas del mes seleccionado (ya están en startDate y endDate)
       from = startDate;
       to = endDate;
@@ -139,7 +134,72 @@ const PanelAdminContent = ({
       if (to && dateStr > to) return false;
       return true;
     });
-  }, [allVisitantes, filterType, startDate, endDate, selectedMonth]);
+  }, [allVisitantes, filterType, startDate, endDate]);
+
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const formatHora = (horaEncuesta) => {
+    if (!horaEncuesta) return '00:00';
+    if (horaEncuesta.includes('T')) {
+      const date = new Date(horaEncuesta);
+      return date.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    }
+    return horaEncuesta;
+  };
+
+  // Visitantes filtrados y ordenados
+  const filteredAndSortedVisitantes = useMemo(() => {
+    let filtered = filteredVisitantes;
+
+    // Aplicar ordenamiento
+    if (sortConfig.key) {
+      filtered = [...filtered].sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Manejo especial para fechas
+        if (sortConfig.key === 'FechaEncuesta') {
+          aValue = parseVisitanteDate(a);
+          bValue = parseVisitanteDate(b);
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          return sortConfig.direction === 'ascending' 
+            ? aValue - bValue 
+            : bValue - aValue;
+        }
+
+        // Manejo especial para horas
+        if (sortConfig.key === 'HoraEncuesta') {
+          aValue = a[sortConfig.key] || '';
+          bValue = b[sortConfig.key] || '';
+          // Convertir a formato comparable (HH:MM)
+          aValue = formatHora(aValue);
+          bValue = formatHora(bValue);
+        }
+
+        // Manejo para valores nulos o indefinidos
+        if (aValue == null) aValue = '';
+        if (bValue == null) bValue = '';
+
+        // Comparación normal para strings y números
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [filteredVisitantes, sortConfig]);
 
   // Reset página cuando cambia el filtro
   useEffect(() => {
@@ -149,10 +209,10 @@ const PanelAdminContent = ({
   // Visitantes de la página actual
   const visitantes = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredVisitantes.slice(start, start + itemsPerPage);
-  }, [filteredVisitantes, currentPage]);
+    return filteredAndSortedVisitantes.slice(start, start + itemsPerPage);
+  }, [filteredAndSortedVisitantes, currentPage]);
 
-  const totalPages = Math.ceil(filteredVisitantes.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedVisitantes.length / itemsPerPage);
 
   const getVisiblePages = () => {
     const pages = [];
@@ -173,34 +233,37 @@ const PanelAdminContent = ({
 
   const handleFilterType = (type) => {
     setFilterType(type);
-    if (type !== 'custom' && type !== 'month') {
+    if (type !== 'custom') {
       setStartDate('');
       setEndDate('');
-      setSelectedMonth('');
     }
     setShowMonthDropdown(false);
   };
 
   const handleMonthSelect = (monthIndex, monthName) => {
     setSelectedMonth(monthName);
-    const currentYear = new Date().getFullYear();
-    const firstDay = `${currentYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
-    const lastDay = new Date(currentYear, monthIndex + 1, 0).toISOString().split('T')[0];
+    const firstDay = `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(selectedYear, monthIndex + 1, 0).toISOString().split('T')[0];
     setStartDate(firstDay);
     setEndDate(lastDay);
+    setFilterType('month');
     setShowMonthDropdown(false);
   };
 
-  const exportToExcel = () => {
-    // Verificar si XLSX está disponible
-    if (!XLSX) {
-      alert('La función de exportación a Excel no está disponible. Por favor, instale las dependencias con "npm install".');
-      return;
+  // Generar años disponibles (desde 2020 hasta el año actual + 1)
+  const getAvailableYears = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = 2020; year <= currentYear + 1; year++) {
+      years.push(year);
     }
+    return years.reverse(); // Más recientes primero
+  };
 
+  const exportToExcel = () => {
     const headers = ['Fecha', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Empresa'];
 
-    const rows = filteredVisitantes.map(visitante => [
+    const rows = filteredAndSortedVisitantes.map(visitante => [
       visitante.FechaEncuesta,
       visitante.Nombre,
       visitante.RUT,
@@ -285,13 +348,33 @@ const PanelAdminContent = ({
     setShowPermanentDeleteModal(false);
   };
 
-  const formatHora = (horaEncuesta) => {
-    if (!horaEncuesta) return '00:00';
-    if (horaEncuesta.includes('T')) {
-      const date = new Date(horaEncuesta);
-      return date.toLocaleTimeString('es-CL', { hour12: false, hour: '2-digit', minute: '2-digit' });
-    }
-    return horaEncuesta;
+  // Función para formatear RUT
+  const formatRUT = (rut) => {
+    if (!rut) return '';
+    // Limpiar el RUT: dejar solo números y posible guión/letra final
+    const cleanRut = rut.replace(/[^0-9kK]/g, '');
+    if (cleanRut.length < 2) return rut;
+    
+    // Separar cuerpo y dígito verificador
+    const cuerpo = cleanRut.slice(0, -1);
+    const dv = cleanRut.slice(-1).toUpperCase();
+    
+    // Formatear con puntos
+    const formattedCuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    
+    return `${formattedCuerpo}-${dv}`;
+  };
+
+  // Función para formatear empresa (primera letra mayúscula)
+  const formatEmpresa = (empresa) => {
+    if (!empresa) return '';
+    return empresa.charAt(0).toUpperCase() + empresa.slice(1).toLowerCase();
+  };
+
+  // Función para formatear email (todo minúsculas)
+  const formatEmail = (email) => {
+    if (!email) return '';
+    return email.toLowerCase();
   };
 
   // Etiqueta del filtro activo
@@ -306,18 +389,31 @@ const PanelAdminContent = ({
     <div className="w-full">
       {/* Filtros de fecha */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-        <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Filtrar por fecha
-        </h2>
+        <div className="flex justify-between items-start mb-3">
+          <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Filtrar por fecha
+          </h2>
+          {filteredAndSortedVisitantes.length > 0 && (
+            <button
+              onClick={exportToExcel}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Descargar Excel {filterType !== 'all' && `(${filteredAndSortedVisitantes.length})`}
+            </button>
+          )}
+        </div>
 
         <div className="flex flex-wrap gap-2 mb-3">
           {[
-            { key: 'all', label: 'Todos' },
-            { key: 'today', label: 'Hoy' },
-            { key: 'week', label: 'Esta semana' },
+            { key: 'all', label: filterLabel.all },
+            { key: 'today', label: filterLabel.today },
+            { key: 'week', label: filterLabel.week },
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -355,6 +451,7 @@ const PanelAdminContent = ({
             
             {showMonthDropdown && (
               <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                {/* Lista de meses del año actual */}
                 <div className="max-h-60 overflow-y-auto">
                   {[
                     { index: 0, name: 'Enero' },
@@ -373,7 +470,6 @@ const PanelAdminContent = ({
                     <button
                       key={month.index}
                       onClick={() => {
-                        setFilterType('month');
                         handleMonthSelect(month.index, month.name);
                         setShowMonthDropdown(false);
                       }}
@@ -387,6 +483,8 @@ const PanelAdminContent = ({
                     </button>
                   ))}
                 </div>
+                
+                {/* Botón de limpiar */}
                 {selectedMonth && (
                   <div className="border-t border-gray-200 p-2">
                     <button
@@ -406,9 +504,31 @@ const PanelAdminContent = ({
               </div>
             )}
           </div>
+
+          {/* Botón de rango personalizado */}
+          <div className="relative">
+            <button
+              onClick={() => setFilterType(filterType === 'custom' ? 'all' : 'custom')}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${
+                filterType === 'custom'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Rango personalizado
+              <svg 
+                className={`w-3 h-3 transition-transform ${filterType === 'custom' ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
         </div>
         <p className="text-gray-600 text-sm">
-          Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
+          Mostrando: <strong>{filteredAndSortedVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
         </p>
 
         {/* Rango personalizado */}
@@ -417,19 +537,41 @@ const PanelAdminContent = ({
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-600 font-medium">Desde:</label>
               <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                type="month"
+                value={startDate ? startDate.substring(0, 7) : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value) {
+                    const firstDay = `${value}-01`;
+                    const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
+                    setStartDate(firstDay);
+                    setEndDate(lastDay);
+                  } else {
+                    setStartDate('');
+                    setEndDate('');
+                  }
+                }}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-600 font-medium">Hasta:</label>
               <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
+                type="month"
+                value={endDate ? endDate.substring(0, 7) : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value) {
+                    const firstDay = `${value}-01`;
+                    const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
+                    setStartDate(firstDay);
+                    setEndDate(lastDay);
+                  } else {
+                    setStartDate('');
+                    setEndDate('');
+                  }
+                }}
+                min={startDate ? startDate.substring(0, 7) : ''}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
@@ -446,37 +588,6 @@ const PanelAdminContent = ({
 
     
       </div>
-
-      {/* Acciones */}
-      {filteredVisitantes.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={exportToExcel}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Exportar Excel {filterType !== 'all' && `(${filteredVisitantes.length})`}
-            </button>
-            {deletedVisitantes.length > 0 && (
-              <button
-                onClick={openPermanentDeleteModal}
-                className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 flex items-center justify-center relative"
-                title="Ver papelera"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {deletedVisitantes.length}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Papelera */}
       {showTrash && deletedVisitantes.length > 0 && (
@@ -569,7 +680,7 @@ const PanelAdminContent = ({
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
           <p className="text-red-700">{error}</p>
         </div>
-      ) : filteredVisitantes.length === 0 ? (
+      ) : filteredAndSortedVisitantes.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
           <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -590,37 +701,123 @@ const PanelAdminContent = ({
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUT</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th 
+                    onClick={() => handleSort('Nombre')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Nombre
+                      {sortConfig.key === 'Nombre' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('RUT')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      RUT
+                      {sortConfig.key === 'RUT' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('Telefono')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Teléfono
+                      {sortConfig.key === 'Telefono' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('Email')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Email
+                      {sortConfig.key === 'Email' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('Empresa')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Empresa
+                      {sortConfig.key === 'Empresa' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('FechaEncuesta')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Fecha
+                      {sortConfig.key === 'FechaEncuesta' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleSort('HoraEncuesta')}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-1">
+                      Hora
+                      {sortConfig.key === 'HoraEncuesta' && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {visitantes.map((visitante, index) => (
                   <tr key={visitante.IDEncuesta} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="px-4 py-3 text-sm text-gray-900">{visitante.Nombre}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{visitante.RUT}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{formatRUT(visitante.RUT)}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{visitante.Telefono}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{visitante.Email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{visitante.Empresa}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{formatEmail(visitante.Email)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{formatEmpresa(visitante.Empresa)}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{visitante.FechaEncuesta || ''}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{formatHora(visitante.HoraEncuesta)}</td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => deleteSurvey(visitante.IDEncuesta)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                        title="Eliminar visitante"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>

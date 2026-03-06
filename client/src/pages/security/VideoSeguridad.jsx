@@ -524,7 +524,7 @@ export default function VideoSeguridad() {
                             <div style={{ padding: '20px', paddingTop: '40px' }}>
                                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                                     <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700 mb-2">
-                                        Te invitamos a responder un  breve cuestionario escaneando el QR.
+                                        Te invitamos a responder un breve cuestionario
                                     </h2>
                                 </div>
 
