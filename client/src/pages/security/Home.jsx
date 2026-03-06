@@ -35,7 +35,6 @@ function Home() {
     'ようこそ',       // 日本語 (Japonés)
     '환영합니다',     // 한국어 (Coreano)
     'مرحباً',         // العربية (Árabe)
-    'Karibu',         // Kiswahili (Swahili)
     'Hoş geldiniz',   // Türkçe (Turco)
     'Välkommen',      // Svenska (Suecso)
     'Welkom',         // Nederlands (Holandés)

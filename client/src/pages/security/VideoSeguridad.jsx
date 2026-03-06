@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from '../../assets/assets-seguridad/logo-cmf-azul.svg';
+import Logo from '../../assets/logo-cmf-azul.svg';
 import { useState, useEffect, useRef } from 'react';
 import tokenManager from '../../utils/tokenManager';
 import BotSaludoAnimado from '../../components/security/BotSaludoAnimado';

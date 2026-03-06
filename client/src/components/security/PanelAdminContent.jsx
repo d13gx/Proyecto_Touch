@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../../services/apiService';
+import * as XLSX from 'xlsx';
 
 const PanelAdminContent = ({
   onBack,
@@ -8,9 +9,12 @@ const PanelAdminContent = ({
   const [allVisitantes, setAllVisitantes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [visitorToDelete, setVisitorToDelete] = useState(null);
+  const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
   const [deletedVisitantes, setDeletedVisitantes] = useState([]);
   const [showTrash, setShowTrash] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Filtros de fecha
   const [filterType, setFilterType] = useState('all'); // all, today, week, month, custom
@@ -184,52 +188,67 @@ const PanelAdminContent = ({
     setShowMonthDropdown(false);
   };
 
-  const exportToCSV = () => {
-    const headers = ['ID', 'Fecha', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Empresa'];
-    shuffledQuestions.forEach(q => {
-      headers.push(`Pregunta ${q.id}: ${q.question}`);
-    });
+  const exportToExcel = () => {
+    const headers = ['Fecha', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Empresa'];
 
-    const rows = filteredVisitantes.map(visitante => {
-      const row = [
-        visitante.IDEncuesta,
-        visitante.FechaEncuesta,
-        visitante.Nombre,
-        visitante.RUT,
-        visitante.Telefono,
-        visitante.Email,
-        visitante.Empresa
-      ];
-      shuffledQuestions.forEach(() => row.push('No disponible'));
-      return row;
-    });
+    const rows = filteredVisitantes.map(visitante => [
+      visitante.FechaEncuesta,
+      visitante.Nombre,
+      visitante.RUT,
+      visitante.Telefono,
+      visitante.Email,
+      visitante.Empresa
+    ]);
 
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Visitantes');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `visitantes_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-  };
-
-  const clearAllSurveys = () => {
-    if (confirm('¿Está seguro de mover TODOS los visitantes filtrados a la papelera?')) {
-      setDeletedVisitantes(prev => [...prev, ...filteredVisitantes]);
-      setAllVisitantes(prev => prev.filter(v => !filteredVisitantes.find(f => f.IDEncuesta === v.IDEncuesta)));
-    }
+    const fileName = `visitantes_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   };
 
   const deleteSurvey = (id) => {
-    if (confirm('¿Está seguro de mover este visitante a la papelera?')) {
-      const visitanteToDelete = allVisitantes.find(v => v.IDEncuesta === id);
-      if (visitanteToDelete) {
-        setDeletedVisitantes(prev => [...prev, visitanteToDelete]);
-        setAllVisitantes(prev => prev.filter(v => v.IDEncuesta !== id));
+    const visitante = allVisitantes.find(v => v.IDEncuesta === id);
+    if (visitante) {
+      setVisitorToDelete(visitante);
+      setShowDeleteModal(true);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (visitorToDelete) {
+      // Mover a papelera en lugar de eliminar directamente
+      setDeletedVisitantes(prev => [...prev, visitorToDelete]);
+      setAllVisitantes(prev => prev.filter(v => v.IDEncuesta !== visitorToDelete.IDEncuesta));
+      setShowDeleteModal(false);
+      setVisitorToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setVisitorToDelete(null);
+  };
+
+  const openPermanentDeleteModal = () => {
+    setShowPermanentDeleteModal(true);
+  };
+
+  const confirmPermanentDelete = async () => {
+    try {
+      // Eliminar todos los elementos de la papelera permanentemente de la base de datos
+      for (const visitante of deletedVisitantes) {
+        await apiService.deleteVisitante(visitante.IDEncuesta);
       }
+      // Vaciar papelera local
+      setDeletedVisitantes([]);
+      setShowPermanentDeleteModal(false);
+      setShowTrash(false);
+    } catch (error) {
+      console.error('Error al vaciar papelera:', error);
+      alert('Error al vaciar la papelera');
     }
   };
 
@@ -241,16 +260,20 @@ const PanelAdminContent = ({
     }
   };
 
-  const permanentlyDeleteAllTrash = () => {
-    if (confirm('¿Está seguro de eliminar PERMANENTEMENTE todos los visitantes de la papelera? Esta acción no se puede deshacer.')) {
-      setDeletedVisitantes([]);
+  const permanentlyDeleteTrash = async (id) => {
+    try {
+      // Eliminar permanentemente de la base de datos
+      await apiService.deleteVisitante(id);
+      // Remover del estado local
+      setDeletedVisitantes(prev => prev.filter(v => v.IDEncuesta !== id));
+    } catch (error) {
+      console.error('Error al eliminar permanentemente:', error);
+      alert('Error al eliminar permanentemente el visitante');
     }
   };
 
-  const permanentlyDeleteTrash = (id) => {
-    if (confirm('¿Está seguro de eliminar permanentemente este visitante?')) {
-      setDeletedVisitantes(prev => prev.filter(v => v.IDEncuesta !== id));
-    }
+  const cancelPermanentDelete = () => {
+    setShowPermanentDeleteModal(false);
   };
 
   const formatHora = (horaEncuesta) => {
@@ -273,29 +296,6 @@ const PanelAdminContent = ({
 
   return (
     <div className="w-full">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-2xl font-bold text-gray-800">Panel de Administración</h1>
-        </div>
-        <div className="flex items-center gap-4 flex-wrap">
-          <p className="text-gray-600 text-sm">
-            Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
-            {filterType !== 'all' && (
-              <span className="ml-2 text-blue-600 font-medium">— Filtro: {filterLabel[filterType]}</span>
-            )}
-          </p>
-          {deletedVisitantes.length > 0 && (
-            <button
-              onClick={() => setShowTrash(!showTrash)}
-              className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 text-sm"
-            >
-              🗑️ Papelera ({deletedVisitantes.length})
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Filtros de fecha */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-4">
         <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -324,14 +324,11 @@ const PanelAdminContent = ({
             >
               {label}
             </button>
-            
           ))}
-          
         </div>
         <p className="text-gray-600 text-sm">
-            Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
+          Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
         </p>
-        
 
         {/* Rango personalizado */}
         {filterType === 'custom' && (
@@ -422,33 +419,111 @@ const PanelAdminContent = ({
       {/* Acciones */}
       {filteredVisitantes.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex justify-between items-center">
             <button
-              onClick={exportToCSV}
+              onClick={exportToExcel}
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Exportar CSV {filterType !== 'all' && `(${filteredVisitantes.length})`}
-            </button>
-            <button
-              onClick={clearAllSurveys}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 text-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Limpiar {filterType !== 'all' ? 'Filtrados' : 'Todas'}
+              Exportar Excel {filterType !== 'all' && `(${filteredVisitantes.length})`}
             </button>
             {deletedVisitantes.length > 0 && (
               <button
-                onClick={() => setShowTrash(!showTrash)}
-                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 flex items-center gap-2 text-sm"
+                onClick={openPermanentDeleteModal}
+                className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 flex items-center justify-center relative"
+                title="Ver papelera"
               >
-                🗑️ Ver Papelera ({deletedVisitantes.length})
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {deletedVisitantes.length}
+                </span>
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Papelera */}
+      {showTrash && deletedVisitantes.length > 0 && (
+        <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg shadow-md p-4 mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-yellow-800">🗑️ Papelera</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  if (confirm('¿Está seguro de eliminar permanentemente todos los elementos de la papelera?')) {
+                    try {
+                      // Eliminar todos los elementos de la papelera permanentemente de la base de datos
+                      for (const visitante of deletedVisitantes) {
+                        await apiService.deleteVisitante(visitante.IDEncuesta);
+                      }
+                      // Vaciar papelera local
+                      setDeletedVisitantes([]);
+                      setShowTrash(false);
+                    } catch (error) {
+                      console.error('Error al vaciar papelera:', error);
+                      alert('Error al vaciar la papelera');
+                    }
+                  }
+                }}
+                className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+              >
+                Vaciar papelera
+              </button>
+              <button
+                onClick={() => setShowTrash(false)}
+                className="bg-gray-600 text-white px-3 py-1 rounded-lg hover:bg-gray-700 text-sm"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+          <p className="text-yellow-700 mb-4 text-sm">
+            Estos visitantes han sido movidos a la papelera. Puedes restaurarlos o eliminarlos permanentemente.
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-yellow-100 border-b border-yellow-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">ID Visita</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Nombre</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Fecha</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Hora</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-yellow-800 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-yellow-200">
+                {deletedVisitantes.map((visitante, index) => (
+                  <tr key={visitante.IDEncuesta} className={index % 2 === 0 ? 'bg-white' : 'bg-yellow-50'}>
+                    <td className="px-4 py-3 text-sm text-gray-900 font-medium">{visitante.IDEncuesta}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{visitante.Nombre}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{visitante.FechaEncuesta || ''}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{formatHora(visitante.HoraEncuesta)}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => restoreVisitante(visitante.IDEncuesta)}
+                          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-xs"
+                        >
+                          Restaurar
+                        </button>
+                        <button
+                          onClick={() => permanentlyDeleteTrash(visitante.IDEncuesta)}
+                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -508,7 +583,7 @@ const PanelAdminContent = ({
                       <button
                         onClick={() => deleteSurvey(visitante.IDEncuesta)}
                         className="text-red-600 hover:text-red-800 p-1"
-                        title="Mover a papelera"
+                        title="Eliminar visitante"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -560,66 +635,72 @@ const PanelAdminContent = ({
         </div>
       )}
 
-      {/* Papelera */}
-      {showTrash && deletedVisitantes.length > 0 && (
-        <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg shadow-md p-4 mb-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-yellow-800">🗑️ Papelera</h2>
-            <div className="flex gap-2">
+      {/* Modal de confirmación */}
+      {showDeleteModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)'
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl p-8 w-[500px] max-w-[90vw] transform transition-all">
+            <h2 className="text-xl font-bold text-gray-700 mb-4">Eliminar visitante</h2>
+            <p className="text-gray-600 mb-6 text-base">¿Está seguro de eliminar este visitante?</p>
+            <div className="flex gap-3 justify-end">
               <button
-                onClick={permanentlyDeleteAllTrash}
-                className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+                onClick={cancelDelete}
+                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 text-sm transition-colors"
               >
-                Eliminar Todos
+                Cancelar
               </button>
               <button
-                onClick={() => setShowTrash(false)}
-                className="bg-gray-600 text-white px-3 py-1 rounded-lg hover:bg-gray-700 text-sm"
+                onClick={confirmDelete}
+                className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 text-sm transition-colors"
               >
-                Cerrar
+                Eliminar
               </button>
             </div>
           </div>
-          <p className="text-yellow-700 mb-4 text-sm">Estos visitantes han sido movidos a la papelera. Puedes restaurarlos o eliminarlos permanentemente.</p>
+        </div>
+      )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-yellow-100 border-b border-yellow-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">ID Visita</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Nombre</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Fecha</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-yellow-800 uppercase tracking-wider">Hora</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-yellow-800 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-yellow-200">
-                {deletedVisitantes.map((visitante, index) => (
-                  <tr key={visitante.IDEncuesta} className={index % 2 === 0 ? 'bg-white' : 'bg-yellow-50'}>
-                    <td className="px-4 py-3 text-sm text-gray-900 font-medium">{visitante.IDEncuesta}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{visitante.Nombre}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{visitante.FechaEncuesta || ''}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{formatHora(visitante.HoraEncuesta)}</td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => restoreVisitante(visitante.IDEncuesta)}
-                          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-xs"
-                        >
-                          Restaurar
-                        </button>
-                        <button
-                          onClick={() => permanentlyDeleteTrash(visitante.IDEncuesta)}
-                          className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 text-xs"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Modal de eliminación permanente */}
+      {showPermanentDeleteModal && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)'
+          }}
+        >
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg shadow-xl p-8 w-[500px] max-w-[90vw] transform transition-all">
+            <div className="flex items-center gap-3 mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <h2 className="text-xl font-bold text-red-700">Advertencia</h2>
+            </div>
+            <p className="text-red-700 mb-6 text-base font-medium">
+              Si borras esto se eliminará permanentemente de la base de datos.
+            </p>
+            <p className="text-gray-600 mb-6 text-sm">
+              Esta acción vaciará permanentemente la papelera con {deletedVisitantes.length} elemento{deletedVisitantes.length !== 1 ? 's' : ''} y no se podrá deshacer.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelPermanentDelete}
+                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmPermanentDelete}
+                className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 text-sm transition-colors"
+              >
+                Eliminar permanentemente
+              </button>
+            </div>
           </div>
         </div>
       )}
