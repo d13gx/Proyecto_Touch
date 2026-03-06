@@ -393,22 +393,6 @@ const PanelAdminContent = ({
               </div>
             )}
           </div>
-          
-          {[
-            { key: 'custom', label: '📅 Personalizado' },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => handleFilterType(key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-                filterType === key
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
         </div>
         <p className="text-gray-600 text-sm">
           Mostrando: <strong>{filteredVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
