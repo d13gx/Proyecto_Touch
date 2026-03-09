@@ -2487,3 +2487,55 @@ def qr_token_stats(request):
     except Exception as e:
         logger.error(f"Error obteniendo estadísticas: {e}")
         return Response({'error': 'Error obteniendo stats'}, status=500)
+
+
+# ========== VISTA PARA RAÍZ (http://totem.cmf.cl/) ==========
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def totem_home(request):
+    """
+    Vista principal para el tótem.
+    Genera un token automáticamente y redirige al cuestionario.
+    """
+    try:
+        logger.info("🏠 Acceso a la raíz del tótem - generando token...")
+        
+        # Generar token usando la misma lógica que el QR
+        from django.conf import settings
+        from django.http import HttpResponseRedirect
+        from urllib.parse import urlencode
+        
+        # Importar uuid para generar token
+        import uuid
+        
+        # Generar token único
+        token = str(uuid.uuid4())
+        
+        # Configurar expiración (3 minutos)
+        TOKEN_EXPIRY_MINUTES = 3
+        expires_at = timezone.now() + timedelta(minutes=TOKEN_EXPIRY_MINUTES)
+        
+        # Guardar token en base de datos
+        qr_token = QRToken.objects.create(
+            token=token,
+            expires_at=expires_at,
+            device_info=request.META.get('HTTP_USER_AGENT', 'Unknown')
+        )
+        
+        logger.info(f"✅ Token generado para tótem: {token[:8]}...")
+        
+        # Construir URL del cuestionario con el token
+        frontend_url = "http://totem.cmf.cl/cuestionario"
+        cuestionario_url = f"{frontend_url}?token={token}"
+        
+        # Redirigir al cuestionario con el token
+        return HttpResponseRedirect(cuestionario_url)
+        
+    except Exception as e:
+        logger.error(f"❌ Error generando token para tótem: {e}")
+        return JsonResponse({
+            'error': 'Error generando token',
+            'details': str(e)
+        }, status=500)

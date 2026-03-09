@@ -8,6 +8,9 @@ router.register(r'mapas', views.MapaViewSet)
 router.register(r'ubicaciones', views.UbicacionViewSet)
 
 urlpatterns = [
+    # Vista principal del tótem (genera token y redirige)
+    path('', views.totem_home, name='totem_home'),
+    
     # URLs existentes
     path('api/auth/csrf/', views.get_csrf_token, name='get_csrf_token'),
     path('api/auth/login/', views.login_ad, name='login_ad'),
