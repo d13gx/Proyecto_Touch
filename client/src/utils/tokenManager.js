@@ -31,7 +31,7 @@ import { getBrowserMetrics } from './browserMetrics.js';
 class TokenManager {
   constructor() {
     this.STORAGE_KEY = 'qr_tokens';
-    this.TOKEN_EXPIRY_MINUTES = 5; // Tokens expiran en 5 minutos
+    this.TOKEN_EXPIRY_MINUTES = 3; // Tokens expiran en 3 minutos
 
     // Detectar si estamos en localhost o en red
     this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';

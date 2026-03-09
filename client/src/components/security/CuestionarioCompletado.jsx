@@ -83,6 +83,18 @@ export default function CuestionarioCompletado({
           </div>
         </div>
 
+        {/* Botón de acción */}
+        <div className="mt-6">
+          <a
+            href="https://www.cmf.cl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-center font-medium transition-colors duration-200"
+          >
+            Visita nuestra web
+          </a>
+        </div>
+
         {/* Botones de acción - SOLO DESARROLLO - Comentar en producción */}
         {/* <div className="space-y-3">
           <button

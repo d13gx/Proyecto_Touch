@@ -62,8 +62,8 @@ const TokenDebugDisplay = ({ tokenValid, token, loading }) => {
   }
 
   return (
-    <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-2 rounded mb-4">
-      <p className="text-sm font-medium">❌ Acceso denegado</p>
+    <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded mb-4">
+      <p className="text-sm font-medium">⚠️ Acceso denegado</p>
       <p className="text-xs mt-1">Razón: {tokenValid.reason}</p>
       <p className="text-xs">Token actual: {token?.substring(0, 8)}...</p>
       <p className="text-xs mt-1">Tokens guardados: {localStorageTokens.length}</p>

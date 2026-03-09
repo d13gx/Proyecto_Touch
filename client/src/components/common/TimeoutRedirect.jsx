@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
+const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/", resetOnActivity = false }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,15 +25,18 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
       }, timeout);
     };
 
-    // Eventos que resetearán el timer
-    const events = [
-      'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
-    ];
+    // Solo agregar event listeners si resetOnActivity es true
+    if (resetOnActivity) {
+      // Eventos que resetearán el timer
+      const events = [
+        'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
+      ];
 
-    // Agregar event listeners
-    events.forEach(event => {
-      document.addEventListener(event, resetTimer, true);
-    });
+      // Agregar event listeners
+      events.forEach(event => {
+        document.addEventListener(event, resetTimer, true);
+      });
+    }
 
     // Iniciar el timer
     resetTimer();
@@ -43,11 +46,17 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      events.forEach(event => {
-        document.removeEventListener(event, resetTimer, true);
-      });
+      
+      if (resetOnActivity) {
+        const events = [
+          'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
+        ];
+        events.forEach(event => {
+          document.removeEventListener(event, resetTimer, true);
+        });
+      }
     };
-  }, [navigate, timeout, redirectTo]);
+  }, [navigate, timeout, redirectTo, resetOnActivity]);
 
   return null; // Este componente no renderiza nada
 };
