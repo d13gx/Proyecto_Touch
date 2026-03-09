@@ -17,7 +17,11 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
       timeoutId = setTimeout(() => {
         console.log(`⏰ Timeout: Redirigiendo a ${redirectTo} por inactividad`);
 
-        if (redirectTo.startsWith('http')) {
+        // Si el redirectTo es "/" (home), redirigir a acceso denegado del cuestionario
+        if (redirectTo === "/") {
+          console.log('⏰ Tiempo del token expirado - redirigiendo a acceso denegado');
+          window.location.href = '/cuestionario?denied=1';
+        } else if (redirectTo.startsWith('http')) {
           window.location.href = redirectTo;
         } else {
           navigate(redirectTo);
