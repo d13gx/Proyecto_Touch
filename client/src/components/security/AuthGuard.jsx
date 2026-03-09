@@ -56,9 +56,9 @@ const AuthGuard = ({ children, fallback = null }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">No tienes permiso</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Ups! No tienes permiso</h2>
             <p className="text-gray-600 mb-4">
-              El usuario <span className="font-medium">{currentUser || 'Desconocido'}</span> no tiene permisos para acceder a la lista de visitas
+              El usuario <span className="font-medium">{currentUser || 'Desconocido'}</span> no tiene permiso para ver la lista de visitas, si necesitas ingresar por favor comunícate con TI.
             </p>
             {error && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
