@@ -1,55 +1,60 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
   const navigate = useNavigate();
+  const startTimeRef = useRef(null);
+  const timeoutIdRef = useRef(null);
 
   useEffect(() => {
-    let timeoutId;
+    // Obtener el tiempo de inicio del token desde sessionStorage
+    const storedStartTime = sessionStorage.getItem('token_start_time');
+    
+    if (!storedStartTime) {
+      // Primera vez que se carga, guardar el tiempo de inicio
+      const now = Date.now();
+      sessionStorage.setItem('token_start_time', now.toString());
+      startTimeRef.current = now;
+    } else {
+      // Ya existe un tiempo de inicio, usarlo
+      startTimeRef.current = parseInt(storedStartTime);
+    }
 
-    const resetTimer = () => {
-      // Limpiar el timeout anterior
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+    const checkExpiration = () => {
+      const now = Date.now();
+      const elapsed = now - startTimeRef.current;
+      
+      console.log(`⏰ Tiempo transcurrido: ${Math.round(elapsed / 1000)}s / ${Math.round(timeout / 1000)}s`);
 
-      // Establecer nuevo timeout
-      timeoutId = setTimeout(() => {
-        console.log(`⏰ Timeout: Redirigiendo a ${redirectTo} por inactividad`);
-
-        // Si el redirectTo es "/" (home), redirigir a acceso denegado del cuestionario
+      if (elapsed >= timeout) {
+        console.log('⏰ Tiempo del token expirado - redirigiendo a acceso denegado');
+        
+        // Limpiar el tiempo de inicio
+        sessionStorage.removeItem('token_start_time');
+        
+        // Redirigir a acceso denegado
         if (redirectTo === "/") {
-          console.log('⏰ Tiempo del token expirado - redirigiendo a acceso denegado');
           window.location.href = '/cuestionario?denied=1';
         } else if (redirectTo.startsWith('http')) {
           window.location.href = redirectTo;
         } else {
           navigate(redirectTo);
         }
-      }, timeout);
+        return;
+      }
+
+      // Programar siguiente verificación
+      timeoutIdRef.current = setTimeout(checkExpiration, 1000); // Verificar cada segundo
     };
 
-    // Eventos que resetearán el timer
-    const events = [
-      'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
-    ];
-
-    // Agregar event listeners
-    events.forEach(event => {
-      document.addEventListener(event, resetTimer, true);
-    });
-
-    // Iniciar el timer
-    resetTimer();
+    // Iniciar la verificación
+    checkExpiration();
 
     // Cleanup
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
       }
-      events.forEach(event => {
-        document.removeEventListener(event, resetTimer, true);
-      });
     };
   }, [navigate, timeout, redirectTo]);
 
