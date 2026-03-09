@@ -112,6 +112,21 @@ export default function SurveyApp() {
           localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
         }
       } else {
+        // Verificar si el tiempo del token ya expiró
+        const tokenStartTime = sessionStorage.getItem('token_start_time');
+        if (tokenStartTime) {
+          const now = Date.now();
+          const elapsed = now - parseInt(tokenStartTime);
+          const timeout = tokenManager.TOKEN_EXPIRY_MINUTES * 60 * 1000;
+          
+          if (elapsed >= timeout) {
+            console.log('⏰ El tiempo del token ya expiró - no generar nuevo token');
+            setTokenValid({ valid: false, reason: 'Token expirado' });
+            setLoading(false);
+            return;
+          }
+        }
+        
         console.log('🔓 Acceso sin token - generando token único...');
         try {
           const baseUrl = window.location.origin + '/cuestionario';
