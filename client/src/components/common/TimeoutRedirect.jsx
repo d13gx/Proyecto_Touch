@@ -29,6 +29,25 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
       if (elapsed >= timeout) {
         console.log('⏰ Tiempo del token expirado - redirigiendo a acceso denegado');
         
+        // Marcar el token como usado en el backend
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentToken = urlParams.get('token');
+        
+        if (currentToken) {
+          // Importar tokenManager dinámicamente para evitar dependencias circulares
+          import('../../utils/tokenManager.js').then(({ default: tokenManager }) => {
+            tokenManager.markTokenAsUsed(currentToken).then(success => {
+              if (success) {
+                console.log('✅ Token marcado como usado al expirar tiempo');
+              } else {
+                console.log('⚠️ No se pudo marcar token como usado al expirar');
+              }
+            }).catch(err => {
+              console.error('❌ Error marcando token como usado:', err);
+            });
+          });
+        }
+        
         // Limpiar el tiempo de inicio
         sessionStorage.removeItem('token_start_time');
         
