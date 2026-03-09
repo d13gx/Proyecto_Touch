@@ -93,7 +93,7 @@ export default function CuestionarioCompletado({
           </button>
           <button
             onClick={() => window.location.href = 'https://www.cmf.cl'}
-            className="w-full bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700"
+            className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Visita nuestra web
           </button>
