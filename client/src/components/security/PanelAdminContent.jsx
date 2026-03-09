@@ -24,6 +24,7 @@ const PanelAdminContent = ({
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const itemsPerPage = 15;
 
@@ -206,6 +207,21 @@ const PanelAdminContent = ({
     setCurrentPage(1);
   }, [filterType, startDate, endDate, selectedMonth]);
 
+  // Cerrar dropdown al hacer clic fuera (desactivado)
+  useEffect(() => {
+    // Comentar esta función para que no se cierre al hacer clic fuera
+    // const handleClickOutside = (event) => {
+    //   if (showMonthDropdown && !event.target.closest('.month-dropdown-container')) {
+    //     setShowMonthDropdown(false);
+    //   }
+    // };
+
+    // document.addEventListener('mousedown', handleClickOutside);
+    // return () => {
+    //   document.removeEventListener('mousedown', handleClickOutside);
+    // };
+  }, [showMonthDropdown]);
+
   // Visitantes de la página actual
   const visitantes = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -248,6 +264,16 @@ const PanelAdminContent = ({
     setEndDate(lastDay);
     setFilterType('month');
     setShowMonthDropdown(false);
+  };
+
+  const handleMonthButtonClick = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setButtonPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width
+    });
+    setShowMonthDropdown(!showMonthDropdown);
   };
 
   // Generar años disponibles (desde 2020 hasta el año actual + 1)
@@ -386,9 +412,9 @@ const PanelAdminContent = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-visible">
       {/* Filtros de fecha */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+      <div className="bg-white rounded-lg shadow-md p-4 mb-4 overflow-visible">
         <div className="flex justify-between items-start mb-3">
           <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,7 +435,7 @@ const PanelAdminContent = ({
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3 overflow-visible">
           {[
             { key: 'all', label: filterLabel.all },
             { key: 'today', label: filterLabel.today },
@@ -429,9 +455,9 @@ const PanelAdminContent = ({
           ))}
           
           {/* Dropdown de meses */}
-          <div className="relative">
+          <div className="relative month-dropdown-container overflow-visible">
             <button
-              onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+              onClick={handleMonthButtonClick}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${
                 filterType === 'month'
                   ? 'bg-blue-600 text-white border-blue-600'
@@ -449,63 +475,77 @@ const PanelAdminContent = ({
               </svg>
             </button>
             
+            {/* Dropdown flotante */}
             {showMonthDropdown && (
-              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
-                {/* Lista de meses del año actual */}
-                <div className="max-h-60 overflow-y-auto">
-                  {[
-                    { index: 0, name: 'Enero' },
-                    { index: 1, name: 'Febrero' },
-                    { index: 2, name: 'Marzo' },
-                    { index: 3, name: 'Abril' },
-                    { index: 4, name: 'Mayo' },
-                    { index: 5, name: 'Junio' },
-                    { index: 6, name: 'Julio' },
-                    { index: 7, name: 'Agosto' },
-                    { index: 8, name: 'Septiembre' },
-                    { index: 9, name: 'Octubre' },
-                    { index: 10, name: 'Noviembre' },
-                    { index: 11, name: 'Diciembre' },
-                  ].map((month) => (
-                    <button
-                      key={month.index}
-                      onClick={() => {
-                        handleMonthSelect(month.index, month.name);
-                        setShowMonthDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors ${
-                        selectedMonth === month.name
-                          ? 'bg-blue-100 text-blue-700 font-medium'
-                          : 'text-gray-700'
-                      }`}
-                    >
-                      {month.name}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Botón de limpiar */}
-                {selectedMonth && (
-                  <div className="border-t border-gray-200 p-2">
-                    <button
-                      onClick={() => {
-                        setSelectedMonth('');
-                        setStartDate('');
-                        setEndDate('');
-                        setFilterType('all');
-                        setShowMonthDropdown(false);
-                      }}
-                      className="w-full text-left px-2 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                    >
-                      Limpiar selección
-                    </button>
+              <>
+                {/* Fondo semitransparente */}
+                <div 
+                  className="fixed inset-0 bg-transparent z-[9998]"
+                  onClick={() => setShowMonthDropdown(false)}
+                />
+                {/* Dropdown */}
+                <div 
+                  className="fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] min-w-[200px] max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200"
+                  style={{
+                    top: `${buttonPosition.top}px`,
+                    left: `${buttonPosition.left}px`,
+                    width: `${buttonPosition.width}px`
+                  }}
+                >
+                  {/* Lista de meses del año actual */}
+                  <div>
+                    {[
+                      { index: 0, name: 'Enero' },
+                      { index: 1, name: 'Febrero' },
+                      { index: 2, name: 'Marzo' },
+                      { index: 3, name: 'Abril' },
+                      { index: 4, name: 'Mayo' },
+                      { index: 5, name: 'Junio' },
+                      { index: 6, name: 'Julio' },
+                      { index: 7, name: 'Agosto' },
+                      { index: 8, name: 'Septiembre' },
+                      { index: 9, name: 'Octubre' },
+                      { index: 10, name: 'Noviembre' },
+                      { index: 11, name: 'Diciembre' },
+                    ].map((month) => (
+                      <button
+                        key={month.index}
+                        onClick={() => {
+                          handleMonthSelect(month.index, month.name);
+                          setShowMonthDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-blue-50 transition-colors ${
+                          selectedMonth === month.name
+                            ? 'bg-blue-100 text-blue-700 font-medium'
+                            : 'text-gray-700'
+                        }`}
+                      >
+                        {month.name}
+                      </button>
+                    ))}
                   </div>
-                )}
-              </div>
+                  
+                  {/* Botón de limpiar */}
+                  {selectedMonth && (
+                    <div className="border-t border-gray-200 p-2">
+                      <button
+                        onClick={() => {
+                          setSelectedMonth('');
+                          setStartDate('');
+                          setEndDate('');
+                          setFilterType('all');
+                          setShowMonthDropdown(false);
+                        }}
+                        className="w-full text-left px-2 py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      >
+                        Limpiar selección
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
-
-          {/* Botón de rango personalizado */}
           <div className="relative">
             <button
               onClick={() => setFilterType(filterType === 'custom' ? 'all' : 'custom')}

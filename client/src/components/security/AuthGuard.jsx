@@ -18,9 +18,6 @@ const AuthGuard = ({ children, fallback = null }) => {
         setIsAuthorized(authData.isAuthorized);
         setCurrentUser(authData.username);
         
-        if (!authData.isAuthorized) {
-          setError(`Usuarios autorizados: ${authData.authorizedUsers.join(', ')}`);
-        }
         
       } catch (err) {
         console.error('Error en verificación de autenticación:', err);
@@ -51,21 +48,21 @@ const AuthGuard = ({ children, fallback = null }) => {
   // Mostrar error de acceso denegado
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center">
         <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full mx-4">
           <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-              <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+              <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Acceso Denegado</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">No tienes permiso</h2>
             <p className="text-gray-600 mb-4">
               El usuario <span className="font-medium">{currentUser || 'Desconocido'}</span> no tiene permisos para acceder a la lista de visitas
             </p>
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-yellow-700">{error}</p>
               </div>
             )}
           </div>

@@ -14,6 +14,7 @@ import SeguridadHome from "./pages/security/Home";
 import VideoSeguridad from "./pages/security/VideoSeguridad";
 import Cuestionario from "./pages/security/Cuestionario";
 import ListaVisita from "./pages/security/ListaVisita";
+import AuthGuard from "./components/security/AuthGuard";
 
 function VisitorOnlyGuard({ children }) {
   const location = useLocation();
@@ -449,14 +450,18 @@ function App() {
             <Route path="/trabajadores/:id" element={<Trab_Detail />} />
             <Route path="/seguridad/video-seguridad" element={<VideoSeguridad />} />
             <Route path="/seguridad/cuestionario" element={<Cuestionario />} />
-            <Route path="/ListaVisita" element={<ListaVisita />} />
             <Route path="/Keyboard" element={<Keyboard />} />
           </Route>
           {/* Rutas sin header/layout principal */}
           <Route path="/cuestionario" element={<Cuestionario />} />
+          <Route path="/ListaVisita" element={
+            <AuthGuard>
+              <ListaVisita />
+            </AuthGuard>
+          } />
 
           <Route
-            path="*"
+            path="*"  
             element={
               <VisitorOnlyGuard>
                 <Navigate to="/home" replace />

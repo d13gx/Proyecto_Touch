@@ -4,9 +4,9 @@
 const AUTHORIZED_USERS = [
   'jmadrid',  // Usuario principal autorizado
   // Agregar aquí otros usuarios autorizados
-  'dreyes',
   'umartinez',
-  'TOTEM CMF'
+  'TOTEM CMF',
+  'dreyes',
   // 'otro_usuario',
 ];
 
@@ -14,7 +14,6 @@ const AUTHORIZED_USERS = [
 const DEVELOPMENT_CONFIG = {
   // En desarrollo, permitir acceso al usuario de prueba
   allowTestUser: true,
-  testUser: 'dreyes',
   
   // Mostrar información adicional de depuración
   showDebugInfo: true,
