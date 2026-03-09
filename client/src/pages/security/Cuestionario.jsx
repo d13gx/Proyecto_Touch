@@ -62,6 +62,25 @@ export default function SurveyApp() {
       if (token) setCurrentToken(token);
 
       if (token) {
+        // Punto 3: Si no hay token en URL pero hay uno guardado, restaurarlo automáticamente
+        if (!tokenFromUrl && savedToken && !cameFromQr) {
+          console.log('🔄 Token no encontrado en URL, pero hay uno guardado. Restaurando...');
+          window.history.replaceState({}, '', `/cuestionario?token=${encodeURIComponent(savedToken)}`);
+          
+          // Validar el token restaurado
+          const validation = await tokenManager.validateToken(savedToken);
+          if (validation.valid) {
+            console.log('✅ Token restaurado válido');
+            setTokenValid(validation);
+            setLoading(false);
+            return; // Salir temprano, no continuar con el flujo normal
+          } else {
+            console.log('⚠️ Token restaurado inválido, limpiando...');
+            sessionStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+            localStorage.removeItem(VISITOR_TOKEN_SESSION_KEY);
+          }
+        }
+
         const surveyForThisToken = surveys.find(s => s.token === token);
         if (surveyForThisToken) {
           console.log('✨ Encuesta encontrada localmente para este token. Mostrando resultados.');
