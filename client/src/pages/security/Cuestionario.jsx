@@ -287,15 +287,15 @@ export default function SurveyApp() {
     const effectiveDebug = debugInfo || storedDebug;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.502-3.242V7.176c0-1.575-1.962-3.242-2.502-3.242H4.938c-1.54 0-2.502 1.667-2.502 3.242v10.582c0 1.575 1.962 3.242 2.502 3.242h13.856c1.54 0 2.502-1.667 2.502-3.242V7.176c0-1.575-1.962-3.242-2.502-3.242z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-red-800 mb-2">
+            <h1 className="text-2xl font-bold text-yellow-800 mb-2">
               {tokenValid?.reason?.toLowerCase().includes('expira') ? 'Tiempo Terminado' : 'Acceso Denegado'}
             </h1>
             <p className="text-gray-600 mb-4">
@@ -307,7 +307,7 @@ export default function SurveyApp() {
             </p>
             <button
               onClick={() => window.location.href = 'https://www.cmf.cl'}
-              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors mt-2"
+              className="w-full bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors mt-2"
             >
               Visita nuestra página
             </button>
