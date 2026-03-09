@@ -233,14 +233,27 @@ app.get('/api/health', (req, res) => {
 app.get('/api/auth/current-user', (req, res) => {
     try {
         // Obtener el nombre de usuario del sistema operativo
-        const username = os.userInfo().username;
+        const userInfo = os.userInfo();
+        const username = userInfo.username;
+        
+        // Logging para depuración
+        console.log('🔍 Depuración de usuario:');
+        console.log('  - os.userInfo():', userInfo);
+        console.log('  - username:', username);
+        console.log('  - process.env.USERNAME:', process.env.USERNAME);
+        console.log('  - process.env.USER:', process.env.USER);
+        
+        // Intentar diferentes formas de obtener el usuario
+        const alternativeUser = process.env.USERNAME || process.env.USER || username;
+        
+        console.log('  - Usuario final a usar:', alternativeUser);
         
         // Obtener configuración y verificar autorización
         const config = getConfig();
-        const hasAccess = isUserAuthorized(username);
+        const hasAccess = isUserAuthorized(alternativeUser);
         
         res.json({
-            username: username,
+            username: alternativeUser,  // Usar el usuario alternativo detectado
             isAuthorized: hasAccess,
             authorizedUsers: config.authorizedUsers,
             isDevelopment: config.isDevelopment,

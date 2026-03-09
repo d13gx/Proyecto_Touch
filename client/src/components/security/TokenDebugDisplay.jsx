@@ -34,7 +34,7 @@ const TokenDebugDisplay = ({ tokenValid, token, loading }) => {
 
   if (tokenValid.reason === 'Acceso directo') {
     return (
-      <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-2 rounded mb-4">
+      <div className="bg-blue-100 acc border-blue-400 text-blue-800 px-4 py-2 rounded mb-4">
         <p className="text-sm font-medium">🔓 Modo desarrollo - Acceso directo</p>
       </div>
     );
