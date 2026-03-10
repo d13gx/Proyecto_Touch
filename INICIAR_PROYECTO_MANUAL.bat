@@ -1,12 +1,19 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title Proyecto Touch - Inicio Manual
+chcp 65001 >nul
+title INICIAR PROYECTO TOUCH - SISTEMA QR TOKEN
 color 0A
 cls
 
 echo ========================================
-echo     PROYECTO TOUCH - INICIO MANUAL
+echo    INICIANDO PROYECTO TOUCH
+echo    SISTEMA QR TOKEN ACTIVO
 echo ========================================
+echo.
+echo [LOG] Inicializando sistema QR Token...
+echo [LOG] Verificando requisitos para escaneo QR
+echo [LOG] Configurando backend para acceso público
+echo [LOG] Preparando frontend para detección QR
 echo.
 echo Este script iniciara automaticamente:
 echo   1. Backend Django (API de Datos)
@@ -81,9 +88,9 @@ echo.
 echo [3/3] Iniciando servidores...
 echo.
  
-:: Iniciar Django (puerto 8000)
-echo [Django] Iniciando servidor Django en puerto 8000...
-start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+:: Iniciar Django (puerto 8000 público)
+echo [Django] Iniciando servidor Django en puerto 8000 (público)...
+start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://totem.cmf.cl:8000 && echo ======================================== && echo. && echo [LOG] Servidor Django iniciado para QR Token System && echo [LOG] Backend listo para recibir peticiones de: && echo [LOG] - Creación de tokens QR && echo [LOG] - Validación de tokens QR && echo [LOG] - Endpoint: /app_touch/api/qr/create/ && echo [LOG] - Endpoint: /app_touch/api/qr/validate/ && echo [LOG] Puerto 8000 abierto para acceso público && echo. && python manage.py runserver 0.0.0.0:8000"
  
 :: Esperar 3 segundos
 timeout /t 3 /nobreak >nul
@@ -100,9 +107,8 @@ if exist "client\backend\server.js" (
 timeout /t 2 /nobreak >nul
  
 :: Iniciar React (puerto 80)
-echo [React] Iniciando aplicacion React en puerto 80...
-if exist "client\package.json" (
-    start "React Frontend" /MIN cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://localhost && echo ======================================== && echo. && npm run dev -- --host"
+echo [React] Iniciando servidor React en puerto 80...
+start "React Frontend" /MIN cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://totem.cmf.cl && echo ======================================== && echo. && echo [LOG] Frontend React iniciado para QR Token System && echo [LOG] Sistema QR listo para escaneo && echo [LOG] URL QR: http://totem.cmf.cl/cuestionario?qr=1 && echo [LOG] Flujo esperado: && echo [LOG] 1. Usuario escanea QR con celular && echo [LOG] 2. Celular accede a: http://totem.cmf.cl/cuestionario?qr=1 && echo [LOG] 3. Frontend detecta ?qr=1 sin token && echo [LOG] 4. Frontend solicita token a backend: http://totem.cmf.cl:8000 && echo [LOG] 5. Backend genera token único && echo [LOG] 6. Frontend valida token y permite acceso && echo. && npm run dev -- --host"
 ) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
@@ -197,15 +203,41 @@ echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
 echo   SERVICIOS ACTIVOS:
-echo   Django API:     http://localhost:8000
+echo   Django API:     http://totem.cmf.cl:8000 (público)
 echo   Node.js API:    http://localhost:3001  
 echo   React App:      http://localhost
 echo.
 echo URL PRINCIPAL (TOTEM):
 echo   %APP_URL%
 echo.
-echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo   Usa directamente: http://totem.cmf.cl
+echo ========================================
+echo        SISTEMA QR TOKEN ACTIVO
+echo ========================================
+echo.
+echo   URL QR PARA ESCANEAR:
+echo   http://totem.cmf.cl/cuestionario?qr=1
+echo.
+echo   FLUJO DE ESCANEO:
+echo   1. Usuario escanea QR con celular
+echo   2. Celular accede a: http://totem.cmf.cl/cuestionario?qr=1
+echo   3. Frontend detecta ?qr=1 sin token
+echo   4. Frontend solicita token a backend: http://totem.cmf.cl:8000
+echo   5. Backend genera token único con fingerprint
+echo   6. Frontend valida token y permite acceso
+echo.
+echo   ENDPOINTS BACKEND:
+echo   - Crear token: POST http://totem.cmf.cl:8000/app_touch/api/qr/create/
+echo   - Validar token: POST http://totem.cmf.cl:8000/app_touch/api/qr/validate/
+echo.
+echo   REQUISITOS:
+echo   - Puerto 8000 abierto en firewall
+echo   - totem.cmf.cl apuntando a IP pública
+echo   - CORS configurado para acceso público
+echo.
+echo   MONITOREO:
+echo   - Ver logs Django: Ventana "Django API Server"
+echo   - Ver logs React: Ventana "React Frontend"
+echo   - Debug en celular: F12 → Console
 echo.
 echo ========================================
 echo.

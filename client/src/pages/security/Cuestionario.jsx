@@ -63,11 +63,31 @@ export default function SurveyApp() {
 
       if (cameFromQr && !tokenFromUrl) {
         console.log('🔄 Acceso desde QR sin token - Generando token automáticamente...');
+        console.log('🌐 Backend URL:', tokenManager.backendUrl);
+        console.log('🌐 Base URL para token:', window.location.origin + '/cuestionario');
+        
+        // Guardar debug info inicial
+        const qrDebugInfo = {
+          href: window.location.href,
+          pathname: window.location.pathname,
+          search: window.location.search,
+          cameFromQr,
+          backendUrl: tokenManager?.backendUrl || null,
+          token: null,
+          stage: 'qr_token_generation_attempt'
+        };
+        setDebugInfo(qrDebugInfo);
+        sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(qrDebugInfo));
+        
         try {
           const baseUrl = window.location.origin + '/cuestionario';
+          console.log('📡 Llamando a getTokenizedUrl...');
           const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
+          console.log('📡 Respuesta getTokenizedUrl:', tokenizedUrl);
+          
           const urlObj = new URL(tokenizedUrl, window.location.origin);
           const newToken = urlObj.searchParams.get('token');
+          console.log('🔑 Token extraído:', newToken);
 
           if (newToken) {
             console.log('✅ Token generado para QR:', newToken);
@@ -77,7 +97,10 @@ export default function SurveyApp() {
             localStorage.setItem(VISITOR_SESSION_KEY, '1');
             localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
 
+            console.log('🔍 Validando token generado...');
             const validation = await tokenManager.validateToken(newToken);
+            console.log('🔍 Resultado validación:', validation);
+            
             if (validation.valid) {
               setTokenValid(validation);
               window.history.replaceState({}, '', tokenizedUrl);
@@ -85,19 +108,53 @@ export default function SurveyApp() {
               return;
             } else {
               console.log('🚫 Token generado inválido:', validation);
+              
+              // Debug detallado para token generado inválido
+              if (validation.debug_info) {
+                console.error('🚫 DETALLES TOKEN INVÁLIDO:', {
+                  token_short: validation.debug_info.token_short,
+                  client_ip: validation.debug_info.client_ip,
+                  stored_fingerprint: validation.debug_info.stored_fingerprint_short,
+                  received_fingerprint: validation.debug_info.received_fingerprint_short,
+                  mismatch_reason: validation.debug_info.mismatch_reason,
+                  timestamp: new Date().toISOString(),
+                  user_agent: navigator.userAgent.substring(0, 100)
+                });
+              }
+              
+              const invalidDebug = { 
+                ...qrDebugInfo, 
+                stage: 'qr_token_validation_failed', 
+                newToken, 
+                validation,
+                debug_details: validation.debug_info || null
+              };
+              setDebugInfo(invalidDebug);
+              sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
               setTokenValid({ valid: false, reason: 'Error generando token QR' });
               setLoading(false);
               return;
             }
           } else {
             console.log('❌ No se pudo generar token para QR');
+            const noTokenDebug = { ...qrDebugInfo, stage: 'qr_token_not_generated', tokenizedUrl };
+            setDebugInfo(noTokenDebug);
+            sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(noTokenDebug));
             setTokenValid({ valid: false, reason: 'No se pudo generar token QR' });
             setLoading(false);
             return;
           }
         } catch (error) {
           console.error('❌ Error generando token QR:', error);
-          setTokenValid({ valid: false, reason: 'Error generando token QR' });
+          console.error('❌ Error completo:', error.message, error.stack);
+          const errorDebug = { 
+            ...qrDebugInfo, 
+            stage: 'qr_token_generation_error', 
+            error: { message: error.message, stack: error.stack }
+          };
+          setDebugInfo(errorDebug);
+          sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(errorDebug));
+          setTokenValid({ valid: false, reason: 'Error generando token QR: ' + error.message });
           setLoading(false);
           return;
         }
@@ -163,8 +220,28 @@ export default function SurveyApp() {
           setTokenValid(validation);
         } else {
           console.log('🚫 Token inválido - acceso denegado:', validation.reason);
+          
+          // Debug detallado para acceso denegado
+          if (validation.debug_info) {
+            console.error('🚫 DETALLES ACCESO DENEGADO:', {
+              token_short: validation.debug_info.token_short,
+              client_ip: validation.debug_info.client_ip,
+              stored_fingerprint: validation.debug_info.stored_fingerprint_short,
+              received_fingerprint: validation.debug_info.received_fingerprint_short,
+              mismatch_reason: validation.debug_info.mismatch_reason,
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent.substring(0, 100)
+            });
+          }
+          
           setTokenValid(validation);
-          const invalidDebug = { ...baseDebug, stage: 'validate_existing_token', token, validation };
+          const invalidDebug = { 
+            ...baseDebug, 
+            stage: 'validate_existing_token', 
+            token, 
+            validation,
+            debug_details: validation.debug_info || null
+          };
           setDebugInfo(invalidDebug);
           sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
           sessionStorage.setItem(VISITOR_SESSION_KEY, 'expired');
@@ -381,8 +458,22 @@ export default function SurveyApp() {
                   ? 'Para volver a contestar el cuestionario tienes que escanear el codigo QR nuevamente'
                   : 'No tienes permiso para acceder al cuestionario.'}
             </p>
+            
+            {/* Debug Information */}
+            {effectiveDebug && (
+              <div className="mt-4 p-3 bg-gray-100 rounded text-left text-xs">
+                <p className="font-bold mb-2">DEBUG INFO:</p>
+                <p><strong>Razón:</strong> {tokenValid.reason}</p>
+                <p><strong>URL:</strong> {effectiveDebug.href}</p>
+                <p><strong>Token:</strong> {effectiveDebug.token || 'No token'}</p>
+                <p><strong>Backend:</strong> {effectiveDebug.backendUrl}</p>
+                <p><strong>Desde QR:</strong> {effectiveDebug.cameFromQr ? 'Sí' : 'No'}</p>
+                {effectiveDebug.stage && <p><strong>Etapa:</strong> {effectiveDebug.stage}</p>}
+                {effectiveDebug.error && <p><strong>Error:</strong> {effectiveDebug.error.message}</p>}
+              </div>
+            )}
             <button
-              onClick={() => window.location.href = 'https://www.cmf.cl'}
+              onClick={() => window.location.href = 'http://www.cmf.cl'}
               className="w-full bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors mt-2"
             >
               Visita nuestra página
