@@ -20,18 +20,21 @@ echo.
 :: Cambiar al directorio principal
 cd /d "%~dp0"
 
-set "IP_172="
-for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /R /C:"IPv4.*172\."') do (
-    set "IP_172=%%A"
-    goto :got_ip_172
-)
-:got_ip_172
-if defined IP_172 set "IP_172=%IP_172: =%"
-if defined IP_172 (
-    set "APP_URL=http://%IP_172%"
-) else (
-    set "APP_URL=http://localhost"
-)
+::set "IP_172="
+::for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /R /C:"IPv4.*172\."') do (
+::    set "IP_172=%%A"
+::    goto :got_ip_172
+::)
+:: :got_ip_172
+::if defined IP_172 set "IP_172=%IP_172: =%"
+::if defined IP_172 (
+::    set "APP_URL=http://%IP_172%"
+::) else (
+::    set "APP_URL=http://localhost"
+::)
+
+
+set "APP_URL=http://totem.cmf.cl"
  
 :: Verificar entorno virtual
 echo [1/3] Verificando entorno virtual...
@@ -202,9 +205,7 @@ echo URL PRINCIPAL (TOTEM):
 echo   %APP_URL%
 echo.
 echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo   1. Ejecuta: ipconfig
-echo   2. Busca tu IP (ej: 192.168.1.X)
-echo   3. Usa: http://[TU-IP]
+echo   Usa directamente: http://totem.cmf.cl
 echo.
 echo ========================================
 echo.
