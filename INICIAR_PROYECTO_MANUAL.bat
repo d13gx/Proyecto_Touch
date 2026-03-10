@@ -28,9 +28,9 @@ for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /R /C:"IPv4.*172\."') do
 :got_ip_172
 if defined IP_172 set "IP_172=%IP_172: =%"
 if defined IP_172 (
-    set "APP_URL=http://%IP_172%:5173"
+    set "APP_URL=http://%IP_172%"
 ) else (
-    set "APP_URL=http://localhost:5173"
+    set "APP_URL=http://localhost"
 )
  
 :: Verificar entorno virtual
@@ -96,10 +96,10 @@ if exist "client\backend\server.js" (
 :: Esperar 2 segundos
 timeout /t 2 /nobreak >nul
  
-:: Iniciar React (puerto 5173)
-echo [React] Iniciando aplicacion React en puerto 5173...
+:: Iniciar React (puerto 80)
+echo [React] Iniciando aplicacion React en puerto 80...
 if exist "client\package.json" (
-    start "React Frontend" cmd /c "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
+    start "React Frontend" cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://localhost && echo ======================================== && echo. && npm run dev -- --host"
 ) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
@@ -222,7 +222,7 @@ echo.
 echo   SERVICIOS ACTIVOS:
 echo   Django API:     http://localhost:8000
 echo   Node.js API:    http://localhost:3001  
-echo   React App:      http://localhost:5173
+echo   React App:      http://localhost
 echo.
 echo URL PRINCIPAL (TOTEM):
 echo   %APP_URL%
@@ -230,7 +230,7 @@ echo.
 echo ACCESO DESDE OTROS DISPOSITIVOS:
 echo   1. Ejecuta: ipconfig
 echo   2. Busca tu IP (ej: 192.168.1.X)
-echo   3. Usa: http://[TU-IP]:5173
+echo   3. Usa: http://[TU-IP]
 echo.
 echo ========================================
 echo.

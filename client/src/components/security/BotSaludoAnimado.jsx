@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./BotSaludoAnimado.css";
-import helpImage from "../../assets/help.jpg";
+import helpImage from "../../assets/help.png";
 
 function BotSaludoAnimado() {
   const [visible, setVisible] = useState(false);
@@ -48,7 +48,7 @@ function BotSaludoAnimado() {
         <img 
           src={helpImage} 
           alt="Ayuda" 
-          className="w-50 h-50 rounded-full object-cover"
+          className="w-40 h-40 object-cover"
         />
         <div>
           {frasesSeguridadCMF[fraseActual]}
