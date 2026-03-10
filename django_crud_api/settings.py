@@ -62,6 +62,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://172.18.8.94:5173', # totem
     'http://172.18.7.150:5173',
     'http://172.19.7.96:5173'  # diego
+    "http://totem.cmf.cl",
 ]
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False

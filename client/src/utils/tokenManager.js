@@ -119,6 +119,7 @@ class TokenManager {
     console.log('🔒 Device fingerprint:', deviceFingerprint.substring(0, 8) + '...');
 
     try {
+      console.log('📡 Enviando request a backend...');
       const response = await fetch(backendUrl, {
         method: 'POST',
         headers: {
@@ -129,6 +130,7 @@ class TokenManager {
 
       console.log('📡 Response status:', response.status);
       console.log('📡 Response ok:', response.ok);
+      console.log('📡 Response headers:', [...response.headers.entries()]);
 
       const result = await response.json();
       console.log('📝 Resultado validación backend:', result);
@@ -149,6 +151,7 @@ class TokenManager {
     } catch (error) {
       console.error('❌ Error validando token con backend:', error);
       console.error('❌ Error completo:', error.message);
+      console.error('❌ Error stack:', error.stack);
       return {
         valid: false,
         reason: 'Error de conexión con servidor: ' + error.message
@@ -245,6 +248,7 @@ class TokenManager {
     const deviceFingerprint = getBrowserMetrics();
 
     try {
+      console.log('📡 Enviando request para crear token...');
       const response = await fetch(`${this.backendUrl}/app_touch/api/qr/create/`, {
         method: 'POST',
         headers: {
@@ -257,7 +261,12 @@ class TokenManager {
         })
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+      console.log('📡 Response headers:', [...response.headers.entries()]);
+
       const result = await response.json();
+      console.log('📝 Resultado creación token:', result);
 
       if (response.ok && result.token) {
         console.log('✅ Token QR creado en backend:', result.token);
@@ -273,6 +282,8 @@ class TokenManager {
       }
     } catch (error) {
       console.error('❌ Error de conexión creando token QR:', error);
+      console.error('❌ Error completo:', error.message);
+      console.error('❌ Error stack:', error.stack);
       // Fallback: crear token local si no hay conexión
       const token = this.createUUID();
       return `${baseUrl}?token=${encodeURIComponent(token)}`;
