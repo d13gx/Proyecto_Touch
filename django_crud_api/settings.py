@@ -23,11 +23,12 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://172.18.7.150:5173",
-    "http://172.18.8.94:5173", # totem
-    "http://172.19.7.96:5173", # diego
+    "http://totem.cmf.cl:80",
+    "http://localhost:80",
+    "http://127.0.0.1:80",
+    "http://172.18.7.150:80",
+    "http://172.18.8.94:80", # totem
+    "http://172.19.7.96:80", # diego
 ]
 
 # Headers y Métodos permitidos para CORS
@@ -56,11 +57,12 @@ CORS_ALLOW_METHODS = [
 
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://172.18.8.94:5173', # totem
-    'http://172.18.7.150:5173',
-    'http://172.19.7.96:5173'  # diego
+    "http://totem.cmf.cl:80",
+    'http://localhost:80',
+    'http://127.0.0.1:80',
+    'http://172.18.8.94:80', # totem
+    'http://172.18.7.150:80',
+    'http://172.19.7.96:80'  # diego
 ]
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False
