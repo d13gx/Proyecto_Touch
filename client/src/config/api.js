@@ -6,7 +6,8 @@ const API_CONFIG = {
   },
   // Para producción (cuando se accede desde otra PC)
   production: {
-    baseURL: 'http://172.19.7.96:3001' // Reemplaza con tu IP real
+    baseURL: 'http://172.18.8.94:3001' // IP TOTEM
+    // baseURL: 'http://172.19.7.96:3001' // IP DIEGO
   }
 };
 
