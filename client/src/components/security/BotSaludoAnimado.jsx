@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./BotSaludoAnimado.css";
+import helpImage from "../../assets/help.jpg";
 
 function BotSaludoAnimado() {
   const [visible, setVisible] = useState(false);
@@ -43,9 +44,15 @@ function BotSaludoAnimado() {
 
   return (
     <div className={`bot-saludo-avatar fade ${visible ? "visible" : "hidden"}`}>
-
-      <div>
-        {frasesSeguridadCMF[fraseActual]}
+      <div className="flex items-center gap-3">
+        <img 
+          src={helpImage} 
+          alt="Ayuda" 
+          className="w-8 h-8 rounded-full object-cover"
+        />
+        <div>
+          {frasesSeguridadCMF[fraseActual]}
+        </div>
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
-import Carousel from '../../components/security/Carousel';
+import Carousel from '../components/security/Carousel';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUsers, FaMapMarkedAlt, FaBuilding, FaHeadset, FaArrowRight } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
-import carrusel1 from '../../assets/carrusel/Brigada2.jpeg';
-import carrusel2 from '../../assets/carrusel/Persona.png';
-import carrusel3 from '../../assets/carrusel/epp.jpg';
-import carrusel4 from '../../assets/carrusel/brigada6.jpg';
-import logo from "../../assets/logocmfblanco.jpg";
-import VideoButton from '../../components/security/VideoButton';
-import PersonalModal from '../../components/common/PersonalModal';
+import carrusel1 from '../assets/carrusel/Brigada2.jpeg';
+import carrusel2 from '../assets/carrusel/Persona.png';
+import carrusel3 from '../assets/carrusel/epp.jpg';
+import carrusel4 from '../assets/carrusel/brigada6.jpg';
+import logo from '../assets/logocmfblanco.jpg';
+import VideoButton from '../components/security/VideoButton';
+import PersonalModal from '../components/common/PersonalModal';
 
 function Home() {
   const carouselImages = [
@@ -30,18 +30,18 @@ function Home() {
     'Willkommen',     // Deutsch
     'Benvenuti',      // Italiano
     'Mari',           // Mapudungun (Mapuche)
-    'Добро пожаловать', // Русский
-    '欢迎',           // 中文 (Chino)
-    'ようこそ',       // 日本語 (Japonés)
-    '환영합니다',     // 한국어 (Coreano)
-    'مرحباً',         // العربية (Árabe)
-    'Hoş geldiniz',   // Türkçe (Turco)
-    'Välkommen',      // Svenska (Suecso)
-    'Welkom',         // Nederlands (Holandés)
-    'Fáilte',         // Gaeilge (Irlandés)
-    'ยินดีต้อนรับ',   // ภาษาไทย (Tailandés)
-    'Chào mừng',      // Tiếng Việt (Vietnamita)
-    'Vitajte',        // Slovenčina (Eslovaco)
+    //'Добро пожаловать', // Русский
+    //'欢迎',           // 中文 (Chino)
+    //'ようこそ',       // 日本語 (Japonés)
+    //'환영합니다',     // 한국어 (Coreano)
+    //'مرحباً',         // العربية (Árabe)
+    //'Hoş geldiniz',   // Türkçe (Turco)
+    //'Välkommen',      // Svenska (Suecso)
+    //'Welkom',         // Nederlands (Holandés)
+    //'Fáilte',         // Gaeilge (Irlandés)
+    //'ยินดีต้อนรับ',   // ภาษาไทย (Tailandés)
+    //'Chào mừng',      // Tiếng Việt (Vietnamita)
+    //'Vitajte',        // Slovenčina (Eslovaco)
   ];
 
   const [currentMessage, setCurrentMessage] = useState(0);
