@@ -88,7 +88,7 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
           <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="max-w-2xl mx-auto">
               <HelpTips
-                title="Información de autenticación LDAP:"
+                title="Información de autenticación:"
                 tips={[
                   "• Usa tu usuario corporativo (sin @cmf.cl)",
                   "• Tu contraseña es la misma que usas para Outlook",
