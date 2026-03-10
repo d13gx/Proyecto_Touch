@@ -63,11 +63,18 @@ export default function SurveyApp() {
 
       if (cameFromQr && !tokenFromUrl) {
         console.log('🔄 Acceso desde QR sin token - Generando token automáticamente...');
+        console.log('🌐 Backend URL:', tokenManager.backendUrl);
+        console.log('🌐 Base URL para token:', window.location.origin + '/cuestionario');
+        
         try {
           const baseUrl = window.location.origin + '/cuestionario';
+          console.log('📡 Llamando a getTokenizedUrl...');
           const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
+          console.log('📡 Respuesta getTokenizedUrl:', tokenizedUrl);
+          
           const urlObj = new URL(tokenizedUrl, window.location.origin);
           const newToken = urlObj.searchParams.get('token');
+          console.log('🔑 Token extraído:', newToken);
 
           if (newToken) {
             console.log('✅ Token generado para QR:', newToken);
@@ -77,7 +84,10 @@ export default function SurveyApp() {
             localStorage.setItem(VISITOR_SESSION_KEY, '1');
             localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
 
+            console.log('🔍 Validando token generado...');
             const validation = await tokenManager.validateToken(newToken);
+            console.log('🔍 Resultado validación:', validation);
+            
             if (validation.valid) {
               setTokenValid(validation);
               window.history.replaceState({}, '', tokenizedUrl);
@@ -97,7 +107,8 @@ export default function SurveyApp() {
           }
         } catch (error) {
           console.error('❌ Error generando token QR:', error);
-          setTokenValid({ valid: false, reason: 'Error generando token QR' });
+          console.error('❌ Error completo:', error.message, error.stack);
+          setTokenValid({ valid: false, reason: 'Error generando token QR: ' + error.message });
           setLoading(false);
           return;
         }
@@ -396,7 +407,7 @@ export default function SurveyApp() {
               </div>
             )}
             <button
-              onClick={() => window.location.href = 'https://www.cmf.cl'}
+              onClick={() => window.location.href = 'http://www.cmf.cl'}
               className="w-full bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors mt-2"
             >
               Visita nuestra página
