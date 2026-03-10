@@ -381,6 +381,20 @@ export default function SurveyApp() {
                   ? 'Para volver a contestar el cuestionario tienes que escanear el codigo QR nuevamente'
                   : 'No tienes permiso para acceder al cuestionario.'}
             </p>
+            
+            {/* Debug Information */}
+            {effectiveDebug && (
+              <div className="mt-4 p-3 bg-gray-100 rounded text-left text-xs">
+                <p className="font-bold mb-2">DEBUG INFO:</p>
+                <p><strong>Razón:</strong> {tokenValid.reason}</p>
+                <p><strong>URL:</strong> {effectiveDebug.href}</p>
+                <p><strong>Token:</strong> {effectiveDebug.token || 'No token'}</p>
+                <p><strong>Backend:</strong> {effectiveDebug.backendUrl}</p>
+                <p><strong>Desde QR:</strong> {effectiveDebug.cameFromQr ? 'Sí' : 'No'}</p>
+                {effectiveDebug.stage && <p><strong>Etapa:</strong> {effectiveDebug.stage}</p>}
+                {effectiveDebug.error && <p><strong>Error:</strong> {effectiveDebug.error.message}</p>}
+              </div>
+            )}
             <button
               onClick={() => window.location.href = 'https://www.cmf.cl'}
               className="w-full bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors mt-2"
