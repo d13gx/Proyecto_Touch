@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBuilding, FaUsers, FaList, FaChartBar, FaArrowLeft, FaArrowRight, FaUserTie, FaSitemap, FaHome, FaLightbulb, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import api, { API_BASE_URL } from '../../config';
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
+import TimeoutRedirect from "../../components/common/TimeoutRedirect"; 
+import './Depto_List.css';
 
 const Depto_List = () => {
   const [vistaActiva, setVistaActiva] = useState(0);
