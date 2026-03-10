@@ -16,19 +16,26 @@ DEBUG = True
 # CONFIGURACIÓN DE SEGURIDAD (CORS, CSRF, SESIONES)
 # =============================================================================
 
-# ALLOWED_HOSTS - Permitir todos para desarrollo
+# ALLOWED_HOSTS - Permitir todos para producción
 ALLOWED_HOSTS = ['*']
 
-# CORS settings
+# CORS settings - Permitir acceso desde cualquier origen para producción
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://172.18.7.150:5173",
-    "http://172.18.8.94:5173", # totem
-    "http://172.19.7.96:5173", # diego
+    "http://localhost:80",
+    "http://127.0.0.1:80",
+    "http://172.18.7.150:80",
+    "http://172.18.8.94:80", # totem
+    "http://172.19.7.96:80",  # diego
     "http://totem.cmf.cl", # dominio de producción
+    # Backend público - permitir acceso desde cualquier lugar
+    "http://totem.cmf.cl:8000",
+    "https://totem.cmf.cl:8000",
+    # Permitir cualquier origen en la misma red para acceso desde celulares
+    "http://172.18.8.94",
+    "http://172.18.7.150", 
+    "http://172.19.7.96",
 ]
 
 # Headers y Métodos permitidos para CORS
@@ -55,14 +62,21 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# CSRF settings
+# CSRF settings - Permitir acceso desde cualquier origen para producción
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://172.18.8.94:5173', # totem
-    'http://172.18.7.150:5173',
-    'http://172.19.7.96:5173'  # diego
+    'http://localhost:80',
+    'http://127.0.0.1:80',
+    'http://172.18.8.94:80', # totem
+    'http://172.18.7.150:80',
+    'http://172.19.7.96:80',  # diego
     "http://totem.cmf.cl",
+    # Backend público - permitir acceso desde cualquier lugar
+    "http://totem.cmf.cl:8000",
+    "https://totem.cmf.cl:8000",
+    # Permitir acceso desde celulares en la misma red
+    "http://172.18.8.94",
+    "http://172.18.7.150", 
+    "http://172.19.7.96",
 ]
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False

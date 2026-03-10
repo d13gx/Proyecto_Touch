@@ -33,13 +33,64 @@ class TokenManager {
     this.STORAGE_KEY = 'qr_tokens';
     this.TOKEN_EXPIRY_MINUTES = 3; // Tokens expiran en 3 minutos
 
-    // Siempre usar el backend local para desarrollo/producción
-    this.backendUrl = 'http://localhost:8000';
+    // Detectar si estamos en localhost o en red, y configurar backend apropiadamente
+    this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (this.isLocalhost) {
+      // Si estamos en localhost, usar backend local
+      this.backendUrl = 'http://localhost:8000';
+    } else {
+      // Si estamos en un dominio externo, intentar backend público
+      // Primero intentar con el dominio, luego con IPs conocidas
+      this.backendUrl = this.detectBackendUrl();
+    }
 
     console.log('🌐 Configuración TokenManager:', {
       hostname: window.location.hostname,
-      backendUrl: this.backendUrl
+      backendUrl: this.backendUrl,
+      isLocalhost: this.isLocalhost
     });
+  }
+
+  // Detectar automáticamente la URL del backend (dominio o IP)
+  detectBackendUrl() {
+    // Lista de URLs posibles para el backend, en orden de preferencia
+    const backendUrls = [
+      'http://totem.cmf.cl:8000',  // Dominio público (requiere DNS)
+      'http://172.18.8.94:8000',   // IP known totem
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000',   // diego
+      // Usar el mismo hostname del frontend pero con puerto 8000
+      `http://${window.location.hostname}:8000`
+    ];
+
+    console.log('🔍 Buscando backend, intentando en orden:', backendUrls);
+    
+    // Devolver la primera opción (el navegador probará conectividad)
+    return backendUrls[0];
+  }
+
+  // Detectar automáticamente la URL del backend del tótem (método antiguo)
+  detectTotemBackendUrl() {
+    // Lista de IPs conocidas donde podría estar corriendo el backend
+    const knownTotemIPs = [
+      'http://172.18.8.94:8000', // totem
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000', // diego
+      'http://192.168.1.100:8000',
+      'http://192.168.0.100:8000',
+      'http://10.0.0.100:8000'
+    ];
+
+    // Primero intentar usar el mismo hostname pero con puerto 8000
+    const currentHost = window.location.hostname;
+    const sameHostBackend = `http://${currentHost}:8000`;
+    knownTotemIPs.unshift(sameHostBackend);
+
+    console.log('🔍 Buscando backend del tótem, intentando:', knownTotemIPs);
+    
+    // Devolver la primera opción (el navegador probará conectividad)
+    return knownTotemIPs[0];
   }
 
   // Generar un token único para el dispositivo

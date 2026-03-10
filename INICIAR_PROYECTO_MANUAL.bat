@@ -81,9 +81,9 @@ echo.
 echo [3/3] Iniciando servidores...
 echo.
  
-:: Iniciar Django (puerto 8000)
-echo [Django] Iniciando servidor Django en puerto 8000...
-start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+:: Iniciar Django (puerto 8000 público)
+echo [Django] Iniciando servidor Django en puerto 8000 (público)...
+start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://totem.cmf.cl:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
  
 :: Esperar 3 segundos
 timeout /t 3 /nobreak >nul
@@ -197,7 +197,7 @@ echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
 echo   SERVICIOS ACTIVOS:
-echo   Django API:     http://localhost:8000
+echo   Django API:     http://totem.cmf.cl:8000 (público)
 echo   Node.js API:    http://localhost:3001  
 echo   React App:      http://localhost
 echo.
