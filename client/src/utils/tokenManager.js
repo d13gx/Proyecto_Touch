@@ -56,10 +56,11 @@ class TokenManager {
   detectBackendUrl() {
     // Lista de URLs posibles para el backend, en orden de preferencia
     const backendUrls = [
-      'http://totem.cmf.cl:8000',  // Dominio público (requiere DNS)
-      'http://172.18.8.94:8000',   // IP known totem
+      'http://totem.cmf.cl/app_touch',  // Dominio público con proxy
+      'http://totem.cmf.cl:8000',      // Dominio público directo
+      'http://172.18.8.94:8000',       // IP known totem
       'http://172.18.7.150:8000',
-      'http://172.19.7.96:8000',   // diego
+      'http://172.19.7.96:8000',       // diego
       // Usar el mismo hostname del frontend pero con puerto 8000
       `http://${window.location.hostname}:8000`
     ];
@@ -165,6 +166,7 @@ class TokenManager {
     
     // Probar múltiples URLs de backend en orden de preferencia
     const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
       'http://totem.cmf.cl:8000',
       'http://172.18.8.94:8000',
       'http://172.18.7.150:8000',
@@ -253,6 +255,7 @@ class TokenManager {
 
     // Probar múltiples URLs de backend en orden de preferencia
     const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
       'http://totem.cmf.cl:8000',
       'http://172.18.8.94:8000',
       'http://172.18.7.150:8000',
@@ -351,6 +354,7 @@ class TokenManager {
 
     // Probar múltiples URLs de backend en orden de preferencia
     const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
       'http://totem.cmf.cl:8000',
       'http://172.18.8.94:8000',
       'http://172.18.7.150:8000',
