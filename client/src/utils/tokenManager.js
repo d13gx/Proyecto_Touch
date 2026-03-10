@@ -33,14 +33,10 @@ class TokenManager {
     this.STORAGE_KEY = 'qr_tokens';
     this.TOKEN_EXPIRY_MINUTES = 3; // Tokens expiran en 3 minutos
 
-    // Detectar si estamos en localhost o en red
-    this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    this.backendUrl = this.isLocalhost
-      ? 'http://localhost:8000'
-      : `http://${window.location.hostname}:8000`;
+    // Siempre usar el backend local para desarrollo/producción
+    this.backendUrl = 'http://localhost:8000';
 
     console.log('🌐 Configuración TokenManager:', {
-      isLocalhost: this.isLocalhost,
       hostname: window.location.hostname,
       backendUrl: this.backendUrl
     });
