@@ -108,7 +108,27 @@ export default function SurveyApp() {
               return;
             } else {
               console.log('🚫 Token generado inválido:', validation);
-              const invalidDebug = { ...qrDebugInfo, stage: 'qr_token_validation_failed', newToken, validation };
+              
+              // Debug detallado para token generado inválido
+              if (validation.debug_info) {
+                console.error('🚫 DETALLES TOKEN INVÁLIDO:', {
+                  token_short: validation.debug_info.token_short,
+                  client_ip: validation.debug_info.client_ip,
+                  stored_fingerprint: validation.debug_info.stored_fingerprint_short,
+                  received_fingerprint: validation.debug_info.received_fingerprint_short,
+                  mismatch_reason: validation.debug_info.mismatch_reason,
+                  timestamp: new Date().toISOString(),
+                  user_agent: navigator.userAgent.substring(0, 100)
+                });
+              }
+              
+              const invalidDebug = { 
+                ...qrDebugInfo, 
+                stage: 'qr_token_validation_failed', 
+                newToken, 
+                validation,
+                debug_details: validation.debug_info || null
+              };
               setDebugInfo(invalidDebug);
               sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
               setTokenValid({ valid: false, reason: 'Error generando token QR' });
@@ -200,8 +220,28 @@ export default function SurveyApp() {
           setTokenValid(validation);
         } else {
           console.log('🚫 Token inválido - acceso denegado:', validation.reason);
+          
+          // Debug detallado para acceso denegado
+          if (validation.debug_info) {
+            console.error('🚫 DETALLES ACCESO DENEGADO:', {
+              token_short: validation.debug_info.token_short,
+              client_ip: validation.debug_info.client_ip,
+              stored_fingerprint: validation.debug_info.stored_fingerprint_short,
+              received_fingerprint: validation.debug_info.received_fingerprint_short,
+              mismatch_reason: validation.debug_info.mismatch_reason,
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent.substring(0, 100)
+            });
+          }
+          
           setTokenValid(validation);
-          const invalidDebug = { ...baseDebug, stage: 'validate_existing_token', token, validation };
+          const invalidDebug = { 
+            ...baseDebug, 
+            stage: 'validate_existing_token', 
+            token, 
+            validation,
+            debug_details: validation.debug_info || null
+          };
           setDebugInfo(invalidDebug);
           sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
           sessionStorage.setItem(VISITOR_SESSION_KEY, 'expired');

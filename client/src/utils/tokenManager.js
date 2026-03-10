@@ -209,9 +209,24 @@ class TokenManager {
             };
           } else {
             console.log('❌ Token inválido con backend:', backendUrl, result.reason);
+            
+            // Debug detallado para acceso denegado
+            if (result.debug_info) {
+              console.error('🚫 DEBUG ACCESO DENEGADO:', {
+                backend: backendUrl,
+                token_short: result.debug_info.token_short,
+                client_ip: result.debug_info.client_ip,
+                stored_fingerprint: result.debug_info.stored_fingerprint_short,
+                received_fingerprint: result.debug_info.received_fingerprint_short,
+                mismatch_reason: result.debug_info.mismatch_reason,
+                timestamp: new Date().toISOString()
+              });
+            }
+            
             return {
               valid: false,
-              reason: result.reason || 'Token inválido'
+              reason: result.reason || 'Token inválido',
+              debug_info: result.debug_info || null
             };
           }
         } else {

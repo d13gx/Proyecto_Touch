@@ -2339,33 +2339,76 @@ def validate_qr_token(request):
             # El campo device_fingerprint en el modelo QRToken actúa como
             # "propietario" del token. Si está vacío, el dispositivo actual
             # lo reclama. Si ya tiene valor, debe coincidir.
+            
+            # Debug detallado del fingerprint
+            client_info = {
+                'ip': QRToken.get_client_ip(request),
+                'user_agent': request.META.get('HTTP_USER_AGENT', '')[:100],
+                'device_fingerprint_provided': bool(device_fingerprint),
+                'device_fingerprint_length': len(device_fingerprint) if device_fingerprint else 0
+            }
+            
+            logger.info(f"🔍 DEBUG ACCESS - Token: {token[:8]}... | "
+                       f"IP: {client_info['ip']} | "
+                       f"UA: {client_info['user_agent'][:50]}... | "
+                       f"Fingerprint: {'✓' if device_fingerprint else '✗'} ({len(device_fingerprint) if device_fingerprint else 0})")
+            
             if device_fingerprint:
                 if qr_token.device_fingerprint:
                     # Token ya reclamado — verificar que sea el mismo dispositivo
                     if qr_token.device_fingerprint != device_fingerprint:
                         reason = 'Acceso denegado: este enlace pertenece a otro dispositivo'
+                        
+                        # Debug detallado del acceso denegado
                         logger.warning(
-                            f"� Fingerprint mismatch token={token[:8]}... "
-                            f"stored={qr_token.device_fingerprint[:8]}... "
-                            f"received={device_fingerprint[:8]}..."
+                            f"🚫 ACCESS DENIED - Fingerprint mismatch\n"
+                            f"├─ Token: {token[:8]}...\n"
+                            f"├─ Stored FP: {qr_token.device_fingerprint[:16]}... (len:{len(qr_token.device_fingerprint)})\n"
+                            f"├─ Received FP: {device_fingerprint[:16]}... (len:{len(device_fingerprint)})\n"
+                            f"├─ Client IP: {client_info['ip']}\n"
+                            f"├─ User Agent: {client_info['user_agent']}\n"
+                            f"├─ Token Created: {qr_token.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"├─ Token Expires: {qr_token.expires_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"├─ Token Used: {qr_token.used}\n"
+                            f"└─ FP Assigned: {qr_token.device_fingerprint[:16]}... at {qr_token.used_at.strftime('%Y-%m-%d %H:%M:%S') if qr_token.used_at else 'Never'}"
                         )
+                        
                         cache_key = f"qr_token_validation_{token}_{device_fingerprint}"
                         _safe_cache_set(cache_key, {
                             'valid': False,
-                            'reason': reason
+                            'reason': reason,
+                            'debug_info': {
+                                'token_short': token[:8],
+                                'client_ip': client_info['ip'],
+                                'stored_fingerprint_short': qr_token.device_fingerprint[:16],
+                                'received_fingerprint_short': device_fingerprint[:16],
+                                'mismatch_reason': 'device_fingerprint_different'
+                            }
                         }, 120)
+                        
                         return Response({
                             'valid': False,
-                            'reason': reason
+                            'reason': reason,
+                            'debug_info': {
+                                'token_short': token[:8],
+                                'client_ip': client_info['ip'],
+                                'stored_fingerprint_short': qr_token.device_fingerprint[:16],
+                                'received_fingerprint_short': device_fingerprint[:16],
+                                'mismatch_reason': 'device_fingerprint_different'
+                            }
                         }, status=403)
-                    logger.info(f"✅ Fingerprint verificado para token: {token[:8]}...")
+                    
+                    logger.info(f"✅ Fingerprint verificado para token: {token[:8]}... | Dispositivo coincide")
                 else:
                     # Primera validación: ligar este token al dispositivo actual
                     qr_token.device_fingerprint = device_fingerprint
                     qr_token.save(update_fields=['device_fingerprint'])
                     logger.info(
-                        f"🔒 Token {token[:8]}... ligado a dispositivo: {device_fingerprint[:8]}..."
+                        f"🔒 Token {token[:8]}... ligado a dispositivo: {device_fingerprint[:16]}... | "
+                        f"IP: {client_info['ip']} | FP Length: {len(device_fingerprint)}"
                     )
+            else:
+                logger.warning(f"⚠️ ACCESS WARNING - No fingerprint provided for token: {token[:8]}... | IP: {client_info['ip']}")
 
             logger.info(f"✅ Token válido: {token[:8]}...")
 
