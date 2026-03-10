@@ -1,11 +1,21 @@
 // Configuración de usuarios autorizados para el Panel Administrativo
 
-// Usuarios autorizados para acceder al panel administrativo
+// ⚠️ IMPORTANTE: Solo estos usuarios pueden acceder a /ListaVisita
+// Tanto para autenticación local (Windows) como remota (LDAP/Credenciales)
 const AUTHORIZED_USERS = [
   'jmadrid',  // Usuario principal autorizado
-  // Agregar aquí otros usuarios autorizados
-  'umartinez',
+  'umartinez', // Usuario secundario autorizado
+  'dreyes',
+  'rtorres'
+  // Agregar aquí otros usuarios autorizados para /ListaVisita
   // 'otro_usuario',
+];
+
+// Dispositivos autorizados para acceso automático (IP/hostname)
+const AUTHORIZED_DEVICES = [
+  'totem.cmf.cl',
+  // Agregar aquí IPs o hostnames de dispositivos autorizados
+  'DESKTOP-JMADRID', // Ejemplo: hostname de PC específica
 ];
 
 // Configuración de desarrollo
@@ -54,10 +64,33 @@ const isUserAuthorized = (username) => {
   return false;
 };
 
+// Verificar si un dispositivo está autorizado (acceso automático)
+const isDeviceAuthorized = (clientInfo) => {
+  const { ip, hostname, userAgent } = clientInfo;
+  
+  // Verificar IP o hostname
+  if (AUTHORIZED_DEVICES.includes(ip) || AUTHORIZED_DEVICES.includes(hostname)) {
+    return true;
+  }
+  
+  // Verificar si contiene patrones conocidos
+  const devicePatterns = [
+    'DESKTOP-JMADRID',
+    'NOTEBOOK-UMARTINEZ',
+    // Agregar más patrones según sea necesario
+  ];
+  
+  return devicePatterns.some(pattern => 
+    hostname.includes(pattern) || userAgent.includes(pattern)
+  );
+};
+
 module.exports = {
   getConfig,
   isUserAuthorized,
+  isDeviceAuthorized,
   AUTHORIZED_USERS,
+  AUTHORIZED_DEVICES,
   DEVELOPMENT_CONFIG,
   PRODUCTION_CONFIG,
 };

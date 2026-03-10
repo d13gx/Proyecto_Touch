@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import TouchKeyboard from "../../components/common/Keyboard";
 import { FaSearch, FaUser, FaBuilding, FaBriefcase, FaKeyboard, FaTimes, FaUsers, FaArrowLeft, FaArrowRight, FaLightbulb } from "react-icons/fa";
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; //
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect";
 import api, { API_BASE_URL } from '../../config';
 
 export function Trab_List() {
@@ -332,8 +332,7 @@ export function Trab_List() {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-      {/* 👇 AGREGAR COMPONENTE */}
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+      <ModuleTimeoutRedirect timeout={60000} />
       <div className="max-w-7xl mx-auto">
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden mb-6">

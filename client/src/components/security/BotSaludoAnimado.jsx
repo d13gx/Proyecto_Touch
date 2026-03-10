@@ -48,7 +48,7 @@ function BotSaludoAnimado() {
         <img 
           src={helpImage} 
           alt="Ayuda" 
-          className="w-8 h-8 rounded-full object-cover"
+          className="w-50 h-50 rounded-full object-cover"
         />
         <div>
           {frasesSeguridadCMF[fraseActual]}

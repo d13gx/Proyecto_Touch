@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FaClock, FaPhone, FaMapMarkerAlt, FaInfoCircle } from "react-icons/fa";
 import './info_list.css'; // Ajusta la ruta según tu estructur
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; //
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect";
 
 export function Info_List() {
   const navigate = useNavigate();
@@ -13,8 +13,7 @@ export function Info_List() {
 
     return (
       <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 overflow-hidden flex flex-col h-full min-h-[700px] group">
-        {/* 👇 AGREGAR COMPONENTE */}
-        <TimeoutRedirect timeout={60000} redirectTo="/" />
+        <ModuleTimeoutRedirect timeout={60000} />
         <div className="p-4 sm:p-5 flex flex-col h-full">
           {/* Header con icono y título */}
           <div className="flex items-center gap-4 mb-6">

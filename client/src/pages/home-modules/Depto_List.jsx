@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBuilding, FaUsers, FaList, FaChartBar, FaArrowLeft, FaArrowRight, FaUserTie, FaSitemap, FaHome, FaLightbulb, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import api, { API_BASE_URL } from '../../config';
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; 
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect";
 import './Depto_List.css';
 
 const Depto_List = () => {
@@ -261,8 +261,6 @@ const Depto_List = () => {
 
       return (
         <div className="bg-white rounded-xl border-2 border-gray-200 p-4 transition-all duration-300 hover:shadow-lg hover:border-blue-300 group">
-          {/* 👇 AGREGAR COMPONENTE */}
-          <TimeoutRedirect timeout={60000} redirectTo="/" />
           {/* Header compacto */}
           <div className="flex items-start justify-between mb-3">
             <div
@@ -658,11 +656,10 @@ const Depto_List = () => {
     );
   };
 
-  // 🔄 COMPONENTE PRINCIPAL
+  // COMPONENTE PRINCIPAL
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-      {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+      <ModuleTimeoutRedirect timeout={60000} />
       <div className="max-w-7xl mx-auto">
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden mb-6 sm:mb-8">

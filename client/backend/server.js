@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { connectDB } = require('./db.js');
 const os = require('os');
-const { isUserAuthorized, getConfig } = require('./config/auth');
+const { isUserAuthorized, getConfig, isDeviceAuthorized } = require('./config/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -229,6 +229,182 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Endpoint para detección automática de dispositivos
+app.post('/api/auth/detect-device', (req, res) => {
+    try {
+        const clientInfo = {
+            ip: req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'],
+            hostname: req.headers['host'] || 'unknown',
+            userAgent: req.headers['user-agent'] || 'unknown',
+            referer: req.headers.referer || 'unknown'
+        };
+        
+        console.log('🔍 Detectando dispositivo:', clientInfo);
+        
+        // Extraer hostname del userAgent si es posible
+        let detectedHostname = 'unknown';
+        if (clientInfo.userAgent) {
+            const windowsMatch = clientInfo.userAgent.match(/Windows NT.*?([A-Z0-9-]+)/);
+            if (windowsMatch) {
+                detectedHostname = windowsMatch[1];
+            }
+        }
+        
+        const deviceInfo = {
+            ...clientInfo,
+            detectedHostname,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Verificar si el dispositivo está autorizado
+        const authorized = isDeviceAuthorized(deviceInfo);
+        
+        res.json({
+            success: true,
+            authorized,
+            deviceInfo,
+            message: authorized ? 'Dispositivo autorizado' : 'Dispositivo no reconocido',
+            requiresLogin: !authorized
+        });
+        
+    } catch (error) {
+        console.error('Error detectando dispositivo:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Error detectando dispositivo', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint para login LDAP (comunicación con Django)
+app.post('/api/auth/ldap-login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Usuario y contraseña son requeridos' 
+            });
+        }
+
+        // Comunicarse con el backend Django para autenticación LDAP
+        const djangoResponse = await fetch('http://localhost:8000/app_touch/api/auth/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!djangoResponse.ok) {
+            const errorData = await djangoResponse.json().catch(() => ({}));
+            return res.status(djangoResponse.status).json({
+                success: false,
+                error: errorData.error || 'Error de autenticación LDAP'
+            });
+        }
+
+        const ldapResult = await djangoResponse.json();
+        
+        if (ldapResult.mensaje === 'Login exitoso') {
+            // Verificar si el usuario está en AUTHORIZED_USERS
+            const isUserInAuthorizedList = isUserAuthorized(ldapResult.usuario);
+            
+            if (!isUserInAuthorizedList) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Usuario autenticado pero no autorizado para acceder a esta función',
+                    requiresAuthorization: true,
+                    isAuthorized: false
+                });
+            }
+            
+            res.json({
+                success: true,
+                username: ldapResult.usuario,
+                fullName: ldapResult.usuario, // Django no devuelve displayName, usamos username
+                email: ldapResult.email,
+                isAuthorized: true,
+                message: 'Autenticación LDAP exitosa y usuario autorizado',
+                loginMethod: 'ldap'
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: ldapResult.error || 'Credenciales LDAP incorrectas',
+                isAuthorized: false
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error en login LDAP:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Error de conexión con servidor LDAP', 
+            details: error.message 
+        });
+    }
+});
+
+// Endpoint para login con credenciales (para acceso remoto)
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        // Credenciales predefinidas para usuarios autorizados
+        const credentials = {
+            'jmadrid': 'cmf123',
+            'umartinez': 'cmf456',
+        };
+        
+        // Validar credenciales
+        if (!username || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Usuario y contraseña son requeridos' 
+            });
+        }
+        
+        if (credentials[username] && credentials[username] === password) {
+            // Verificar si el usuario está en AUTHORIZED_USERS
+            const isUserInAuthorizedList = isUserAuthorized(username);
+            
+            if (!isUserInAuthorizedList) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Usuario autenticado pero no autorizado para acceder a esta función',
+                    requiresAuthorization: true,
+                    isAuthorized: false
+                });
+            }
+            
+            res.json({
+                success: true,
+                username: username,
+                isAuthorized: true,
+                message: 'Login exitoso y usuario autorizado',
+                loginMethod: 'credentials'
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: 'Credenciales incorrectas',
+                isAuthorized: false
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Error en el servidor', 
+            details: error.message 
+        });
+    }
+});
+
 // Endpoint para obtener usuario Windows actual y verificar acceso
 app.get('/api/auth/current-user', (req, res) => {
     try {
@@ -271,8 +447,8 @@ app.get('/api/auth/current-user', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, async () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(PORT, '0.0.0.0', async () => {
+    console.log(`Servidor corriendo en puerto ${PORT} (accesible desde cualquier IP)`);
     await initializeDB();
 });
 
