@@ -61,6 +61,48 @@ export default function SurveyApp() {
       console.log('🔍 Token para validación:', token);
       if (token) setCurrentToken(token);
 
+      if (cameFromQr && !tokenFromUrl) {
+        console.log('🔄 Acceso desde QR sin token - Generando token automáticamente...');
+        try {
+          const baseUrl = window.location.origin + '/cuestionario';
+          const tokenizedUrl = await tokenManager.getTokenizedUrl(baseUrl);
+          const urlObj = new URL(tokenizedUrl, window.location.origin);
+          const newToken = urlObj.searchParams.get('token');
+
+          if (newToken) {
+            console.log('✅ Token generado para QR:', newToken);
+            setCurrentToken(newToken);
+            sessionStorage.setItem(VISITOR_SESSION_KEY, '1');
+            sessionStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
+            localStorage.setItem(VISITOR_SESSION_KEY, '1');
+            localStorage.setItem(VISITOR_TOKEN_SESSION_KEY, newToken);
+
+            const validation = await tokenManager.validateToken(newToken);
+            if (validation.valid) {
+              setTokenValid(validation);
+              window.history.replaceState({}, '', tokenizedUrl);
+              setLoading(false);
+              return;
+            } else {
+              console.log('🚫 Token generado inválido:', validation);
+              setTokenValid({ valid: false, reason: 'Error generando token QR' });
+              setLoading(false);
+              return;
+            }
+          } else {
+            console.log('❌ No se pudo generar token para QR');
+            setTokenValid({ valid: false, reason: 'No se pudo generar token QR' });
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Error generando token QR:', error);
+          setTokenValid({ valid: false, reason: 'Error generando token QR' });
+          setLoading(false);
+          return;
+        }
+      }
+
       if (token) {
         // Punto 3: Si no hay token en URL pero hay uno guardado, restaurarlo automáticamente
         if (!tokenFromUrl && savedToken && !cameFromQr) {

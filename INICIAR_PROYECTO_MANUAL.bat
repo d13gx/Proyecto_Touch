@@ -80,7 +80,7 @@ echo.
  
 :: Iniciar Django (puerto 8000)
 echo [Django] Iniciando servidor Django en puerto 8000...
-start "Django API Server" cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
  
 :: Esperar 3 segundos
 timeout /t 3 /nobreak >nul
@@ -88,7 +88,7 @@ timeout /t 3 /nobreak >nul
 :: Iniciar Node.js (puerto 3001)
 echo [Node.js] Iniciando servidor Node.js en puerto 3001...
 if exist "client\backend\server.js" (
-    start "Node.js API Server" cmd /c "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
+    start "Node.js API Server" /MIN cmd /c "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
 ) else (
     echo [!] No se ha encontrado server.js, omitiendo Node.js
 )
@@ -99,7 +99,7 @@ timeout /t 2 /nobreak >nul
 :: Iniciar React (puerto 80)
 echo [React] Iniciando aplicacion React en puerto 80...
 if exist "client\package.json" (
-    start "React Frontend" cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://localhost && echo ======================================== && echo. && npm run dev -- --host"
+    start "React Frontend" /MIN cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://localhost && echo ======================================== && echo. && npm run dev -- --host"
 ) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
@@ -109,33 +109,7 @@ echo.
 echo [ESPERA] Esperando que todos los servidores se inicien completamente...
 timeout /t 15 /nobreak >nul
 
-:: Crear VBScript temporal para minimizar ventanas
-echo [MINIMIZANDO] Creando script de minimizacion...
-echo Set objShell = CreateObject("WScript.Shell") > minimize.vbs
-echo Set oShell = CreateObject("Shell.Application") >> minimize.vbs
-echo WScript.Sleep 2000 >> minimize.vbs
-echo objShell.AppActivate "Django API Server" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.AppActivate "Node.js API Server" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.AppActivate "React Frontend" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-
-:: Ejecutar el script de minimización
-echo [MINIMIZANDO] Ejecutando script de minimizacion...
-cscript //nologo minimize.vbs
-
-:: Limpiar el script temporal
-del minimize.vbs
-
-echo [MINIMIZANDO] Proceso de minimizacion completado.
-
-timeout /t 2 /nobreak >nul
+echo [OK] Todos los servidores se iniciaron en segundo plano.
 
 :: ========================================
 :: Abrir navegador y enviar F11
@@ -234,9 +208,9 @@ echo   3. Usa: http://[TU-IP]
 echo.
 echo ========================================
 echo.
-echo Las ventanas de los servidores se han iniciado
-echo y seran minimizadas automaticamente.
-echo NO las cierres, siguen corriendo en segundo plano.
+echo Las ventanas de los servidores se inician minimizadas
+echo y corren en segundo plano automáticamente.
+echo NO las cierres, siguen funcionando en segundo plano.
 echo.
 echo Este script se cerrara automaticamente en 3 segundos...
 timeout /t 3 /nobreak >nul
