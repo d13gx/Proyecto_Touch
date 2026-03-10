@@ -181,7 +181,9 @@ class TokenManager {
     for (const backendUrl of backendUrls) {
       try {
         console.log('📡 Intentando backend:', backendUrl);
-        const fullBackendUrl = `${backendUrl}/app_touch/api/qr/validate/`;
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/validate/' : '/app_touch/api/qr/validate/';
+        const fullBackendUrl = `${backendUrl}${apiPath}`;
         console.log('🌐 URL completa:', fullBackendUrl);
 
         const response = await fetch(fullBackendUrl, {
@@ -266,7 +268,9 @@ class TokenManager {
     for (const backendUrl of backendUrls) {
       try {
         console.log('📡 Intentando marcar token usado con backend:', backendUrl);
-        const response = await fetch(`${backendUrl}/app_touch/api/qr/mark-used/`, {
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/mark-used/' : '/app_touch/api/qr/mark-used/';
+        const response = await fetch(`${backendUrl}${apiPath}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -365,7 +369,9 @@ class TokenManager {
     for (const backendUrl of backendUrls) {
       try {
         console.log('📡 Intentando crear token con backend:', backendUrl);
-        const response = await fetch(`${backendUrl}/app_touch/api/qr/create/`, {
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/create/' : '/app_touch/api/qr/create/';
+        const response = await fetch(`${backendUrl}${apiPath}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
