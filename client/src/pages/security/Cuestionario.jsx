@@ -66,6 +66,19 @@ export default function SurveyApp() {
         console.log('🌐 Backend URL:', tokenManager.backendUrl);
         console.log('🌐 Base URL para token:', window.location.origin + '/cuestionario');
         
+        // Guardar debug info inicial
+        const qrDebugInfo = {
+          href: window.location.href,
+          pathname: window.location.pathname,
+          search: window.location.search,
+          cameFromQr,
+          backendUrl: tokenManager?.backendUrl || null,
+          token: null,
+          stage: 'qr_token_generation_attempt'
+        };
+        setDebugInfo(qrDebugInfo);
+        sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(qrDebugInfo));
+        
         try {
           const baseUrl = window.location.origin + '/cuestionario';
           console.log('📡 Llamando a getTokenizedUrl...');
@@ -95,12 +108,18 @@ export default function SurveyApp() {
               return;
             } else {
               console.log('🚫 Token generado inválido:', validation);
+              const invalidDebug = { ...qrDebugInfo, stage: 'qr_token_validation_failed', newToken, validation };
+              setDebugInfo(invalidDebug);
+              sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(invalidDebug));
               setTokenValid({ valid: false, reason: 'Error generando token QR' });
               setLoading(false);
               return;
             }
           } else {
             console.log('❌ No se pudo generar token para QR');
+            const noTokenDebug = { ...qrDebugInfo, stage: 'qr_token_not_generated', tokenizedUrl };
+            setDebugInfo(noTokenDebug);
+            sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(noTokenDebug));
             setTokenValid({ valid: false, reason: 'No se pudo generar token QR' });
             setLoading(false);
             return;
@@ -108,6 +127,13 @@ export default function SurveyApp() {
         } catch (error) {
           console.error('❌ Error generando token QR:', error);
           console.error('❌ Error completo:', error.message, error.stack);
+          const errorDebug = { 
+            ...qrDebugInfo, 
+            stage: 'qr_token_generation_error', 
+            error: { message: error.message, stack: error.stack }
+          };
+          setDebugInfo(errorDebug);
+          sessionStorage.setItem(VISITOR_DEBUG_SESSION_KEY, JSON.stringify(errorDebug));
           setTokenValid({ valid: false, reason: 'Error generando token QR: ' + error.message });
           setLoading(false);
           return;
