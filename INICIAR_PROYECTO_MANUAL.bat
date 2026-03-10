@@ -136,7 +136,82 @@ del minimize.vbs
 echo [MINIMIZANDO] Proceso de minimizacion completado.
 
 timeout /t 2 /nobreak >nul
-start "Proyecto Touch" "%APP_URL%"
+
+:: ========================================
+:: Abrir navegador y enviar F11
+:: ========================================
+echo [NAVEGADOR] Detectando navegador disponible...
+set "CHROME_PATH="
+set "EDGE_PATH="
+set "FIREFOX_PATH="
+set "BROWSER_TITLE="
+
+:: Verificar Chrome
+if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
+    set "CHROME_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe"
+) else if exist "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" (
+    set "CHROME_PATH=C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+)
+
+:: Verificar Edge
+if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
+    set "EDGE_PATH=C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+) else if exist "C:\Program Files\Microsoft\Edge\Application\msedge.exe" (
+    set "EDGE_PATH=C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+)
+
+:: Verificar Firefox
+if exist "C:\Program Files\Mozilla Firefox\firefox.exe" (
+    set "FIREFOX_PATH=C:\Program Files\Mozilla Firefox\firefox.exe"
+) else if exist "C:\Program Files (x86)\Mozilla Firefox\firefox.exe" (
+    set "FIREFOX_PATH=C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+)
+
+:: Abrir navegador segun el disponible
+if defined CHROME_PATH (
+    echo [NAVEGADOR] Abriendo Google Chrome...
+    start "" "%CHROME_PATH%" "%APP_URL%"
+    set "BROWSER_TITLE=Google Chrome"
+) else if defined EDGE_PATH (
+    echo [NAVEGADOR] Abriendo Microsoft Edge...
+    start "" "%EDGE_PATH%" "%APP_URL%"
+    set "BROWSER_TITLE=Microsoft Edge"
+) else if defined FIREFOX_PATH (
+    echo [NAVEGADOR] Abriendo Mozilla Firefox...
+    start "" "%FIREFOX_PATH%" -url "%APP_URL%"
+    set "BROWSER_TITLE=Mozilla Firefox"
+) else (
+    echo [NAVEGADOR] Abriendo navegador predeterminado...
+    start "" "%APP_URL%"
+    set "BROWSER_TITLE=Windows Internet Explorer"
+)
+
+:: Esperar que el navegador cargue la pagina completamente
+echo [NAVEGADOR] Esperando que el navegador cargue...
+timeout /t 6 /nobreak >nul
+
+:: Crear VBScript para enviar F11 y poner pantalla completa
+echo [NAVEGADOR] Enviando F11 para pantalla completa...
+(
+echo Set objShell = CreateObject^("WScript.Shell"^)
+echo Dim titulo
+echo titulo = "%BROWSER_TITLE%"
+echo Dim i
+echo For i = 1 To 8
+echo     If objShell.AppActivate^(titulo^) Then
+echo         WScript.Sleep 1000
+echo         objShell.SendKeys "{F11}"
+echo         WScript.Sleep 500
+echo         Exit For
+echo     End If
+echo     WScript.Sleep 1000
+echo Next
+) > fullscreen.vbs
+
+cscript //nologo fullscreen.vbs
+del fullscreen.vbs
+
+echo [NAVEGADOR] Pantalla completa activada.
  
 :: Mensaje final
 echo.

@@ -5,7 +5,6 @@ const AUTHORIZED_USERS = [
   'jmadrid',  // Usuario principal autorizado
   // Agregar aquí otros usuarios autorizados
   'umartinez',
-  'TOTEM CMF',
   'dreyes',
   // 'otro_usuario',
 ];

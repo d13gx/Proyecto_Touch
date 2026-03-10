@@ -83,33 +83,15 @@ export default function CuestionarioCompletado({
           </div>
         </div>
 
-        {/* Botón de acción */}
-        <div className="mt-6">
-          <a
-            href="https://www.cmf.cl"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-center font-medium transition-colors duration-200"
+        {/* Botones de acción */}
+        <div className="space-y-3">
+          <button
+            onClick={() => window.location.href = 'https://www.cmf.cl'}
+            className="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Visita nuestra web
-          </a>
+          </button>
         </div>
-
-        {/* Botones de acción - SOLO DESARROLLO - Comentar en producción */}
-        {/* <div className="space-y-3">
-          <button
-            onClick={onNewSurvey}
-            className="w-full bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
-          >
-            Nuevo Cuestionario
-          </button>
-          <button
-            onClick={onViewAllSurveys}
-            className="w-full bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300"
-          >
-            Ver Todos los Cuestionarios 
-          </button>
-        </div> */}
       </div>
     </div>
   );

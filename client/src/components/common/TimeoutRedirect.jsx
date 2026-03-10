@@ -1,62 +1,81 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/", resetOnActivity = false }) => {
+const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
   const navigate = useNavigate();
+  const startTimeRef = useRef(null);
+  const timeoutIdRef = useRef(null);
 
   useEffect(() => {
-    let timeoutId;
+    // Obtener el tiempo de inicio del token desde sessionStorage
+    const storedStartTime = sessionStorage.getItem('token_start_time');
+    
+    if (!storedStartTime) {
+      // Primera vez que se carga, guardar el tiempo de inicio
+      const now = Date.now();
+      sessionStorage.setItem('token_start_time', now.toString());
+      startTimeRef.current = now;
+    } else {
+      // Ya existe un tiempo de inicio, usarlo
+      startTimeRef.current = parseInt(storedStartTime);
+    }
 
-    const resetTimer = () => {
-      // Limpiar el timeout anterior
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+    const checkExpiration = () => {
+      const now = Date.now();
+      const elapsed = now - startTimeRef.current;
+      
+      console.log(`⏰ Tiempo transcurrido: ${Math.round(elapsed / 1000)}s / ${Math.round(timeout / 1000)}s`);
 
-      // Establecer nuevo timeout
-      timeoutId = setTimeout(() => {
-        console.log(`⏰ Timeout: Redirigiendo a ${redirectTo} por inactividad`);
-
-        if (redirectTo.startsWith('http')) {
+      if (elapsed >= timeout) {
+        console.log('⏰ Tiempo del token expirado - redirigiendo a acceso denegado');
+        
+        // Marcar el token como usado en el backend
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentToken = urlParams.get('token');
+        
+        if (currentToken) {
+          // Importar tokenManager dinámicamente para evitar dependencias circulares
+          import('../../utils/tokenManager.js').then(({ default: tokenManager }) => {
+            tokenManager.markTokenAsUsed(currentToken).then(success => {
+              if (success) {
+                console.log('✅ Token marcado como usado al expirar tiempo');
+              } else {
+                console.log('⚠️ No se pudo marcar token como usado al expirar');
+              }
+            }).catch(err => {
+              console.error('❌ Error marcando token como usado:', err);
+            });
+          });
+        }
+        
+        // Limpiar el tiempo de inicio
+        sessionStorage.removeItem('token_start_time');
+        
+        // Redirigir a acceso denegado
+        if (redirectTo === "/") {
+          window.location.href = '/cuestionario?denied=1';
+        } else if (redirectTo.startsWith('http')) {
           window.location.href = redirectTo;
         } else {
           navigate(redirectTo);
         }
-      }, timeout);
+        return;
+      }
+
+      // Programar siguiente verificación
+      timeoutIdRef.current = setTimeout(checkExpiration, 1000); // Verificar cada segundo
     };
 
-    // Solo agregar event listeners si resetOnActivity es true
-    if (resetOnActivity) {
-      // Eventos que resetearán el timer
-      const events = [
-        'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
-      ];
-
-      // Agregar event listeners
-      events.forEach(event => {
-        document.addEventListener(event, resetTimer, true);
-      });
-    }
-
-    // Iniciar el timer
-    resetTimer();
+    // Iniciar la verificación
+    checkExpiration();
 
     // Cleanup
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      
-      if (resetOnActivity) {
-        const events = [
-          'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
-        ];
-        events.forEach(event => {
-          document.removeEventListener(event, resetTimer, true);
-        });
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
       }
     };
-  }, [navigate, timeout, redirectTo, resetOnActivity]);
+  }, [navigate, timeout, redirectTo]);
 
   return null; // Este componente no renderiza nada
 };
