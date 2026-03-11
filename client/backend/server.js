@@ -38,7 +38,7 @@ app.post('/api/visitante', async (req, res) => {
     try {
         await checkDBConnection();
         const { personalData } = req.body;
-        
+
         if (!pool) {
             return res.status(500).json({ error: 'No hay conexión a la base de datos' });
         }
@@ -60,17 +60,17 @@ app.post('/api/visitante', async (req, res) => {
         const result = await request.query(query);
         const visitanteId = result.recordset[0].IDEncuesta;
 
-        res.status(201).json({ 
-            success: true, 
+        res.status(201).json({
+            success: true,
             message: 'Visita del visitante registrada exitosamente',
-            visitanteId 
+            visitanteId
         });
 
     } catch (error) {
         console.error('Error al guardar visitante:', error);
-        res.status(500).json({ 
-            error: 'Error al registrar la visita del visitante', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al registrar la visita del visitante',
+            details: error.message
         });
     }
 });
@@ -79,7 +79,7 @@ app.post('/api/visitante', async (req, res) => {
 app.get('/api/visitantes', async (req, res) => {
     try {
         await checkDBConnection();
-        
+
         if (!pool) {
             return res.status(500).json({ error: 'No hay conexión a la base de datos' });
         }
@@ -103,9 +103,9 @@ app.get('/api/visitantes', async (req, res) => {
 
     } catch (error) {
         console.error('Error al obtener visitantes:', error);
-        res.status(500).json({ 
-            error: 'Error al obtener los visitantes', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al obtener los visitantes',
+            details: error.message
         });
     }
 });
@@ -114,13 +114,13 @@ app.get('/api/visitantes', async (req, res) => {
 app.delete('/api/visitantes/:id', async (req, res) => {
     try {
         await checkDBConnection();
-        
+
         if (!pool) {
             return res.status(500).json({ error: 'No hay conexión a la base de datos' });
         }
 
         const { id } = req.params;
-        
+
         const query = `
             DELETE FROM Visitantes 
             WHERE IDEncuesta = @id;
@@ -130,21 +130,21 @@ app.delete('/api/visitantes/:id', async (req, res) => {
         request.input('id', id);
 
         const result = await request.query(query);
-        
+
         if (result.rowsAffected[0] === 0) {
             return res.status(404).json({ error: 'Visitante no encontrado' });
         }
 
-        res.json({ 
-            success: true, 
-            message: 'Visitante eliminado exitosamente' 
+        res.json({
+            success: true,
+            message: 'Visitante eliminado exitosamente'
         });
 
     } catch (error) {
         console.error('Error al eliminar visitante:', error);
-        res.status(500).json({ 
-            error: 'Error al eliminar el visitante', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al eliminar el visitante',
+            details: error.message
         });
     }
 });
@@ -153,7 +153,7 @@ app.delete('/api/visitantes/:id', async (req, res) => {
 app.delete('/api/visitantes', async (req, res) => {
     try {
         await checkDBConnection();
-        
+
         if (!pool) {
             return res.status(500).json({ error: 'No hay conexión a la base de datos' });
         }
@@ -161,17 +161,17 @@ app.delete('/api/visitantes', async (req, res) => {
         const query = `DELETE FROM Visitantes;`;
 
         const result = await pool.request().query(query);
-        
-        res.json({ 
-            success: true, 
-            message: `Todos los visitantes han sido eliminados (${result.rowsAffected[0]} registros)` 
+
+        res.json({
+            success: true,
+            message: `Todos los visitantes han sido eliminados (${result.rowsAffected[0]} registros)`
         });
 
     } catch (error) {
         console.error('Error al limpiar todos los visitantes:', error);
-        res.status(500).json({ 
-            error: 'Error al eliminar todos los visitantes', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al eliminar todos los visitantes',
+            details: error.message
         });
     }
 });
@@ -180,13 +180,13 @@ app.delete('/api/visitantes', async (req, res) => {
 app.get('/api/visitante/rut/:rut', async (req, res) => {
     try {
         await checkDBConnection();
-        
+
         if (!pool) {
             return res.status(500).json({ error: 'No hay conexión a la base de datos' });
         }
 
         const { rut } = req.params;
-        
+
         const query = `
             SELECT TOP 1 Nombre
             FROM Visitantes
@@ -198,32 +198,32 @@ app.get('/api/visitante/rut/:rut', async (req, res) => {
         request.input('rut', rut.replace(/\./g, '')); // Limpiar RUT: quitar solo puntos
 
         const result = await request.query(query);
-        
+
         if (result.recordset.length === 0) {
-            return res.json({ 
-                success: false, 
-                message: 'RUT no encontrado' 
+            return res.json({
+                success: false,
+                message: 'RUT no encontrado'
             });
         }
 
-        res.json({ 
-            success: true, 
-            nombre: result.recordset[0].Nombre 
+        res.json({
+            success: true,
+            nombre: result.recordset[0].Nombre
         });
 
     } catch (error) {
         console.error('Error al consultar RUT:', error);
-        res.status(500).json({ 
-            error: 'Error al consultar RUT', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al consultar RUT',
+            details: error.message
         });
     }
 });
 
 // Endpoint de health check
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
+    res.json({
+        status: 'OK',
         timestamp: new Date().toISOString(),
         database: pool ? 'connected' : 'disconnected'
     });
@@ -238,9 +238,9 @@ app.post('/api/auth/detect-device', (req, res) => {
             userAgent: req.headers['user-agent'] || 'unknown',
             referer: req.headers.referer || 'unknown'
         };
-        
+
         console.log('🔍 Detectando dispositivo:', clientInfo);
-        
+
         // Extraer hostname del userAgent si es posible
         let detectedHostname = 'unknown';
         if (clientInfo.userAgent) {
@@ -249,16 +249,16 @@ app.post('/api/auth/detect-device', (req, res) => {
                 detectedHostname = windowsMatch[1];
             }
         }
-        
+
         const deviceInfo = {
             ...clientInfo,
             detectedHostname,
             timestamp: new Date().toISOString()
         };
-        
+
         // Verificar si el dispositivo está autorizado
         const authorized = isDeviceAuthorized(deviceInfo);
-        
+
         res.json({
             success: true,
             authorized,
@@ -266,13 +266,13 @@ app.post('/api/auth/detect-device', (req, res) => {
             message: authorized ? 'Dispositivo autorizado' : 'Dispositivo no reconocido',
             requiresLogin: !authorized
         });
-        
+
     } catch (error) {
         console.error('Error detectando dispositivo:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Error detectando dispositivo', 
-            details: error.message 
+        res.status(500).json({
+            success: false,
+            error: 'Error detectando dispositivo',
+            details: error.message
         });
     }
 });
@@ -281,11 +281,11 @@ app.post('/api/auth/detect-device', (req, res) => {
 app.post('/api/auth/ldap-login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
+
         if (!username || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Usuario y contraseña son requeridos' 
+            return res.status(400).json({
+                success: false,
+                error: 'Usuario y contraseña son requeridos'
             });
         }
 
@@ -307,11 +307,11 @@ app.post('/api/auth/ldap-login', async (req, res) => {
         }
 
         const ldapResult = await djangoResponse.json();
-        
+
         if (ldapResult.mensaje === 'Login exitoso') {
             // Verificar si el usuario está en AUTHORIZED_USERS
             const isUserInAuthorizedList = isUserAuthorized(ldapResult.usuario);
-            
+
             if (!isUserInAuthorizedList) {
                 return res.status(403).json({
                     success: false,
@@ -320,7 +320,7 @@ app.post('/api/auth/ldap-login', async (req, res) => {
                     isAuthorized: false
                 });
             }
-            
+
             res.json({
                 success: true,
                 username: ldapResult.usuario,
@@ -337,13 +337,13 @@ app.post('/api/auth/ldap-login', async (req, res) => {
                 isAuthorized: false
             });
         }
-        
+
     } catch (error) {
         console.error('Error en login LDAP:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Error de conexión con servidor LDAP', 
-            details: error.message 
+        res.status(500).json({
+            success: false,
+            error: 'Error de conexión con servidor LDAP',
+            details: error.message
         });
     }
 });
@@ -352,25 +352,25 @@ app.post('/api/auth/ldap-login', async (req, res) => {
 app.post('/api/auth/login', (req, res) => {
     try {
         const { username, password } = req.body;
-        
+
         // Credenciales predefinidas para usuarios autorizados
         const credentials = {
             'jmadrid': 'cmf123',
             'umartinez': 'cmf456',
         };
-        
+
         // Validar credenciales
         if (!username || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Usuario y contraseña son requeridos' 
+            return res.status(400).json({
+                success: false,
+                error: 'Usuario y contraseña son requeridos'
             });
         }
-        
+
         if (credentials[username] && credentials[username] === password) {
             // Verificar si el usuario está en AUTHORIZED_USERS
             const isUserInAuthorizedList = isUserAuthorized(username);
-            
+
             if (!isUserInAuthorizedList) {
                 return res.status(403).json({
                     success: false,
@@ -379,7 +379,7 @@ app.post('/api/auth/login', (req, res) => {
                     isAuthorized: false
                 });
             }
-            
+
             res.json({
                 success: true,
                 username: username,
@@ -394,13 +394,13 @@ app.post('/api/auth/login', (req, res) => {
                 isAuthorized: false
             });
         }
-        
+
     } catch (error) {
         console.error('Error en login:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Error en el servidor', 
-            details: error.message 
+        res.status(500).json({
+            success: false,
+            error: 'Error en el servidor',
+            details: error.message
         });
     }
 });
@@ -411,23 +411,23 @@ app.get('/api/auth/current-user', (req, res) => {
         // Obtener el nombre de usuario del sistema operativo
         const userInfo = os.userInfo();
         const username = userInfo.username;
-        
+
         // Logging para depuración
         console.log('🔍 Depuración de usuario:');
         console.log('  - os.userInfo():', userInfo);
         console.log('  - username:', username);
         console.log('  - process.env.USERNAME:', process.env.USERNAME);
         console.log('  - process.env.USER:', process.env.USER);
-        
+
         // Intentar diferentes formas de obtener el usuario
         const alternativeUser = process.env.USERNAME || process.env.USER || username;
-        
+
         console.log('  - Usuario final a usar:', alternativeUser);
-        
+
         // Obtener configuración y verificar autorización
         const config = getConfig();
         const hasAccess = isUserAuthorized(alternativeUser);
-        
+
         res.json({
             username: alternativeUser,  // Usar el usuario alternativo detectado
             isAuthorized: hasAccess,
@@ -436,12 +436,12 @@ app.get('/api/auth/current-user', (req, res) => {
             showDebugInfo: config.showDebugInfo,
             message: hasAccess ? 'Acceso concedido' : 'Acceso denegado'
         });
-        
+
     } catch (error) {
         console.error('Error al obtener usuario actual:', error);
-        res.status(500).json({ 
-            error: 'Error al verificar usuario', 
-            details: error.message 
+        res.status(500).json({
+            error: 'Error al verificar usuario',
+            details: error.message
         });
     }
 });
