@@ -35,7 +35,7 @@ class TokenManager {
 
     // Detectar si estamos en localhost o en red, y configurar backend apropiadamente
     this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
+
     if (this.isLocalhost) {
       // Si estamos en localhost, usar backend local
       this.backendUrl = 'http://localhost:8000';
@@ -56,7 +56,7 @@ class TokenManager {
   detectBackendUrl() {
     // Lista de URLs posibles para el backend, en orden de preferencia
     const backendUrls = [
-      'http://totem.cmf.cl/app_touch',  // Dominio público con proxy
+      // 'http://totem.cmf.cl/app_touch',  // Dominio público con proxy
       'http://totem.cmf.cl:8000',      // Dominio público directo
       'http://172.18.8.94:8000',       // IP known totem
       'http://172.18.7.150:8000',
@@ -66,7 +66,7 @@ class TokenManager {
     ];
 
     console.log('🔍 Buscando backend, intentando en orden:', backendUrls);
-    
+
     // Devolver la primera opción que funcione
     return backendUrls[0];
   }
@@ -89,7 +89,7 @@ class TokenManager {
     knownTotemIPs.unshift(sameHostBackend);
 
     console.log('🔍 Buscando backend del tótem, intentando:', knownTotemIPs);
-    
+
     // Devolver la primera opción (el navegador probará conectividad)
     return knownTotemIPs[0];
   }
@@ -163,7 +163,7 @@ class TokenManager {
   // Validar si un token es válido (incluye device fingerprint)
   async validateToken(token) {
     console.log('🔍 Validando token con backend:', token);
-    
+
     // Probar múltiples URLs de backend en orden de preferencia
     const backendUrls = [
       'http://totem.cmf.cl/app_touch',
@@ -213,7 +213,7 @@ class TokenManager {
             };
           } else {
             console.log('❌ Token inválido con backend:', backendUrl, result.reason);
-            
+
             // Debug detallado para acceso denegado
             if (result.debug_info) {
               console.error('🚫 DEBUG ACCESO DENEGADO:', {
@@ -226,7 +226,7 @@ class TokenManager {
                 timestamp: new Date().toISOString()
               });
             }
-            
+
             return {
               valid: false,
               reason: result.reason || 'Token inválido',

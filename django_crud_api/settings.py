@@ -29,6 +29,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://172.18.8.94:80", # totem
     "http://172.19.7.96:80",  # diego
     "http://totem.cmf.cl", # dominio de producción
+    "https://totem.cmf.cl", # dominio de producción con seguridad
     # Backend público - permitir acceso desde cualquier lugar
     "http://totem.cmf.cl:8000",
     "https://totem.cmf.cl:8000",
