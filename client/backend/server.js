@@ -17,6 +17,23 @@ async function initializeDB() {
     try {
         pool = await connectDB();
         console.log('Base de datos conectada');
+        
+        // Optimización: Crear índice para la búsqueda de RUT si no existe
+        // Esto evita que la base de datos haga un escaneo completo de la tabla
+        // y permite que "deje de buscar" inmediatamente si el RUT no existe.
+        try {
+            await pool.request().query(`
+                IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Visitantes_RUT_Fecha' AND object_id = OBJECT_ID('Visitantes'))
+                BEGIN
+                    CREATE NONCLUSTERED INDEX IX_Visitantes_RUT_Fecha 
+                    ON Visitantes(RUT, FechaEncuesta DESC) 
+                    INCLUDE (Nombre);
+                END
+            `);
+            console.log('Índice de optimización para RUT verificado/creado');
+        } catch (idxError) {
+            console.error('Aviso: No se pudo verificar o crear el índice de RUT (esto puede ser normal por falta de permisos):', idxError.message);
+        }
     } catch (error) {
         console.error('Error al conectar la base de datos:', error);
         console.log('Servidor iniciado sin conexión a base de datos. Se reintentará en cada petición.');
