@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import authService from '../../services/authService';
 import { FaKey, FaSignInAlt, FaTimes, FaEye, FaEyeSlash, FaCheckCircle, FaUser, FaLightbulb } from 'react-icons/fa';
+import logo from "../../assets/logo.jpg";
 
 const LoginForm = ({ onLoginSuccess, onBack }) => {
   const [credentials, setCredentials] = useState({
@@ -18,7 +19,7 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!credentials.username || !credentials.password) {
       setError('Por favor, complete todos los campos');
       return;
@@ -30,7 +31,7 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
     try {
       // Solo login LDAP
       const result = await authService.loginLDAP(credentials.username, credentials.password);
-      
+
       if (result.success || result.mensaje === 'Login exitoso') {
         onLoginSuccess(result);
       } else {
@@ -40,7 +41,7 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
       if (error.response?.status === 403) {
         // Error de autorización - usuario no está en AUTHORIZED_USERS
         setError('Usuario autenticado pero no autorizado para acceder. Contacte al administrador del sistema.');
-      } else {  
+      } else {
         setError(error.message || 'Error de conexión LDAP. Intente nuevamente.');
       }
     } finally {
@@ -70,17 +71,26 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 h-24 sm:h-32 flex items-center justify-between px-6 sm:px-8 lg:px-10">
-            <div className="flex items-center gap-4 sm:gap-6">
-              <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-4 border-white/30 bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-2xl">
-                <FaKey className="text-xl sm:text-2xl md:text-3xl" />
+            <div className="w-full flex items-center justify-between">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-4 border-white/30 bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-2xl flex-shrink-0">
+                  <FaKey className="text-xl sm:text-2xl md:text-3xl" />
+                </div>
+                <div className="text-white">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
+                    Acceso a Lista de Visitas
+                  </h1>
+                  <p className="text-blue-100 text-sm sm:text-base">
+                    Autenticación requerida para acceder al sistema
+                  </p>
+                </div>
               </div>
-              <div className="text-white">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">
-                  Acceso a Lista de Visitas
-                </h1>
-                <p className="text-blue-100 text-sm sm:text-base">
-                  Autenticación requerida para acceder al sistema
-                </p>
+              <div className="flex items-center">
+                <img
+                  src={logo}
+                  alt="Logo CMF"
+                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl shadow-lg border-2 border-white"
+                />
               </div>
             </div>
           </div>
@@ -131,7 +141,7 @@ const LoginForm = ({ onLoginSuccess, onBack }) => {
                       autoComplete="current-password"
                     />
                     <FaKey className="absolute left-4 top-1/2 transform -translate-y-1/2 text-xl text-blue-500" />
-                    
+
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
