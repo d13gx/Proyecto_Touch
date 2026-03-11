@@ -3,7 +3,7 @@
  * 
  * Este archivo centraliza todas las URLs de los backends y la lógica de detección de red.
  * Resuelve problemas de CORS y conectividad en la red corporativa.
- */
+ 
 
 const getNetworkConfig = () => {
     const hostname = window.location.hostname;
@@ -65,3 +65,4 @@ console.log('🌐 API Configuration Loaded:', {
     django: DJANGO_API_URL,
     isLocal: config.isLocal
 });
+*/
