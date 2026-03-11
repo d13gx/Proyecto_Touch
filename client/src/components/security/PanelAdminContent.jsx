@@ -541,7 +541,7 @@ const PanelAdminContent = ({
 
           <div className="relative">
             <select
-              value={(filterType === 'year' || filterType === 'month') ? selectedYear : ''}
+              value={selectedYear}
               onChange={(e) => {
                 const newYear = e.target.value;
                 setSelectedYear(newYear);
@@ -573,7 +573,6 @@ const PanelAdminContent = ({
                 backgroundSize: '1rem'
               }}
             >
-              <option value="" disabled>Año</option>
               {getAvailableYears().map(year => (
                 <option key={year} value={year} className="text-gray-700 bg-white">
                   {year}
