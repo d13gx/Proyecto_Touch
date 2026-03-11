@@ -15,9 +15,6 @@ const CuestionarioHeader = () => {
               <h1 className="text-2xl font-bold mb-1 drop-shadow-lg">
                 Cuestionario de Seguridad
               </h1>
-              <p className="text-blue-100 opacity-90">
-                CMF Envases - Seguridad Industrial
-              </p>
             </div>
           </div>
           <div className="flex items-center">
