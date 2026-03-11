@@ -24,27 +24,30 @@ const PanelAdminContent = ({
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [yearButtonPosition, setYearButtonPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const itemsPerPage = 15;
 
+  const fetchVisitantes = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getVisitantes();
+      const sorted = data.sort((a, b) => b.IDEncuesta - a.IDEncuesta);
+      setAllVisitantes(sorted);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar visitantes:', err);
+      setError('No se pudieron cargar los datos desde la base de datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cargar visitantes desde la base de datos
   useEffect(() => {
-    const loadVisitantes = async () => {
-      try {
-        setLoading(true);
-        const data = await apiService.getVisitantes();
-        const sorted = data.sort((a, b) => b.IDEncuesta - a.IDEncuesta);
-        setAllVisitantes(sorted);
-        setError(null);
-      } catch (err) {
-        console.error('Error al cargar visitantes:', err);
-        setError('No se pudieron cargar los datos desde la base de datos');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadVisitantes();
+    fetchVisitantes();
   }, []);
 
   // Helpers de fecha
@@ -279,7 +282,19 @@ const PanelAdminContent = ({
       left: rect.left + window.scrollX,
       width: rect.width
     });
+    setShowYearDropdown(false);
     setShowMonthDropdown(!showMonthDropdown);
+  };
+
+  const handleYearButtonClick = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setYearButtonPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width
+    });
+    setShowMonthDropdown(false);
+    setShowYearDropdown(!showYearDropdown);
   };
 
   // Generar años disponibles (desde el año actual hasta el año actual + 2)
@@ -429,17 +444,28 @@ const PanelAdminContent = ({
             </svg>
             Filtrar por fecha
           </h2>
-          {filteredAndSortedVisitantes.length > 0 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={exportToExcel}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+              onClick={fetchVisitantes}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Descargar Excel {filterType !== 'all' && `(${filteredAndSortedVisitantes.length})`}
+              Actualizar
             </button>
-          )}
+            {filteredAndSortedVisitantes.length > 0 && (
+              <button
+                onClick={exportToExcel}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar Excel {filterType !== 'all' && `(${filteredAndSortedVisitantes.length})`}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-3 overflow-visible">
@@ -539,46 +565,80 @@ const PanelAdminContent = ({
             )}
           </div>
 
-          <div className="relative">
-            <select
-              value={selectedYear}
-              onChange={(e) => {
-                const newYear = e.target.value;
-                setSelectedYear(newYear);
-
-                if (selectedMonth) {
-                  const monthMap = {
-                    'Enero': 0, 'Febrero': 1, 'Marzo': 2, 'Abril': 3, 'Mayo': 4, 'Junio': 5,
-                    'Julio': 6, 'Agosto': 7, 'Septiembre': 8, 'Octubre': 9, 'Noviembre': 10, 'Diciembre': 11
-                  };
-                  const monthIndex = monthMap[selectedMonth];
-                  const firstDay = `${newYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
-                  const lastDay = new Date(newYear, monthIndex + 1, 0).toISOString().split('T')[0];
-
-                  setStartDate(firstDay);
-                  setEndDate(lastDay);
-                  setFilterType('month');
-                } else {
-                  setFilterType('year');
-                  setStartDate('');
-                  setEndDate('');
-                }
-              }}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border outline-none appearance-none pr-8 bg-no-repeat bg-[right_0.5rem_center] ${(filterType === 'year' || filterType === 'month')
+          <div className="relative year-dropdown-container overflow-visible">
+            <button
+              onClick={handleYearButtonClick}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${(filterType === 'year' || filterType === 'month')
                 ? 'bg-blue-600 text-white border-blue-600'
                 : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                 }`}
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='${(filterType === 'year' || filterType === 'month') ? 'white' : 'gray'}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                backgroundSize: '1rem'
-              }}
             >
-              {getAvailableYears().map(year => (
-                <option key={year} value={year} className="text-gray-700 bg-white">
-                  {year}
-                </option>
-              ))}
-            </select>
+              {(filterType === 'year' || filterType === 'month') ? selectedYear : 'Año'}
+              <svg
+                className={`w-3 h-3 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown flotante */}
+            {showYearDropdown && (
+              <>
+                {/* Fondo semitransparente */}
+                <div
+                  className="fixed inset-0 bg-transparent z-[9998]"
+                  onClick={() => setShowYearDropdown(false)}
+                />
+                {/* Dropdown */}
+                <div
+                  className="fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] min-w-[120px] max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200"
+                  style={{
+                    top: `${yearButtonPosition.top}px`,
+                    left: `${yearButtonPosition.left}px`,
+                    width: `${Math.max(yearButtonPosition.width, 100)}px`
+                  }}
+                >
+                  <div className="py-1">
+                    {getAvailableYears().map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => {
+                          setSelectedYear(year);
+
+                          if (selectedMonth) {
+                            const monthMap = {
+                              'Enero': 0, 'Febrero': 1, 'Marzo': 2, 'Abril': 3, 'Mayo': 4, 'Junio': 5,
+                              'Julio': 6, 'Agosto': 7, 'Septiembre': 8, 'Octubre': 9, 'Noviembre': 10, 'Diciembre': 11
+                            };
+                            const monthIndex = monthMap[selectedMonth];
+                            const firstDay = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+                            const lastDay = new Date(year, monthIndex + 1, 0).toISOString().split('T')[0];
+
+                            setStartDate(firstDay);
+                            setEndDate(lastDay);
+                            setFilterType('month');
+                          } else {
+                            setFilterType('year');
+                            setStartDate('');
+                            setEndDate('');
+                          }
+                          setShowYearDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors ${parseInt(selectedYear) === year
+                          ? 'bg-blue-100 text-blue-700 font-medium'
+                          : 'text-gray-700'
+                          }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="relative">
@@ -607,10 +667,10 @@ const PanelAdminContent = ({
             Mostrando: <strong>{filteredAndSortedVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
           </p>
 
-          {filterType !== 'all' && (
+          {filterType !== 'today' && (
             <button
               onClick={() => {
-                setFilterType('all');
+                setFilterType('today');
                 setStartDate('');
                 setEndDate('');
                 setSelectedMonth('');
