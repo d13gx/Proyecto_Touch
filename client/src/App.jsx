@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Nav } from "./components/layout/Nav";
 import { HomePage } from "./pages/deprecated/HomePage";
-import { Trab_List } from "./pages/workers/Trab_List";
+import { Trab_List } from "./pages/home-modules/Trab_List";
 import Depto_List from "./pages/home-modules/Depto_List";
 import Info_List from "./pages/home-modules/Info_List";
 import Mapa_Cmf from "./pages/home-modules/Mapa_Cmf";
 import Depto_Detail from "./pages/home-modules/Depto_Detail";
-import Trab_Detail from "./pages/workers/Trab_Detail";
+import Trab_Detail from "./pages/home-modules/Trab_Detail";
 import Keyboard from "./components/common/Keyboard";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from './components/common/ThemeContext';
