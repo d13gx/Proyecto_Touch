@@ -125,7 +125,7 @@ const PanelAdminContent = ({
       to = endDate;
     }
 
-    if (!from && !to) return allVisitantes;
+    if (!from && !to && filterType !== 'year') return allVisitantes;
 
     return allVisitantes.filter((v) => {
       const date = parseVisitanteDate(v);
@@ -140,7 +140,7 @@ const PanelAdminContent = ({
       if (to && dateStr > to) return false;
       return true;
     });
-  }, [allVisitantes, filterType, startDate, endDate]);
+  }, [allVisitantes, filterType, startDate, endDate, selectedYear]);
 
   const handleSort = (key) => {
     let direction = 'ascending';
@@ -265,6 +265,7 @@ const PanelAdminContent = ({
     setSelectedMonth(monthName);
     const firstDay = `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
     const lastDay = new Date(selectedYear, monthIndex + 1, 0).toISOString().split('T')[0];
+
     setStartDate(firstDay);
     setEndDate(lastDay);
     setFilterType('month');
@@ -281,11 +282,11 @@ const PanelAdminContent = ({
     setShowMonthDropdown(!showMonthDropdown);
   };
 
-  // Generar años disponibles (desde 2020 hasta el año actual + 1)
+  // Generar años disponibles (desde el año actual hasta el año actual + 2)
   const getAvailableYears = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
-    for (let year = 2020; year <= currentYear + 1; year++) {
+    for (let year = currentYear; year <= currentYear + 2; year++) {
       years.push(year);
     }
     return years.reverse(); // Más recientes primero
@@ -553,6 +554,7 @@ const PanelAdminContent = ({
                   const monthIndex = monthMap[selectedMonth];
                   const firstDay = `${newYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
                   const lastDay = new Date(newYear, monthIndex + 1, 0).toISOString().split('T')[0];
+
                   setStartDate(firstDay);
                   setEndDate(lastDay);
                   setFilterType('month');
@@ -638,12 +640,9 @@ const PanelAdminContent = ({
                   const value = e.target.value;
                   if (value) {
                     const firstDay = `${value}-01`;
-                    const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
                     setStartDate(firstDay);
-                    setEndDate(lastDay);
                   } else {
                     setStartDate('');
-                    setEndDate('');
                   }
                 }}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -657,12 +656,9 @@ const PanelAdminContent = ({
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value) {
-                    const firstDay = `${value}-01`;
                     const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
-                    setStartDate(firstDay);
                     setEndDate(lastDay);
                   } else {
-                    setStartDate('');
                     setEndDate('');
                   }
                 }}
@@ -670,14 +666,7 @@ const PanelAdminContent = ({
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-            {(startDate || endDate) && (
-              <button
-                onClick={() => { setStartDate(''); setEndDate(''); }}
-                className="text-xs text-red-500 hover:text-red-700 underline"
-              >
-                Limpiar fechas
-              </button>
-            )}
+
           </div>
         )}
 
