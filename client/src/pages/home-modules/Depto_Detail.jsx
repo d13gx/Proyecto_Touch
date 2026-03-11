@@ -8,7 +8,7 @@ import {
   FaSignInAlt, FaEnvelopeOpen, FaArrowRight
 } from "react-icons/fa";
 import { API_BASE_URL } from '../../config';
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect";
 
 export default function Depto_Detail() {
   const location = useLocation();
@@ -711,8 +711,7 @@ export default function Depto_Detail() {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-      {/* 👇 AQUÍ VA EL TIMEOUTREDIRECT - NIVEL RAÍZ */}
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+      <ModuleTimeoutRedirect timeout={60000} />
       <div className="max-w-7xl mx-auto">
         {/* Botón de regreso para móviles */}
         <div className="mb-4 sm:mb-6 sm:hidden">

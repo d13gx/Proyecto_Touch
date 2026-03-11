@@ -24,27 +24,30 @@ const PanelAdminContent = ({
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [yearButtonPosition, setYearButtonPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const itemsPerPage = 15;
 
+  const fetchVisitantes = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getVisitantes();
+      const sorted = data.sort((a, b) => b.IDEncuesta - a.IDEncuesta);
+      setAllVisitantes(sorted);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar visitantes:', err);
+      setError('No se pudieron cargar los datos desde la base de datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Cargar visitantes desde la base de datos
   useEffect(() => {
-    const loadVisitantes = async () => {
-      try {
-        setLoading(true);
-        const data = await apiService.getVisitantes();
-        const sorted = data.sort((a, b) => b.IDEncuesta - a.IDEncuesta);
-        setAllVisitantes(sorted);
-        setError(null);
-      } catch (err) {
-        console.error('Error al cargar visitantes:', err);
-        setError('No se pudieron cargar los datos desde la base de datos');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadVisitantes();
+    fetchVisitantes();
   }, []);
 
   // Helpers de fecha
@@ -61,7 +64,7 @@ const PanelAdminContent = ({
       // Formato DD-MM-YYYY o DD/MM/YYYY
       const dmyMatch = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
       if (dmyMatch) {
-        date = new Date(`${dmyMatch[3]}-${dmyMatch[2].padStart(2,'0')}-${dmyMatch[1].padStart(2,'0')}`);
+        date = new Date(`${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`);
       }
 
       // Formato YYYY-MM-DD
@@ -125,17 +128,22 @@ const PanelAdminContent = ({
       to = endDate;
     }
 
-    if (!from && !to) return allVisitantes;
+    if (!from && !to && filterType !== 'year') return allVisitantes;
 
     return allVisitantes.filter((v) => {
       const date = parseVisitanteDate(v);
       if (!date) return false;
       const dateStr = date.toISOString().split('T')[0];
+
+      if (filterType === 'year' && selectedYear) {
+        return date.getFullYear() === parseInt(selectedYear);
+      }
+
       if (from && dateStr < from) return false;
       if (to && dateStr > to) return false;
       return true;
     });
-  }, [allVisitantes, filterType, startDate, endDate]);
+  }, [allVisitantes, filterType, startDate, endDate, selectedYear]);
 
   const handleSort = (key) => {
     let direction = 'ascending';
@@ -170,8 +178,8 @@ const PanelAdminContent = ({
           bValue = parseVisitanteDate(b);
           if (!aValue) return 1;
           if (!bValue) return -1;
-          return sortConfig.direction === 'ascending' 
-            ? aValue - bValue 
+          return sortConfig.direction === 'ascending'
+            ? aValue - bValue
             : bValue - aValue;
         }
 
@@ -260,6 +268,7 @@ const PanelAdminContent = ({
     setSelectedMonth(monthName);
     const firstDay = `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`;
     const lastDay = new Date(selectedYear, monthIndex + 1, 0).toISOString().split('T')[0];
+
     setStartDate(firstDay);
     setEndDate(lastDay);
     setFilterType('month');
@@ -273,14 +282,26 @@ const PanelAdminContent = ({
       left: rect.left + window.scrollX,
       width: rect.width
     });
+    setShowYearDropdown(false);
     setShowMonthDropdown(!showMonthDropdown);
   };
 
-  // Generar años disponibles (desde 2020 hasta el año actual + 1)
+  const handleYearButtonClick = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setYearButtonPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width
+    });
+    setShowMonthDropdown(false);
+    setShowYearDropdown(!showYearDropdown);
+  };
+
+  // Generar años disponibles (desde el año actual hasta el año actual + 2)
   const getAvailableYears = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
-    for (let year = 2020; year <= currentYear + 1; year++) {
+    for (let year = currentYear; year <= currentYear + 2; year++) {
       years.push(year);
     }
     return years.reverse(); // Más recientes primero
@@ -380,14 +401,14 @@ const PanelAdminContent = ({
     // Limpiar el RUT: dejar solo números y posible guión/letra final
     const cleanRut = rut.replace(/[^0-9kK]/g, '');
     if (cleanRut.length < 2) return rut;
-    
+
     // Separar cuerpo y dígito verificador
     const cuerpo = cleanRut.slice(0, -1);
     const dv = cleanRut.slice(-1).toUpperCase();
-    
+
     // Formatear con puntos
     const formattedCuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    
+
     return `${formattedCuerpo}-${dv}`;
   };
 
@@ -408,7 +429,8 @@ const PanelAdminContent = ({
     all: 'Todos',
     today: 'Hoy',
     week: 'Esta semana',
-    month: selectedMonth || 'Mes',
+    month: `${selectedMonth} ${selectedYear}`,
+    year: `Año ${selectedYear}`,
   };
 
   return (
@@ -422,17 +444,28 @@ const PanelAdminContent = ({
             </svg>
             Filtrar por fecha
           </h2>
-          {filteredAndSortedVisitantes.length > 0 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={exportToExcel}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+              onClick={fetchVisitantes}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Descargar Excel {filterType !== 'all' && `(${filteredAndSortedVisitantes.length})`}
+              Actualizar
             </button>
-          )}
+            {filteredAndSortedVisitantes.length > 0 && (
+              <button
+                onClick={exportToExcel}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar Excel {filterType !== 'all' && `(${filteredAndSortedVisitantes.length})`}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-3 overflow-visible">
@@ -444,47 +477,45 @@ const PanelAdminContent = ({
             <button
               key={key}
               onClick={() => handleFilterType(key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-                filterType === key
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${filterType === key
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
             >
               {label}
             </button>
           ))}
-          
+
           {/* Dropdown de meses */}
           <div className="relative month-dropdown-container overflow-visible">
             <button
               onClick={handleMonthButtonClick}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${
-                filterType === 'month'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${filterType === 'month'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
             >
               {selectedMonth || 'Mes'}
-              <svg 
-                className={`w-3 h-3 transition-transform ${showMonthDropdown ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className={`w-3 h-3 transition-transform ${showMonthDropdown ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            
+
             {/* Dropdown flotante */}
             {showMonthDropdown && (
               <>
                 {/* Fondo semitransparente */}
-                <div 
+                <div
                   className="fixed inset-0 bg-transparent z-[9998]"
                   onClick={() => setShowMonthDropdown(false)}
                 />
                 {/* Dropdown */}
-                <div 
+                <div
                   className="fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] min-w-[200px] max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200"
                   style={{
                     top: `${buttonPosition.top}px`,
@@ -514,52 +545,115 @@ const PanelAdminContent = ({
                           handleMonthSelect(month.index, month.name);
                           setShowMonthDropdown(false);
                         }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-blue-50 transition-colors ${
-                          selectedMonth === month.name
-                            ? 'bg-blue-100 text-blue-700 font-medium'
-                            : 'text-gray-700'
-                        }`}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-blue-50 transition-colors ${selectedMonth === month.name
+                          ? 'bg-blue-100 text-blue-700 font-medium'
+                          : 'text-gray-700'
+                          }`}
                       >
                         {month.name}
                       </button>
                     ))}
                   </div>
-                  
+
                   {/* Botón de limpiar */}
                   {selectedMonth && (
                     <div className="border-t border-gray-200 p-2">
-                      <button
-                        onClick={() => {
-                          setSelectedMonth('');
-                          setStartDate('');
-                          setEndDate('');
-                          setFilterType('all');
-                          setShowMonthDropdown(false);
-                        }}
-                        className="w-full text-left px-2 py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                      >
-                        Limpiar selección
-                      </button>
                     </div>
                   )}
                 </div>
               </>
             )}
           </div>
+
+          <div className="relative year-dropdown-container overflow-visible">
+            <button
+              onClick={handleYearButtonClick}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${(filterType === 'year' || filterType === 'month')
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+              {(filterType === 'year' || filterType === 'month') ? selectedYear : 'Año'}
+              <svg
+                className={`w-3 h-3 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown flotante */}
+            {showYearDropdown && (
+              <>
+                {/* Fondo semitransparente */}
+                <div
+                  className="fixed inset-0 bg-transparent z-[9998]"
+                  onClick={() => setShowYearDropdown(false)}
+                />
+                {/* Dropdown */}
+                <div
+                  className="fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[9999] min-w-[120px] max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200"
+                  style={{
+                    top: `${yearButtonPosition.top}px`,
+                    left: `${yearButtonPosition.left}px`,
+                    width: `${Math.max(yearButtonPosition.width, 100)}px`
+                  }}
+                >
+                  <div className="py-1">
+                    {getAvailableYears().map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => {
+                          setSelectedYear(year);
+
+                          if (selectedMonth) {
+                            const monthMap = {
+                              'Enero': 0, 'Febrero': 1, 'Marzo': 2, 'Abril': 3, 'Mayo': 4, 'Junio': 5,
+                              'Julio': 6, 'Agosto': 7, 'Septiembre': 8, 'Octubre': 9, 'Noviembre': 10, 'Diciembre': 11
+                            };
+                            const monthIndex = monthMap[selectedMonth];
+                            const firstDay = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+                            const lastDay = new Date(year, monthIndex + 1, 0).toISOString().split('T')[0];
+
+                            setStartDate(firstDay);
+                            setEndDate(lastDay);
+                            setFilterType('month');
+                          } else {
+                            setFilterType('year');
+                            setStartDate('');
+                            setEndDate('');
+                          }
+                          setShowYearDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors ${parseInt(selectedYear) === year
+                          ? 'bg-blue-100 text-blue-700 font-medium'
+                          : 'text-gray-700'
+                          }`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           <div className="relative">
             <button
               onClick={() => setFilterType(filterType === 'custom' ? 'all' : 'custom')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${
-                filterType === 'custom'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1 ${filterType === 'custom'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
             >
               Rango personalizado
-              <svg 
-                className={`w-3 h-3 transition-transform ${filterType === 'custom' ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className={`w-3 h-3 transition-transform ${filterType === 'custom' ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -567,9 +661,31 @@ const PanelAdminContent = ({
             </button>
           </div>
         </div>
-        <p className="text-gray-600 text-sm">
-          Mostrando: <strong>{filteredAndSortedVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
-        </p>
+
+        <div className="flex justify-between items-center">
+          <p className="text-gray-600 text-sm">
+            Mostrando: <strong>{filteredAndSortedVisitantes.length}</strong> de <strong>{allVisitantes.length}</strong> visitas
+          </p>
+
+          {filterType !== 'today' && (
+            <button
+              onClick={() => {
+                setFilterType('today');
+                setStartDate('');
+                setEndDate('');
+                setSelectedMonth('');
+                setSelectedYear(new Date().getFullYear());
+                setShowMonthDropdown(false);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Limpiar filtros
+            </button>
+          )}
+        </div>
 
         {/* Rango personalizado */}
         {filterType === 'custom' && (
@@ -583,12 +699,9 @@ const PanelAdminContent = ({
                   const value = e.target.value;
                   if (value) {
                     const firstDay = `${value}-01`;
-                    const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
                     setStartDate(firstDay);
-                    setEndDate(lastDay);
                   } else {
                     setStartDate('');
-                    setEndDate('');
                   }
                 }}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -602,12 +715,9 @@ const PanelAdminContent = ({
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value) {
-                    const firstDay = `${value}-01`;
                     const lastDay = new Date(value.split('-')[0], parseInt(value.split('-')[1]), 0).toISOString().split('T')[0];
-                    setStartDate(firstDay);
                     setEndDate(lastDay);
                   } else {
-                    setStartDate('');
                     setEndDate('');
                   }
                 }}
@@ -615,18 +725,11 @@ const PanelAdminContent = ({
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-            {(startDate || endDate) && (
-              <button
-                onClick={() => { setStartDate(''); setEndDate(''); }}
-                className="text-xs text-red-500 hover:text-red-700 underline"
-              >
-                Limpiar fechas
-              </button>
-            )}
+
           </div>
         )}
 
-    
+
       </div>
 
       {/* Papelera */}
@@ -741,7 +844,7 @@ const PanelAdminContent = ({
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th 
+                  <th
                     onClick={() => handleSort('Nombre')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -749,14 +852,14 @@ const PanelAdminContent = ({
                       Nombre
                       {sortConfig.key === 'Nombre' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('RUT')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -764,14 +867,14 @@ const PanelAdminContent = ({
                       RUT
                       {sortConfig.key === 'RUT' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('Telefono')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -779,14 +882,14 @@ const PanelAdminContent = ({
                       Teléfono
                       {sortConfig.key === 'Telefono' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('Email')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -794,14 +897,14 @@ const PanelAdminContent = ({
                       Email
                       {sortConfig.key === 'Email' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('Empresa')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -809,14 +912,14 @@ const PanelAdminContent = ({
                       Empresa
                       {sortConfig.key === 'Empresa' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('FechaEncuesta')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -824,14 +927,14 @@ const PanelAdminContent = ({
                       Fecha
                       {sortConfig.key === 'FechaEncuesta' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => handleSort('HoraEncuesta')}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   >
@@ -839,8 +942,8 @@ const PanelAdminContent = ({
                       Hora
                       {sortConfig.key === 'HoraEncuesta' && (
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} 
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d={sortConfig.direction === 'ascending' ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
                           />
                         </svg>
                       )}
@@ -882,11 +985,10 @@ const PanelAdminContent = ({
             <button
               key={pageNum}
               onClick={() => loadPage(pageNum)}
-              className={`px-3 py-1 rounded font-medium transition-colors text-sm ${
-                currentPage === pageNum
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-3 py-1 rounded font-medium transition-colors text-sm ${currentPage === pageNum
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               {pageNum}
             </button>
@@ -905,7 +1007,7 @@ const PanelAdminContent = ({
 
       {/* Modal de confirmación */}
       {showDeleteModal && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center z-50"
           style={{
             background: 'rgba(0, 0, 0, 0.4)',
@@ -935,7 +1037,7 @@ const PanelAdminContent = ({
 
       {/* Modal de eliminación permanente */}
       {showPermanentDeleteModal && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center z-50"
           style={{
             background: 'rgba(0, 0, 0, 0.4)',

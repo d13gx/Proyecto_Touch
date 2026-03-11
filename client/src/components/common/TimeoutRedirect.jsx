@@ -1,12 +1,19 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const startTimeRef = useRef(null);
   const timeoutIdRef = useRef(null);
 
   useEffect(() => {
+    // Solo verificar el tiempo si estamos en la página del cuestionario
+    if (!location.pathname.includes('/cuestionario')) {
+      console.log('🚫 No estamos en /cuestionario - omitiendo verificación de tiempo');
+      return;
+    }
+
     // Obtener el tiempo de inicio del token desde sessionStorage
     const storedStartTime = sessionStorage.getItem('token_start_time');
     
@@ -21,6 +28,15 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
     }
 
     const checkExpiration = () => {
+      // Verificar nuevamente que aún estamos en /cuestionario
+      if (!location.pathname.includes('/cuestionario')) {
+        console.log('🚫 Cambiamos de página - deteniendo verificación de tiempo');
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+        }
+        return;
+      }
+
       const now = Date.now();
       const elapsed = now - startTimeRef.current;
       
@@ -51,7 +67,7 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
         // Limpiar el tiempo de inicio
         sessionStorage.removeItem('token_start_time');
         
-        // Redirigir a acceso denegado
+        // Redirigir a acceso denegado (Tiempo terminado)
         if (redirectTo === "/") {
           window.location.href = '/cuestionario?denied=1';
         } else if (redirectTo.startsWith('http')) {
@@ -75,7 +91,7 @@ const TimeoutRedirect = ({ timeout = 60000, redirectTo = "/" }) => {
         clearTimeout(timeoutIdRef.current);
       }
     };
-  }, [navigate, timeout, redirectTo]);
+  }, [navigate, timeout, redirectTo, location.pathname]);
 
   return null; // Este componente no renderiza nada
 };

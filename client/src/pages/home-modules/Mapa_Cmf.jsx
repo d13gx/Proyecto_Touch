@@ -11,7 +11,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
-import TimeoutRedirect from "../../components/common/TimeoutRedirect";
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect";
 import {
   FaMapMarkerAlt,
   FaCrosshairs,
@@ -382,7 +382,7 @@ const MapaCmf = () => {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+      <ModuleTimeoutRedirect timeout={60000} />
       <div className="max-w-7xl mx-auto">
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl overflow-hidden mb-6">

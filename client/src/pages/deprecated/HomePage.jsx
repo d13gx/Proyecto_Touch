@@ -9,7 +9,7 @@ import carrusel_4 from "../../assets/Inyeccion-Soplado_2-1.png";
 import carrusel_5 from "../../assets/innovacion-4.png";
 import carrusel_6 from "../../assets/seguridad.png";
 import { useState } from "react";
-import TimeoutRedirect from "../../components/common/TimeoutRedirect"; // 👈 IMPORTAR
+import ModuleTimeoutRedirect from "../../components/common/ModuleTimeoutRedirect"; // 👈 IMPORTAR
 import PersonalModal from "../../components/common/PersonalModal"; // 👈 IMPORTAR MODAL */
 
 
@@ -32,7 +32,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100 py-3 sm:py-6 px-3 sm:px-4 lg:px-6">
-      <TimeoutRedirect timeout={60000} redirectTo="/" />
+      <ModuleTimeoutRedirect timeout={60000} />
       <div className="max-w-7xl mx-auto">
         {/* Header principal */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6">

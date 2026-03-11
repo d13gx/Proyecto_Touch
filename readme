@@ -25,6 +25,9 @@ pip freeze > requirements.txt
 -- Host
 vite.config.js -- aqui se deja autorizado el host para subir el proyecto a un servidor 
 
+-- Lista Visita
+\client\src\config
+aqui descomentar el local para verlo yo
 
 # para actualizar las dependencias
 

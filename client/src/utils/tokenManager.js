@@ -33,17 +33,65 @@ class TokenManager {
     this.STORAGE_KEY = 'qr_tokens';
     this.TOKEN_EXPIRY_MINUTES = 3; // Tokens expiran en 3 minutos
 
-    // Detectar si estamos en localhost o en red
+    // Detectar si estamos en localhost o en red, y configurar backend apropiadamente
     this.isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    this.backendUrl = this.isLocalhost
-      ? 'http://localhost:8000'
-      : `http://${window.location.hostname}:8000`;
+
+    if (this.isLocalhost) {
+      // Si estamos en localhost, usar backend local
+      this.backendUrl = 'http://localhost:8000';
+    } else {
+      // Si estamos en un dominio externo, intentar backend público
+      // Primero intentar con el dominio, luego con IPs conocidas
+      this.backendUrl = this.detectBackendUrl();
+    }
 
     console.log('🌐 Configuración TokenManager:', {
-      isLocalhost: this.isLocalhost,
       hostname: window.location.hostname,
-      backendUrl: this.backendUrl
+      backendUrl: this.backendUrl,
+      isLocalhost: this.isLocalhost
     });
+  }
+
+  // Detectar automáticamente la URL del backend (dominio o IP)
+  detectBackendUrl() {
+    // Lista de URLs posibles para el backend, en orden de preferencia
+    const backendUrls = [
+      // 'http://totem.cmf.cl/app_touch',  // Dominio público con proxy
+      'http://totem.cmf.cl:8000',      // Dominio público directo
+      'http://172.18.8.94:8000',       // IP known totem
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000',       // diego
+      // Usar el mismo hostname del frontend pero con puerto 8000
+      `http://${window.location.hostname}:8000`
+    ];
+
+    console.log('🔍 Buscando backend, intentando en orden:', backendUrls);
+
+    // Devolver la primera opción que funcione
+    return backendUrls[0];
+  }
+
+  // Detectar automáticamente la URL del backend del tótem (método antiguo)
+  detectTotemBackendUrl() {
+    // Lista de IPs conocidas donde podría estar corriendo el backend
+    const knownTotemIPs = [
+      'http://172.18.8.94:8000', // totem
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000', // diego
+      'http://192.168.1.100:8000',
+      'http://192.168.0.100:8000',
+      'http://10.0.0.100:8000'
+    ];
+
+    // Primero intentar usar el mismo hostname pero con puerto 8000
+    const currentHost = window.location.hostname;
+    const sameHostBackend = `http://${currentHost}:8000`;
+    knownTotemIPs.unshift(sameHostBackend);
+
+    console.log('🔍 Buscando backend del tótem, intentando:', knownTotemIPs);
+
+    // Devolver la primera opción (el navegador probará conectividad)
+    return knownTotemIPs[0];
   }
 
   // Generar un token único para el dispositivo
@@ -115,77 +163,137 @@ class TokenManager {
   // Validar si un token es válido (incluye device fingerprint)
   async validateToken(token) {
     console.log('🔍 Validando token con backend:', token);
-    const backendUrl = `${this.backendUrl}/app_touch/api/qr/validate/`;
-    console.log('🌐 URL completa:', backendUrl);
+
+    // Probar múltiples URLs de backend en orden de preferencia
+    const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
+      'http://totem.cmf.cl:8000',
+      'http://172.18.8.94:8000',
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000',
+      `http://${window.location.hostname}:8000`
+    ];
 
     // Obtener fingerprint del dispositivo actual
     const deviceFingerprint = getBrowserMetrics();
     console.log('🔒 Device fingerprint:', deviceFingerprint.substring(0, 8) + '...');
 
-    try {
-      const response = await fetch(backendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, device_fingerprint: deviceFingerprint })
-      });
+    for (const backendUrl of backendUrls) {
+      try {
+        console.log('📡 Intentando backend:', backendUrl);
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/validate/' : '/app_touch/api/qr/validate/';
+        const fullBackendUrl = `${backendUrl}${apiPath}`;
+        console.log('🌐 URL completa:', fullBackendUrl);
 
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
+        const response = await fetch(fullBackendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token, device_fingerprint: deviceFingerprint }),
+          // Timeout de 5 segundos por cada intento
+          signal: AbortSignal.timeout(5000)
+        });
 
-      const result = await response.json();
-      console.log('📝 Resultado validación backend:', result);
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response ok:', response.ok);
 
-      if (response.ok && result.valid) {
-        return {
-          valid: true,
-          token: result.token_data.token,
-          deviceInfo: result.token_data.device_info,
-          createdAt: result.token_data.created_at
-        };
-      } else {
-        return {
-          valid: false,
-          reason: result.reason || 'Error en validación'
-        };
+        if (response.ok) {
+          const result = await response.json();
+          console.log('📝 Resultado validación backend:', result);
+
+          if (result.valid) {
+            console.log('✅ Token válido con backend:', backendUrl);
+            return {
+              valid: true,
+              token: result.token_data.token,
+              deviceInfo: result.token_data.device_info,
+              createdAt: result.token_data.created_at
+            };
+          } else {
+            console.log('❌ Token inválido con backend:', backendUrl, result.reason);
+
+            // Debug detallado para acceso denegado
+            if (result.debug_info) {
+              console.error('🚫 DEBUG ACCESO DENEGADO:', {
+                backend: backendUrl,
+                token_short: result.debug_info.token_short,
+                client_ip: result.debug_info.client_ip,
+                stored_fingerprint: result.debug_info.stored_fingerprint_short,
+                received_fingerprint: result.debug_info.received_fingerprint_short,
+                mismatch_reason: result.debug_info.mismatch_reason,
+                timestamp: new Date().toISOString()
+              });
+            }
+
+            return {
+              valid: false,
+              reason: result.reason || 'Token inválido',
+              debug_info: result.debug_info || null
+            };
+          }
+        } else {
+          console.log('❌ Error HTTP con backend:', backendUrl, response.status);
+        }
+      } catch (error) {
+        console.log('❌ Error con backend:', backendUrl, error.message);
+        // Continuar con el siguiente backend
+        continue;
       }
-    } catch (error) {
-      console.error('❌ Error validando token con backend:', error);
-      console.error('❌ Error completo:', error.message);
-      return {
-        valid: false,
-        reason: 'Error de conexión con servidor: ' + error.message
-      };
     }
+
+    // Si todos los backends fallaron
+    console.error('❌ Todos los backends fallaron para validar token');
+    return {
+      valid: false,
+      reason: 'No se pudo conectar con ningún servidor backend'
+    };
   }
 
   // Marcar token como usado (ahora usa backend)
   async markTokenAsUsed(token) {
     console.log('🔒 Marcando token como usado en backend:', token);
 
-    try {
-      const response = await fetch(`${this.backendUrl}/app_touch/api/qr/mark-used/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token })
-      });
+    // Probar múltiples URLs de backend en orden de preferencia
+    const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
+      'http://totem.cmf.cl:8000',
+      'http://172.18.8.94:8000',
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000',
+      `http://${window.location.hostname}:8000`
+    ];
 
-      const result = await response.json();
+    for (const backendUrl of backendUrls) {
+      try {
+        console.log('📡 Intentando marcar token usado con backend:', backendUrl);
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/mark-used/' : '/app_touch/api/qr/mark-used/';
+        const response = await fetch(`${backendUrl}${apiPath}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token }),
+          signal: AbortSignal.timeout(5000)
+        });
 
-      if (response.ok && result.success) {
-        console.log('✅ Token marcado como usado en backend:', result);
-        return true;
-      } else {
-        console.error('❌ Error marcando token como usado:', result.error);
-        return false;
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log('✅ Token marcado como usado en backend:', backendUrl);
+            return true;
+          }
+        }
+      } catch (error) {
+        console.log('❌ Error con backend:', backendUrl, error.message);
+        continue;
       }
-    } catch (error) {
-      console.error('❌ Error de conexión marcando token:', error);
-      return false;
     }
+
+    console.error('❌ Todos los backends fallaron para marcar token');
+    return false;
   }
 
   // Limpiar tokens expirados
@@ -248,39 +356,59 @@ class TokenManager {
     // Obtener fingerprint del dispositivo actual
     const deviceFingerprint = getBrowserMetrics();
 
-    try {
-      const response = await fetch(`${this.backendUrl}/app_touch/api/qr/create/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          base_url: baseUrl,
-          device_info: this.getDeviceInfo(),
-          device_fingerprint: deviceFingerprint
-        })
-      });
+    // Probar múltiples URLs de backend en orden de preferencia
+    const backendUrls = [
+      'http://totem.cmf.cl/app_touch',
+      'http://totem.cmf.cl:8000',
+      'http://172.18.8.94:8000',
+      'http://172.18.7.150:8000',
+      'http://172.19.7.96:8000',
+      `http://${window.location.hostname}:8000`
+    ];
 
-      const result = await response.json();
+    for (const backendUrl of backendUrls) {
+      try {
+        console.log('📡 Intentando crear token con backend:', backendUrl);
+        // Evitar duplicar /app_touch si ya está en la URL base
+        const apiPath = backendUrl.includes('/app_touch') ? '/api/qr/create/' : '/app_touch/api/qr/create/';
+        const response = await fetch(`${backendUrl}${apiPath}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base_url: baseUrl,
+            device_info: this.getDeviceInfo(),
+            device_fingerprint: deviceFingerprint
+          }),
+          signal: AbortSignal.timeout(5000)
+        });
 
-      if (response.ok && result.token) {
-        console.log('✅ Token QR creado en backend:', result.token);
-        if (result.qr_url) {
-          return result.qr_url;
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response ok:', response.ok);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('📝 Resultado creación token:', result);
+
+          if (result.token) {
+            console.log('✅ Token QR creado en backend:', backendUrl, result.token);
+            if (result.qr_url) {
+              return result.qr_url;
+            }
+            return `${baseUrl}?token=${encodeURIComponent(result.token)}`;
+          }
         }
-        return `${baseUrl}?token=${encodeURIComponent(result.token)}`;
-      } else {
-        console.error('❌ Error creando token QR:', result.error);
-        // Fallback: crear token local si el backend falla
-        const token = this.createUUID();
-        return `${baseUrl}?token=${encodeURIComponent(token)}`;
+      } catch (error) {
+        console.log('❌ Error con backend:', backendUrl, error.message);
+        continue;
       }
-    } catch (error) {
-      console.error('❌ Error de conexión creando token QR:', error);
-      // Fallback: crear token local si no hay conexión
-      const token = this.createUUID();
-      return `${baseUrl}?token=${encodeURIComponent(token)}`;
     }
+
+    // Si todos los backends fallaron, usar fallback local
+    console.error('❌ Todos los backends fallaron, usando fallback local');
+    const token = this.createUUID();
+    return `${baseUrl}?token=${encodeURIComponent(token)}`;
   }
 
   // Generar y guardar token cuando el dispositivo accede

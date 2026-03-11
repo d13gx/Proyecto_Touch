@@ -1,12 +1,19 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title Proyecto Touch - Inicio Manual
+chcp 65001 >nul
+title INICIAR PROYECTO TOUCH - SISTEMA QR TOKEN
 color 0A
 cls
 
 echo ========================================
-echo     PROYECTO TOUCH - INICIO MANUAL
+echo    INICIANDO PROYECTO TOUCH
+echo    SISTEMA QR TOKEN ACTIVO
 echo ========================================
+echo.
+echo [LOG] Inicializando sistema QR Token...
+echo [LOG] Verificando requisitos para escaneo QR
+echo [LOG] Configurando backend para acceso público
+echo [LOG] Preparando frontend para detección QR
 echo.
 echo Este script iniciara automaticamente:
 echo   1. Backend Django (API de Datos)
@@ -20,18 +27,21 @@ echo.
 :: Cambiar al directorio principal
 cd /d "%~dp0"
 
-set "IP_172="
-for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /R /C:"IPv4.*172\."') do (
-    set "IP_172=%%A"
-    goto :got_ip_172
-)
-:got_ip_172
-if defined IP_172 set "IP_172=%IP_172: =%"
-if defined IP_172 (
-    set "APP_URL=http://%IP_172%:5173"
-) else (
-    set "APP_URL=http://localhost:5173"
-)
+::set "IP_172="
+::for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /R /C:"IPv4.*172\."') do (
+::    set "IP_172=%%A"
+::    goto :got_ip_172
+::)
+:: :got_ip_172
+::if defined IP_172 set "IP_172=%IP_172: =%"
+::if defined IP_172 (
+::    set "APP_URL=http://%IP_172%"
+::) else (
+::    set "APP_URL=http://localhost"
+::)
+
+
+set "APP_URL=http://totem.cmf.cl"
  
 :: Verificar entorno virtual
 echo [1/3] Verificando entorno virtual...
@@ -78,9 +88,9 @@ echo.
 echo [3/3] Iniciando servidores...
 echo.
  
-:: Iniciar Django (puerto 8000)
-echo [Django] Iniciando servidor Django en puerto 8000...
-start "Django API Server" cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://localhost:8000 && echo ======================================== && echo. && python manage.py runserver 0.0.0.0:8000"
+:: Iniciar Django (puerto 8000 público)
+echo [Django] Iniciando servidor Django en puerto 8000 (público)...
+start "Django API Server" /MIN cmd /c "title Django API Server - Puerto 8000 && cd /d %~dp0 && call venv\Scripts\activate.bat && echo. && echo ======================================== && echo     Django API Server - PUERTO 8000 && echo     http://totem.cmf.cl:8000 && echo ======================================== && echo. && echo [LOG] Servidor Django iniciado para QR Token System && echo [LOG] Backend listo para recibir peticiones de: && echo [LOG] - Creación de tokens QR && echo [LOG] - Validación de tokens QR && echo [LOG] - Endpoint: /app_touch/api/qr/create/ && echo [LOG] - Endpoint: /app_touch/api/qr/validate/ && echo [LOG] Puerto 8000 abierto para acceso público && echo. && python manage.py runserver 0.0.0.0:8000"
  
 :: Esperar 3 segundos
 timeout /t 3 /nobreak >nul
@@ -88,7 +98,7 @@ timeout /t 3 /nobreak >nul
 :: Iniciar Node.js (puerto 3001)
 echo [Node.js] Iniciando servidor Node.js en puerto 3001...
 if exist "client\backend\server.js" (
-    start "Node.js API Server" cmd /c "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
+    start "Node.js API Server" /MIN cmd /c "title Node.js API Server - Puerto 3001 && cd /d %~dp0client\backend && echo. && echo ======================================== && echo     Node.js API Server - PUERTO 3001 && echo     http://localhost:3001 && echo ======================================== && echo. && node server.js"
 ) else (
     echo [!] No se ha encontrado server.js, omitiendo Node.js
 )
@@ -96,10 +106,9 @@ if exist "client\backend\server.js" (
 :: Esperar 2 segundos
 timeout /t 2 /nobreak >nul
  
-:: Iniciar React (puerto 5173)
-echo [React] Iniciando aplicacion React en puerto 5173...
-if exist "client\package.json" (
-    start "React Frontend" cmd /c "title React Frontend - Puerto 5173 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 5173 && echo     http://localhost:5173 && echo ======================================== && echo. && npm run dev -- --host"
+:: Iniciar React (puerto 80)
+echo [React] Iniciando servidor React en puerto 80...
+start "React Frontend" /MIN cmd /c "title React Frontend - Puerto 80 && cd /d %~dp0client && echo. && echo ======================================== && echo     React Frontend - PUERTO 80 && echo     http://totem.cmf.cl && echo ======================================== && echo. && echo [LOG] Frontend React iniciado para QR Token System && echo [LOG] Sistema QR listo para escaneo && echo [LOG] URL QR: http://totem.cmf.cl/cuestionario?qr=1 && echo [LOG] Flujo esperado: && echo [LOG] 1. Usuario escanea QR con celular && echo [LOG] 2. Celular accede a: http://totem.cmf.cl/cuestionario?qr=1 && echo [LOG] 3. Frontend detecta ?qr=1 sin token && echo [LOG] 4. Frontend solicita token a backend: http://totem.cmf.cl:8000 && echo [LOG] 5. Backend genera token único && echo [LOG] 6. Frontend valida token y permite acceso && echo. && npm run dev -- --host"
 ) else (    
     echo [OK] No se ha encontrado package.json, omitiendo React
 )
@@ -109,33 +118,7 @@ echo.
 echo [ESPERA] Esperando que todos los servidores se inicien completamente...
 timeout /t 15 /nobreak >nul
 
-:: Crear VBScript temporal para minimizar ventanas
-echo [MINIMIZANDO] Creando script de minimizacion...
-echo Set objShell = CreateObject("WScript.Shell") > minimize.vbs
-echo Set oShell = CreateObject("Shell.Application") >> minimize.vbs
-echo WScript.Sleep 2000 >> minimize.vbs
-echo objShell.AppActivate "Django API Server" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.AppActivate "Node.js API Server" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.AppActivate "React Frontend" >> minimize.vbs
-echo WScript.Sleep 500 >> minimize.vbs
-echo objShell.SendKeys "%% n" >> minimize.vbs
-
-:: Ejecutar el script de minimización
-echo [MINIMIZANDO] Ejecutando script de minimizacion...
-cscript //nologo minimize.vbs
-
-:: Limpiar el script temporal
-del minimize.vbs
-
-echo [MINIMIZANDO] Proceso de minimizacion completado.
-
-timeout /t 2 /nobreak >nul
+echo [OK] Todos los servidores se iniciaron en segundo plano.
 
 :: ========================================
 :: Abrir navegador y enviar F11
@@ -220,23 +203,47 @@ echo     PROYECTO INICIADO CORRECTAMENTE!
 echo ========================================
 echo.
 echo   SERVICIOS ACTIVOS:
-echo   Django API:     http://localhost:8000
+echo   Django API:     http://totem.cmf.cl:8000 (público)
 echo   Node.js API:    http://localhost:3001  
-echo   React App:      http://localhost:5173
+echo   React App:      http://localhost
 echo.
 echo URL PRINCIPAL (TOTEM):
 echo   %APP_URL%
 echo.
-echo ACCESO DESDE OTROS DISPOSITIVOS:
-echo   1. Ejecuta: ipconfig
-echo   2. Busca tu IP (ej: 192.168.1.X)
-echo   3. Usa: http://[TU-IP]:5173
+echo ========================================
+echo        SISTEMA QR TOKEN ACTIVO
+echo ========================================
+echo.
+echo   URL QR PARA ESCANEAR:
+echo   http://totem.cmf.cl/cuestionario?qr=1
+echo.
+echo   FLUJO DE ESCANEO:
+echo   1. Usuario escanea QR con celular
+echo   2. Celular accede a: http://totem.cmf.cl/cuestionario?qr=1
+echo   3. Frontend detecta ?qr=1 sin token
+echo   4. Frontend solicita token a backend: http://totem.cmf.cl:8000
+echo   5. Backend genera token único con fingerprint
+echo   6. Frontend valida token y permite acceso
+echo.
+echo   ENDPOINTS BACKEND:
+echo   - Crear token: POST http://totem.cmf.cl:8000/app_touch/api/qr/create/
+echo   - Validar token: POST http://totem.cmf.cl:8000/app_touch/api/qr/validate/
+echo.
+echo   REQUISITOS:
+echo   - Puerto 8000 abierto en firewall
+echo   - totem.cmf.cl apuntando a IP pública
+echo   - CORS configurado para acceso público
+echo.
+echo   MONITOREO:
+echo   - Ver logs Django: Ventana "Django API Server"
+echo   - Ver logs React: Ventana "React Frontend"
+echo   - Debug en celular: F12 → Console
 echo.
 echo ========================================
 echo.
-echo Las ventanas de los servidores se han iniciado
-echo y seran minimizadas automaticamente.
-echo NO las cierres, siguen corriendo en segundo plano.
+echo Las ventanas de los servidores se inician minimizadas
+echo y corren en segundo plano automáticamente.
+echo NO las cierres, siguen funcionando en segundo plano.
 echo.
 echo Este script se cerrara automaticamente en 3 segundos...
 timeout /t 3 /nobreak >nul
