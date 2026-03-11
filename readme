@@ -9,7 +9,7 @@
 
 -
 
--- React
+-- React (frontend)
 cd client   # carpeta donde está el React
 npm install   # o yarn install  (instalas dependecias usadas en el proyecto)
 
@@ -18,16 +18,28 @@ cd client/backend
 npm install   # o yarn install  (instalas dependecias usadas en el proyecto para el backend de base de datos) 
 
 -- En La Raiz Del Proyecto Django
-python -m venv venv
-pip install -r requirements.txt
-pip freeze > requirements.txt
+python -m venv venv               # enotrno virtual 
+pip install -r requirements.txt   # instalar dependecias
+pip freeze > requirements.txt     # actualizar dependecias
 
 -- Host
-vite.config.js -- aqui se deja autorizado el host para subir el proyecto a un servidor 
+vite.config.js                    # aqui se deja autorizado el host para subir el proyecto a un servidor 
 
 -- Lista Visita
 \client\src\config
-aqui descomentar el local para verlo yo
+#aqui descomentar el local para verlo yo
+
+----- GIT -----
+-- mandar cambios a github
+git add .
+git commit -m "mensaje"
+git push 
+
+-- recibir cambios
+git pull 
+
+-- ver estado (que archivos se han modificado)
+git status
 
 # para actualizar las dependencias
 

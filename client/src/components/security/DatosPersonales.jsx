@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { consultarPorRUT } from '../../services/api';
 
-export default function DatosPersonales({ 
+export default function DatosPersonales({
   onContinue,
   onReset
 }) {
@@ -13,7 +12,6 @@ export default function DatosPersonales({
     empresa: ''
   });
   const [errors, setErrors] = useState({});
-  const [loadingRUT, setLoadingRUT] = useState(false);
 
   const resetForm = () => {
     setPersonalData({ nombre: '', rut: '', telefono: '', email: '', empresa: '' });
@@ -74,26 +72,8 @@ export default function DatosPersonales({
     }
   };
 
-  const handleRutBlur = async () => {
-    const rut = personalData.rut;
-    
-    // Consultar nombre si el RUT es válido y está completo
-    if (validateRut(rut) && rut.length >= 9 && rut.match(/^\d{1,2}\.\d{3}\.\d{3}-[0-9K]$/)) {
-      setLoadingRUT(true);
-      try {
-        const response = await consultarPorRUT(rut);
-        if (response.success && response.nombre) {
-          setPersonalData(prev => ({ 
-            ...prev, 
-            nombre: response.nombre
-          }));
-        }
-      } catch (error) {
-        console.error('Error al consultar RUT:', error);
-      } finally {
-        setLoadingRUT(false);
-      }
-    }
+  const handleRutBlur = () => {
+    // La consulta automática de RUT ha sido removida
   };
 
   const validatePersonalData = (data) => {
@@ -145,7 +125,7 @@ export default function DatosPersonales({
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validatePersonalData(personalData);
-    
+
     if (Object.keys(validationErrors).length === 0) {
       onContinue(personalData);
     } else {
@@ -172,12 +152,10 @@ export default function DatosPersonales({
               }`}
             placeholder="Ej: 12.345.678-9"
             maxLength="12"
-            disabled={loadingRUT}
           />
-          {loadingRUT && <p className="text-blue-500 text-sm mt-1">Consultando RUT...</p>}
           {errors.rut && <p className="text-red-500 text-sm mt-1">{errors.rut}</p>}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Nombre Completo <span className="text-red-500">*</span>
@@ -191,7 +169,6 @@ export default function DatosPersonales({
               }`}
             placeholder="Ej: Juan Pérez"
             maxLength="100"
-            readOnly={loadingRUT}
           />
           {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
         </div>
